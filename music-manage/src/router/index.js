@@ -1,13 +1,23 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 
+// 路由
+import login from '@/views/login.vue'
+
 Vue.use(VueRouter)
 
 const routes = [
   {
     path: '/',
-    name: 'home',
-    component: HomeView
+    redirect: '/login'
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: login,
+    meta: {
+      title: '登录页面'
+    }
   }
 ]
 
