@@ -6,12 +6,11 @@ import store from './store'
 // 重置css样式
 import '@/assets/css/reset.css'
 
-// element-ui
-import ElementUI from 'element-ui'
-import 'element-ui/lib/theme-chalk/index.css'
+// 整合elementUI
+import './plugins/element.js'
 
-// 注册elementui插件
-Vue.use(ElementUI)
+// 引入Axios插件
+import './utils/request'
 
 Vue.config.productionTip = false
 

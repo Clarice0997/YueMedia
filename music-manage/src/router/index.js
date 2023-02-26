@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 
 // 路由
 import login from '@/views/login.vue'
+import home from '@/views/home.vue'
 
 Vue.use(VueRouter)
 
@@ -17,6 +18,14 @@ const routes = [
     component: login,
     meta: {
       title: '登录页面'
+    }
+  },
+  {
+    path: '/home',
+    name: 'home',
+    component: home,
+    meta: {
+      title: '首页'
     }
   }
 ]

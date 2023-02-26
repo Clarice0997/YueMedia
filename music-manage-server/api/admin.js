@@ -8,10 +8,42 @@ const Admin = require('../dbModel/admin')
 
 // 管理员登录
 router.post('/account/login', (req, res) => {
-  console.log('login')
+  // 获取请求体中的数据
+  const email = req.body.email
+  const password = req.body.password
+  // 查找邮箱判断是否存在
+  Admin.findOne({
+    email: email
+  }).then(admin => {
+    if (admin) {
+      // 数据库中的密码
+      const dbPassword = admin.password
+      const isValidPassword = dbPassword === password
+      // 密码匹配情况处理
+      if (isValidPassword) {
+        res.status(200).json({
+          status: 200,
+          message: '登录成功',
+          token: 'token'
+        })
+      } else {
+        res.status(406).json({
+          status: 406,
+          message: '用户名或者密码错误'
+        })
+      }
+    } else {
+      res.status(406).json({
+        status: 406,
+        message: '用户名或者密码错误'
+      })
+    }
+  })
 })
 
-// 管理员注册
+/**
+ * 管理员注册
+ */
 router.post('/account/register', (req, res) => {
   const email = req.body.email
   // 邮箱不重复

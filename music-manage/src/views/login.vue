@@ -14,7 +14,7 @@
         <el-form-item label="验证码" prop="inputCaptcha">
           <div class="capture_code">
             <el-input style="width: 150px" v-model="loginForm.inputCaptcha" placeholder="验证码"></el-input>
-            <img width="80" style="background: #eee9e9; margin-left: 30px" height="32" :src="captureSrc" />
+            <img width="80" style="background: #eee9e9; margin-left: 30px; cursor: pointer" height="32" :src="captureSrc" @click="refreshCaptcha" />
           </div>
         </el-form-item>
         <el-form-item>
@@ -79,10 +79,19 @@ export default {
     resetForm(formName) {
       this.$refs[formName].resetFields()
     },
+    // 初始化验证码
+    initCaptcha() {
+      this.captureSrc = `http://localhost:3000/apis/safecode?time${new Date()}`
+    },
+
     // 重置验证码
-    refreshCapcha() {
-      this.captureSrc = `http://localhost:3000/api/safecode?time${new Date()}`
+    refreshCaptcha() {
+      this.captureSrc = `http://localhost:3000/apis/safecode?time${new Date()}`
     }
+  },
+
+  mounted() {
+    this.initCaptcha()
   }
 }
 </script>
