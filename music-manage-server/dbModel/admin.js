@@ -1,5 +1,7 @@
 const mongoose = require('mongoose')
 
+const { hashSync } = require('bcrypt')
+
 const adminModel = mongoose.Schema({
   email: {
     require: true,
@@ -11,7 +13,10 @@ const adminModel = mongoose.Schema({
   },
   password: {
     require: true,
-    type: String
+    type: String,
+    set(val) {
+      return hashSync(val, 10)
+    }
   },
   identity: {
     require: true,

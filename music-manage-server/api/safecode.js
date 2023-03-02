@@ -20,7 +20,7 @@ router.get('/', (req, res) => {
   // 验证码文本
   const captchaText = captcha.text
   // cookie 返回验证码文本
-  res.cookie('capcha', captchaText)
+  res.cookie('capchaText', captchaText)
 
   // 设置返回请求头
   res.setHeader('Content-Type', 'image/svg+xml')
