@@ -9,7 +9,6 @@ const Admin = require('../dbModel/admin')
 
 // JWT
 const jwt = require('jsonwebtoken')
-const JWT_KEY = require('../secret/jwtkey')
 
 // 管理员登录
 router.post('/account/login', (req, res) => {
@@ -35,7 +34,7 @@ router.post('/account/login', (req, res) => {
           identity: admin.identity
         }
         // 生成JWT
-        jwt.sign(JWT_RULE, JWT_KEY.KEY, { expiresIn: 3600 }, (err, token) => {
+        jwt.sign(JWT_RULE, process.env.JWT_key, { expiresIn: 3600 }, (err, token) => {
           if (err) {
             console.log('generate jwt error =>' + err)
             res.status(500).json({
