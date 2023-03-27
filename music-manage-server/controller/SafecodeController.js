@@ -6,12 +6,21 @@ const { generateSafeCode } = require('../service/SafecodeService')
 
 // 获取验证码接口
 router.get('/', (req, res) => {
-  // cookie 返回验证码文本
-  res.cookie('capchaText', captchaText)
+  // 解构获取 type
+  const { type } = req.query
 
   // 设置返回请求头
   res.setHeader('Content-Type', 'image/svg+xml')
-  res.send(String(captcha.data))
+
+  // Service
+  generateSafeCode(type, result => {
+    if (result.code === 200) {
+      res.cookie('uuid', result.data.uuid)
+      res.status(result.code).send(String(result.data.svg))
+    } else {
+      res.status(result.code).send(result.data)
+    }
+  })
 })
 
 module.exports = router

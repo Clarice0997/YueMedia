@@ -5,8 +5,8 @@ const { createPool } = require('generic-pool')
 
 // 连接池配置
 const redisPoolOption = {
-  min: process.env.RedisPoolMin,
-  max: process.env.RedisPoolMax
+  min: process.env.RedisPoolMin ? process.env.RedisPoolMin : 4,
+  max: process.env.RedisPoolMax ? process.env.RedisPoolMax : 8
 }
 
 // 创建 Redis 连接池
