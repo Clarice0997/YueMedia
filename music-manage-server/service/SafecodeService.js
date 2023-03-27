@@ -1,7 +1,7 @@
 // import module
 const svgCaptcha = require('svg-captcha')
 const { v4: uuidv4 } = require('uuid')
-const { redisHandler } = require('../db/redis')
+const { getRedis, setRedis, delRedis } = require('../utils/RedisHandler')
 
 // Math 验证码生成相关参数
 const MathCaptchaConfig = {
@@ -22,47 +22,6 @@ const StringCaptchaConfig = {
   width: 80,
   height: 32,
   color: true
-}
-
-/**
- * Redis set SafeCode
- * @param {*} uuid
- * @param {*} text
- */
-async function setSafeCode(uuid, text) {
-  try {
-    await redisHandler('set', uuid, text)
-  } catch (err) {
-    console.log(`Redis SafeCode Set Error => ${err}`)
-    throw err
-  }
-}
-
-/**
- * Redis get SafeCode
- * @param {*} uuid
- */
-async function getSafeCode(uuid) {
-  try {
-    return redisHandler('get', uuid)
-  } catch (err) {
-    console.log(`Redis SafeCode Get Error => ${err}`)
-    throw err
-  }
-}
-
-/**
- * Redis del SafeCode
- * @param {*} uuid
- * @returns
- */
-async function delSafeCode(uuid) {
-  try {
-    return redisHandler('del', uuid)
-  } catch (err) {
-    console.log(`Redis SafeCode Del Error => ${err}`)
-    throw err
-  }
 }
 
 /**
@@ -90,7 +49,7 @@ async function generateSafeCode(type) {
 
   // Redis storage
   try {
-    await setSafeCode(uuid, captcha.text)
+    await setRedis(uuid, captcha.text)
   } catch (err) {
     throw {
       code: 500,
@@ -110,6 +69,13 @@ async function generateSafeCode(type) {
   }
 }
 
+/**
+ * validate SafeCode
+ * @param {*} type
+ * @param {*} answer
+ * @param {*} uuid
+ * @returns
+ */
 async function validateSafeCode(type, answer, uuid) {
   // 判断参数是否合法
   if (!(type && answer && uuid)) {
@@ -124,7 +90,7 @@ async function validateSafeCode(type, answer, uuid) {
   // 根据 uuid 从 Redis 中取出答案
   let result
   try {
-    result = await getSafeCode(uuid)
+    result = await getRedis(uuid)
   } catch (err) {
     throw {
       code: 500,
@@ -146,7 +112,7 @@ async function validateSafeCode(type, answer, uuid) {
   if (flag) {
     // 清除 Redis 缓存
     try {
-      await delSafeCode(uuid)
+      await delRedis(uuid)
     } catch (err) {
       throw {
         code: 500,
