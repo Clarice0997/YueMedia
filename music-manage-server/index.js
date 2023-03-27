@@ -1,5 +1,6 @@
 const express = require('express')
 const bodyParser = require('body-parser')
+const cookieParser = require('cookie-parser')
 const app = express()
 
 // 导入环境变量
@@ -11,7 +12,10 @@ require('./db/mongodb')
 // 导入跨域中间件
 require('./config/Cors')(app)
 
-// 处理body中间件
+// 处理 Cookie 中间件
+app.use(cookieParser())
+
+// 处理 body 中间件
 app.use(express.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())

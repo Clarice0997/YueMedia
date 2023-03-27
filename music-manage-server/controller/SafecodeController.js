@@ -2,7 +2,7 @@
 const router = require('express').Router()
 
 // 导入 Service
-const { generateSafeCode } = require('../service/SafecodeService')
+const { generateSafeCode, validateSafeCode } = require('../service/SafecodeService')
 
 /**
  * 获取验证码接口
@@ -22,6 +22,25 @@ router.get('/', async (req, res) => {
       res.cookie('uuid', data.uuid)
       res.status(code).send(String(data.svg))
     }
+  } catch ({ code, data }) {
+    res.status(code).send(data)
+  }
+})
+
+/**
+ * 验证验证码接口
+ */
+router.get('/validate', async (req, res) => {
+  // 解构获取参数
+  const { type, answer } = req.query
+  // 获取 Cookie 中的 uuid
+  const uuid = req.cookies['uuid']
+
+  // Service
+  try {
+    const { code, data } = await validateSafeCode(type, answer, uuid)
+    // response
+    res.status(code).send(data)
   } catch ({ code, data }) {
     res.status(code).send(data)
   }

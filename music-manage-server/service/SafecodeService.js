@@ -39,6 +39,33 @@ async function setSafeCode(uuid, text) {
 }
 
 /**
+ * Redis get SafeCode
+ * @param {*} uuid
+ */
+async function getSafeCode(uuid) {
+  try {
+    return redisHandler('get', uuid)
+  } catch (err) {
+    console.log(`Redis SafeCode Get Error => ${err}`)
+    throw err
+  }
+}
+
+/**
+ * Redis del SafeCode
+ * @param {*} uuid
+ * @returns
+ */
+async function delSafeCode(uuid) {
+  try {
+    return redisHandler('del', uuid)
+  } catch (err) {
+    console.log(`Redis SafeCode Del Error => ${err}`)
+    throw err
+  }
+}
+
+/**
  * generate captcha
  * @param {*} type
  * @returns
@@ -83,5 +110,66 @@ async function generateSafeCode(type) {
   }
 }
 
+async function validateSafeCode(type, answer, uuid) {
+  // 判断参数是否合法
+  if (!(type && answer && uuid)) {
+    throw {
+      code: 400,
+      data: {
+        message: '请求参数不合法！'
+      }
+    }
+  }
+
+  // 根据 uuid 从 Redis 中取出答案
+  let result
+  try {
+    result = await getSafeCode(uuid)
+  } catch (err) {
+    throw {
+      code: 500,
+      data: {
+        message: err
+      }
+    }
+  }
+
+  // 判断验证码类型
+  let flag
+  if (type === 'string') {
+    flag = answer.toLowerCase() === result.toLowerCase()
+  } else if (type === 'math') {
+    flag = Number(answer) === Number(result)
+  }
+
+  // 返回值
+  if (flag) {
+    // 清除 Redis 缓存
+    try {
+      await delSafeCode(uuid)
+    } catch (err) {
+      throw {
+        code: 500,
+        data: {
+          message: err
+        }
+      }
+    }
+    return {
+      code: 200,
+      data: {
+        message: '验证码验证成功'
+      }
+    }
+  } else {
+    return {
+      code: 400,
+      data: {
+        message: '验证码验证失败'
+      }
+    }
+  }
+}
+
 // 导出 Service
-module.exports = { generateSafeCode }
+module.exports = { generateSafeCode, validateSafeCode }
