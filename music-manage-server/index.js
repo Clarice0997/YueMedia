@@ -6,6 +6,9 @@ const app = express()
 // 导入环境变量
 require('dotenv').config()
 
+// 连接 MySQL 数据库
+require('./db/mysql')
+
 // 连接 MongoDB 数据库
 require('./db/mongodb')
 

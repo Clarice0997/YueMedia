@@ -1,181 +1,61 @@
-// 导入mysql模块
+// import module
 const mysql = require('mysql')
 
-// 定义数据库连接池
-// 优点：1.资源重用 2.更快的响应速度 3.避免资源泄露
-const connectPool = mysql.createPool({
+// mysql pool
+const MySQLConnectionPool = mysql.createPool({
   host: process.env.MySQLHost,
   port: Number(process.env.MySQLPort),
   user: process.env.MySQLUser,
   password: process.env.MySQLPassword,
-  database: process.env.MySQLDatabase
+  database: process.env.MySQLDatabase,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+})
+
+MySQLConnectionPool.on('connection', connection => {
+  console.log('数据库连接成功')
+  connection.query('SET SESSION wait_timeout = 28800')
+  connection.query('SET NAMES utf8mb4')
+})
+
+MySQLConnectionPool.on('enqueue', () => {
+  console.log('数据库连接池已满')
+})
+
+MySQLConnectionPool.on('release', () => {
+  console.log('数据库连接释放')
 })
 
 // 判断连接池的启动状态
-if (connectPool) console.log('数据库启动成功，连接池创建成功')
+if (MySQLConnectionPool) console.log(`MySQL has been connected. Database name: ${process.env.MySQLDatabase}`)
 
-/**
- * @param {String} sql sql查询
- * @param {*} callback 回传
- * @return 数据库查询结果数组
- *
- * 功能描述：数据库查询
- * 日期：2022.09.07
- */
-function querySelect(sql, callback) {
-  // 连接池建立连接
-  connectPool.getConnection(function (error, connection) {
-    try {
-      // 连接查询
-      /**
-       *     参数模板
-       *     var sql = 'select * from tb limit 100'
-       */
-      connection.query(sql, function (err, result) {
-        try {
-          // 消除RowDataPacket方法 https://blog.csdn.net/yihanzhi/article/details/79455790
-          // JSON字符串互转即可消除
-          if (typeof result != 'undefined') {
-            result = JSON.stringify(result)
-            result = JSON.parse(result)
-          }
-          // 回传
-          callback(err, result)
-          // 释放连接
-          connection.release()
-        } catch (err) {
-          console.log('数据库查询失败')
-          console.log(err)
-        }
-      })
-    } catch (error) {
-      console.log('连接失败')
-      console.log(error)
-    }
-  })
+// 查询结果转换函数
+function transformResult(result) {
+  result = JSON.stringify(result)
+  result = JSON.parse(result)
+  return result
 }
 
-/**
- *
- * @param {String} sql
- * @param {*} callback
- * @return 数据库是否添加成功
- *
- * 功能描述：数据库添加
- * 日期：2022.09.07
- */
-function queryInsert(sql, callback) {
-  // 连接池建立连接
-  connectPool.getConnection(function (error, connection) {
-    try {
-      // 连接添加
-      /**
-       *     参数模板
-       *     var sql = 'insert into tb(id,title,status,username,date) values(null,'1',1,'admin','2022-11-30')'
-       */
-      connection.query(sql, function (err, result) {
-        try {
-          // 消除RowDataPacket方法 https://blog.csdn.net/yihanzhi/article/details/79455790
-          // JSON字符串互转即可消除
-          if (typeof result != 'undefined') {
-            result = JSON.stringify(result)
-            result = JSON.parse(result)
-          }
-          // 回传
-          callback(err, result)
-          // 释放连接
+// MySQL Select
+const mysqlHandler = async sql => {
+  // 从连接池中获取连接
+  return new Promise(async (resolve, reject) => {
+    await MySQLConnectionPool.getConnection(async (err, connection) => {
+      try {
+        if (err) throw new Error(err)
+        await connection.query(sql, async (err, result) => {
+          if (err) throw new Error(err)
+          let data = await transformResult(result)
           connection.release()
-        } catch (error) {
-          console.log('数据库添加失败')
-          console.log(error)
-        }
-      })
-    } catch (error) {
-      console.log('连接失败')
-      console.log(error)
-    }
-  })
-}
-
-/**
- *
- * @param {String} sql
- * @param {*} callback
- * @return 数据库是否更改成功
- *
- * 功能描述：数据库改变
- * 日期：2022.09.07
- */
-function queryUpdate(sql, callback) {
-  // 连接池建立连接
-  connectPool.getConnection(function (error, connection) {
-    try {
-      // 连接更改
-      /**
-       *     参数模板
-       *     var sql = "update tb set title='更改的文字内容' where id=1"
-       */
-      connection.query(sql, function (err, result) {
-        try {
-          // 消除RowDataPacket方法 https://blog.csdn.net/yihanzhi/article/details/79455790
-          // JSON字符串互转即可消除
-          if (typeof result != 'undefined') {
-            result = JSON.stringify(result)
-            result = JSON.parse(result)
-          }
-          // 回传
-          callback(err, result)
-          // 释放连接
-          connection.release()
-        } catch (error) {
-          console.log('数据库更改失败')
-          console.log(error)
-        }
-      })
-    } catch (error) {
-      console.log('连接失败')
-      console.log(error)
-    }
-  })
-}
-
-/**
- *
- * @param {String} sql
- * @param {*} callback
- * @return 数据库是删除成功
- *
- * 功能描述：数据库删除
- * 日期：2022.09.07
- */
-function queryDelete(sql, callback) {
-  // 连接池建立连接
-  connectPool.getConnection(function (error, connection) {
-    try {
-      // 连接更改
-      connection.query(sql, function (err, result) {
-        try {
-          // 消除RowDataPacket方法 https://blog.csdn.net/yihanzhi/article/details/79455790
-          // JSON字符串互转即可消除
-          if (typeof result != 'undefined') {
-            result = JSON.stringify(result)
-            result = JSON.parse(result)
-          }
-          // 回传
-          callback(err, result)
-          // 释放连接
-          connection.release()
-        } catch (error) {
-          console.log('数据库删除失败')
-          console.log(error)
-        }
-      })
-    } catch (error) {
-      console.log('连接失败')
-      console.log(error)
-    }
+          resolve(data)
+        })
+      } catch (err) {
+        reject(err)
+      }
+    })
   })
 }
 
 // 导出模块
-module.exports = { querySelect, queryInsert, queryUpdate, queryDelete }
+module.exports = { mysqlHandler }
