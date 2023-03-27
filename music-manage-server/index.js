@@ -8,8 +8,8 @@ require('dotenv').config()
 // 连接 MongoDB 数据库
 require('./db/mongodb')
 
-// 连接 Redis 数据库
-// const redis = require('./db/redis')
+// 导入 Redis 数据库操作函数
+const { redisHandler } = require('./db/redis')
 
 // 导入跨域中间件
 require('./config/Cors')(app)
