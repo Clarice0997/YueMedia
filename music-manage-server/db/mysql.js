@@ -41,8 +41,8 @@ function transformResult(result) {
 const mysqlHandler = async sql => {
   // 从连接池中获取连接
   return new Promise(async (resolve, reject) => {
-    await MySQLConnectionPool.getConnection(async (err, connection) => {
-      try {
+    try {
+      await MySQLConnectionPool.getConnection(async (err, connection) => {
         if (err) throw new Error(err)
         await connection.query(sql, async (err, result) => {
           if (err) throw new Error(err)
@@ -50,10 +50,10 @@ const mysqlHandler = async sql => {
           connection.release()
           resolve(data)
         })
-      } catch (err) {
-        reject(err)
-      }
-    })
+      })
+    } catch (err) {
+      reject(err)
+    }
   })
 }
 

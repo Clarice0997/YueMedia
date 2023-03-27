@@ -25,7 +25,7 @@ app.use(bodyParser.json())
 
 // 路由
 // 登录注册路由
-app.use('/apis/admin', require('./controller/AdminController'))
+app.use('/apis/user', require('./controller/UserController'))
 // 验证码路由
 app.use('/apis/safecode', require('./controller/SafecodeController'))
 
