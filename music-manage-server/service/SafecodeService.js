@@ -24,73 +24,63 @@ const StringCaptchaConfig = {
   color: true
 }
 
-// Redis set SafeCode
-function setSafeCode(uuid, text) {
-  return new Promise((resolve, reject) => {
-    redisHandler('set', uuid, text)
-      .then(() => {
-        resolve()
-      })
-      .catch(err => {
-        console.log(`Redis SafeCode Set Error => ${err}`)
-        reject()
-      })
-  })
+/**
+ * Redis set SafeCode
+ * @param {*} uuid
+ * @param {*} text
+ */
+async function setSafeCode(uuid, text) {
+  try {
+    await redisHandler('set', uuid, text)
+  } catch (err) {
+    console.log(`Redis SafeCode Set Error => ${err}`)
+    throw err
+  }
 }
 
-function generateSafeCode(type, callback) {
+/**
+ * generate captcha
+ * @param {*} type
+ * @returns
+ */
+async function generateSafeCode(type) {
   // 生成 uuid
   const uuid = uuidv4()
 
-  // 条件判断
-  const actions = {
-    string: () => {
-      const captcha = svgCaptcha.create(StringCaptchaConfig)
-      // Set Redis
-      setSafeCode(uuid, captcha.text)
-        .then(() => {
-          callback({
-            code: 200,
-            data: {
-              svg: captcha.data,
-              uuid
-            }
-          })
-        })
-        .catch(err => {
-          callback({
-            code: 500,
-            data: {
-              message: err
-            }
-          })
-        })
-    },
-    math: () => {
-      const captcha = svgCaptcha.createMathExpr(MathCaptchaConfig)
-      // Set Redis
-      setSafeCode(uuid, captcha.text)
-        .then(() => {
-          callback({
-            code: 200,
-            data: {
-              svg: captcha.data,
-              uuid
-            }
-          })
-        })
-        .catch(err => {
-          callback({
-            code: 500,
-            data: {
-              message: err
-            }
-          })
-        })
+  let captcha
+
+  // 生成验证码
+  switch (type) {
+    case 'string':
+      captcha = svgCaptcha.create(StringCaptchaConfig)
+      break
+    case 'math':
+      captcha = svgCaptcha.createMathExpr(MathCaptchaConfig)
+      break
+    default:
+      captcha = svgCaptcha.create(StringCaptchaConfig)
+  }
+
+  // Redis storage
+  try {
+    await setSafeCode(uuid, captcha.text)
+  } catch (err) {
+    throw {
+      code: 500,
+      data: {
+        message: err
+      }
     }
   }
 
-  return actions[type]?.() ?? actions['string']()
+  // 返回验证码数据
+  return {
+    code: 200,
+    data: {
+      svg: captcha.data,
+      uuid
+    }
+  }
 }
 
 // 导出 Service
