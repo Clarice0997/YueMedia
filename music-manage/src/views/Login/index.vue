@@ -1,6 +1,5 @@
 <template>
   <div>
-    <img class="wave" src="@/assets/image/wave.png" />
     <div class="bg"></div>
     <div class="container">
       <div class="img">
@@ -28,19 +27,12 @@ export default {
 </script>
 
 <style lang="less">
-.wave {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  height: 100%;
-  z-index: -1;
-}
 .bg {
   width: 100vw;
   height: 100vh;
   position: fixed;
   z-index: -100;
-  background-image: linear-gradient(to top, #e6e9f0 0%, #eef1f5 100%);
+  background-image: url('@/assets/image/bg.jpg');
 }
 .container {
   width: 100vw;
@@ -72,6 +64,10 @@ export default {
   transition: 0.3s;
   width: 350px;
   font-family: 'poppins', sans-serif;
+  box-sizing: content-box;
+  background: rgba(255, 255, 255, 0.578);
+  padding: 20px;
+  border-radius: 1rem;
 
   h1 {
     font-size: 2rem;
@@ -100,7 +96,17 @@ export default {
   }
 }
 
+.el-form:hover {
+  background: rgba(255, 255, 255, 0.868);
+}
+
 // Responsive
+@media screen and (min-width: 1400px) {
+  .container {
+    grid-gap: 1rem;
+  }
+}
+
 @media screen and (max-width: 1000px) {
   .img img {
     width: 350px;
