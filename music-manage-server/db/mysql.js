@@ -37,7 +37,7 @@ function transformResult(result) {
   return result
 }
 
-// MySQL Select
+// MySQL Handler
 const mysqlHandler = async sql => {
   // 从连接池中获取连接
   return new Promise(async (resolve, reject) => {

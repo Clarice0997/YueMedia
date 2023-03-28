@@ -3,7 +3,7 @@ const router = require('express').Router()
 const { loginService, registerService } = require('../service/UserService')
 
 /**
- * 管理员登录
+ * 用户登录
  */
 router.post('/account/login', async (req, res) => {
   // 解构请求体
@@ -19,7 +19,7 @@ router.post('/account/login', async (req, res) => {
 })
 
 /**
- * 管理员注册
+ * 用户注册
  */
 router.post('/account/register', async (req, res) => {
   const body = req.body

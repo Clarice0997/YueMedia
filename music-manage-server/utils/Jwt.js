@@ -15,4 +15,13 @@ const generateJsonWebToken = async payload => {
   })
 }
 
-module.exports = { generateJsonWebToken }
+/**
+ * 解密 JWT
+ * @param {*} token
+ * @returns
+ */
+const decryptJsonWebToken = async token => {
+  return jwt.verify(token, process.env.JWT_key)
+}
+
+module.exports = { generateJsonWebToken, decryptJsonWebToken }
