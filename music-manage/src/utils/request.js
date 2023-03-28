@@ -14,7 +14,7 @@ import NProgress from 'nprogress'
 // 设置默认请求格式
 // axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
 // 允许axios携带cookie
-// axios.defaults.withCredentials = true
+axios.defaults.withCredentials = true
 
 // 封装axios
 const request = axios.create({

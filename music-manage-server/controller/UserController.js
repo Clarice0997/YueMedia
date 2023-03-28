@@ -12,7 +12,9 @@ router.post('/account/login', async (req, res) => {
   try {
     const { code, data } = await loginService(username, password, req.ip)
     // response
-    res.status(code).send(data)
+    // set JsonWebToken
+    if (data.token) res.cookie('Access-Token', data.token)
+    res.status(code).send({ ...data, code })
   } catch (err) {
     console.log(err)
   }
@@ -27,7 +29,7 @@ router.post('/account/register', async (req, res) => {
   try {
     const { code, data } = await registerService(body)
     // response
-    res.status(code).send(data)
+    res.status(code).send({ ...data, code })
   } catch (err) {
     console.log(err)
   }

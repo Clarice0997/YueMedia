@@ -1,5 +1,5 @@
 <template>
-  <el-form ref="form" :model="form" :rules="rules" size="medium">
+  <el-form ref="form" :model="form" :rules="rules" size="medium" @keydown.enter.native="clickLoginHandler">
     <h1>登录悦音</h1>
     <el-form-item prop="username">
       <el-input v-model="form.username" placeholder="账号" clearable prefix-icon="el-icon-user"></el-input>
@@ -8,7 +8,7 @@
       <el-input v-model="form.password" placeholder="密码" show-password prefix-icon="el-icon-lock"></el-input>
     </el-form-item>
     <div class="safecode-container">
-      <img src="http://localhost:3000/apis/safecode?type=math" class="safecode-img" />
+      <img :src="captchaSrc" class="safecode-img" @click="clickRefreshCaptcha" />
       <el-form-item prop="safecode">
         <el-input v-model="form.safecode" placeholder="验证码"></el-input>
       </el-form-item>
@@ -19,6 +19,10 @@
 </template>
 
 <script>
+// import modules
+import { loginAPI, validateSafeCodeAPI } from '@/apis/loginAPI'
+import router from '@/router'
+
 export default {
   name: 'MusicManageSystemLogin',
 
@@ -41,9 +45,9 @@ export default {
           },
           // 长度校验
           {
-            min: 6,
+            min: 5,
             max: 20,
-            message: '登录名长度在6-20字符之间',
+            message: '登录名长度在5-20字符之间',
             trigger: 'blur'
           }
         ],
@@ -79,15 +83,88 @@ export default {
       // Loading显隐
       fullscreenLoading: false,
       // 按钮加载状态
-      btnLoading: false
+      btnLoading: false,
+      // 验证码地址
+      captchaSrc: `${process.env.VUE_APP_REQUEST_URL}/apis/safecode`
     }
   },
 
   mounted() {},
 
   methods: {
+    // 刷新验证码函数
+    clickRefreshCaptcha() {
+      this.captchaSrc = `${process.env.VUE_APP_REQUEST_URL}/apis/safecode?timestamp=${new Date().getTime()}`
+    },
     // 点击登录按钮处理函数
-    clickLoginHandler() {}
+    clickLoginHandler() {
+      // 校验登录表单是否合法
+      this.$refs.form.validate(async valid => {
+        if (valid) {
+          // Loading遮罩
+          this.fullscreenLoading = true
+          // 加载按钮
+          this.btnLoading = true
+
+          // 验证验证码是否正确
+          try {
+            await validateSafeCodeAPI(this.form.safecode)
+          } catch ({ response }) {
+            // 验证码错误弹窗
+            this.$message({
+              message: response.data.message,
+              type: 'error',
+              duration: 2000
+            })
+            // 刷新验证码
+            this.clickRefreshCaptcha()
+            // 重置表单
+            this.form = this.$options.data().form
+            // 停止加载按钮
+            this.btnLoading = false
+            // 停止全屏遮罩
+            this.fullscreenLoading = false
+            return false
+          }
+
+          // 验证码正确则调用登录 API
+          loginAPI(this.form.username, this.form.password)
+            .then(async ({ data }) => {
+              // 保存 JsonWebToken
+              await localStorage.setItem('Access-Token', data.token)
+              // 登录成功弹窗
+              this.$message({
+                message: data.message,
+                type: 'success',
+                duration: 1500,
+                onClose: () => {
+                  router.replace('/home')
+                }
+              })
+            })
+            .catch(({ response }) => {
+              // 提示错误弹窗
+              this.$message({
+                message: response.data.message,
+                type: 'error',
+                duration: 2000
+              })
+            })
+            .finally(() => {
+              // 刷新验证码
+              this.clickRefreshCaptcha()
+              // 重置表单
+              this.form = this.$options.data().form
+              // 停止加载按钮
+              this.btnLoading = false
+              // 停止全屏遮罩
+              this.fullscreenLoading = false
+            })
+        } else {
+          return false
+        }
+      })
+    }
   }
 }
 </script>
@@ -98,6 +175,8 @@ export default {
   grid-template-columns: 30% 70%;
   img {
     height: 100%;
+    background-color: #eef7f8;
+    cursor: pointer;
   }
   .el-form-item {
     margin: 0;

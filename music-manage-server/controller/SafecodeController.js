@@ -20,9 +20,10 @@ router.get('/', async (req, res) => {
       res.setHeader('Content-Type', 'image/svg+xml')
       // response cookie
       res.cookie('uuid', data.uuid)
+      res.cookie('type', data.type)
       res.status(code).send(String(data.svg))
     } else {
-      res.status(code).send(data)
+      res.status(code).send({ ...data, code })
     }
   } catch (err) {
     console.log(err)
@@ -34,15 +35,15 @@ router.get('/', async (req, res) => {
  */
 router.get('/validate', async (req, res) => {
   // 解构获取参数
-  const { type, answer } = req.query
-  // 获取 Cookie 中的 uuid
-  const uuid = req.cookies['uuid']
+  const { answer } = req.query
+  // 获取 Cookie 中的 uuid 和 type
+  const { uuid, type } = req.cookies
 
   // Service
   try {
     const { code, data } = await validateSafeCode(type, answer, uuid)
     // response
-    res.status(code).send(data)
+    res.status(code).send({ ...data, code })
   } catch (err) {
     console.log(err)
   }

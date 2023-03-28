@@ -35,6 +35,10 @@ async function generateSafeCode(type) {
 
   let captcha
 
+  if (!type) {
+    Boolean(Math.round(Math.random())) ? (type = 'string') : (type = 'math')
+  }
+
   // 生成验证码
   switch (type) {
     case 'string':
@@ -64,7 +68,8 @@ async function generateSafeCode(type) {
     code: 200,
     data: {
       svg: captcha.data,
-      uuid
+      uuid,
+      type
     }
   }
 }

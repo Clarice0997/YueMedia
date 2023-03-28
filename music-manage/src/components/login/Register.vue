@@ -46,9 +46,9 @@ export default {
           },
           // 长度校验
           {
-            min: 6,
+            min: 5,
             max: 20,
-            message: '登录名长度在6-20字符之间',
+            message: '登录名长度在5-20字符之间',
             trigger: 'blur'
           }
         ],

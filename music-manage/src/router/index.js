@@ -32,6 +32,15 @@ const routes = [
         }
       }
     ]
+  },
+  {
+    path: '/home',
+    name: '主页',
+    component: () => import(/* webpackChunkName: "loginComponent" */ '@/views/Home'),
+    meta: {
+      title: '主页',
+      requireAuth: true
+    }
   }
 ]
 

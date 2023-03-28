@@ -2,21 +2,33 @@
 import request from '@/utils/request.js'
 
 /**
- * 注册
- *
- * @param {*} param0
+ * 登录 API
+ * @param {*} username
+ * @param {*} password
  * @returns
  */
-export const registerAPI = function ({ email, password }) {
-  return request.post('', { email, password })
+export const loginAPI = async (username, password) => {
+  return request.post('/apis/user/account/login', { username, password })
 }
 
 /**
- * 登录
- *
+ * 注册 API
  * @param {*} param0
  * @returns
  */
-export const loginAPI = function ({ email, password }) {
-  return request.post('', { email, password })
+export const registerAPI = async ({ username, password, nickname, phone, email }) => {
+  return request.post('/apis/user/account/register', { username, password, nickname, phone, email })
+}
+
+/**
+ * 验证验证码 API
+ * @param {*} answer
+ * @returns
+ */
+export const validateSafeCodeAPI = async answer => {
+  return request.get('/apis/safecode/validate', {
+    params: {
+      answer
+    }
+  })
 }

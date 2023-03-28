@@ -62,7 +62,7 @@ async function loginService(username, password, ip) {
       code: 200,
       data: {
         message: '登录成功！',
-        token: token
+        token
       }
     }
   } else {
