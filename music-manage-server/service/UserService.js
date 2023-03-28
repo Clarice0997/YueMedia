@@ -2,8 +2,7 @@
 const { hashSync, compareSync } = require('bcrypt')
 const { mysqlHandler } = require('../db/mysql')
 const { v4: uuidv4 } = require('uuid')
-
-// bcrypt.compareSync(password, dbPassword)
+const { generateJsonWebToken } = require('../utils/Jwt')
 
 async function loginService(username, password) {
   // 判断参数是否存在
@@ -16,7 +15,35 @@ async function loginService(username, password) {
     }
   }
   // 获取 MySQL 用户信息，判断用户是否存在
-  if (await mysqlHandler(`select * from users where username = ${username}`)) {
+  // 防止暴力破解
+  const user = await mysqlHandler(`select * from users where username = '${username}'`)
+  if (user == false) {
+    return {
+      code: 400,
+      data: {
+        message: '账号密码错误！'
+      }
+    }
+  }
+  // 用户存在则比对密码是否相同
+  let flag = compareSync(password, user[0].password)
+  if (flag) {
+    let token = await generateJsonWebToken({ uno: user[0].uno, username: user[0].username, nickname: user[0].nickname, status: user[0].status, type: user[0].type })
+    console.log(token)
+    return {
+      code: 200,
+      data: {
+        message: '登录成功！',
+        token: token
+      }
+    }
+  } else {
+    return {
+      code: 400,
+      data: {
+        message: '账号密码错误！'
+      }
+    }
   }
 }
 

@@ -21,9 +21,11 @@ router.get('/', async (req, res) => {
       // response cookie
       res.cookie('uuid', data.uuid)
       res.status(code).send(String(data.svg))
+    } else {
+      res.status(code).send(data)
     }
-  } catch ({ code, data }) {
-    res.status(code).send(data)
+  } catch (err) {
+    console.log(err)
   }
 })
 
@@ -41,8 +43,8 @@ router.get('/validate', async (req, res) => {
     const { code, data } = await validateSafeCode(type, answer, uuid)
     // response
     res.status(code).send(data)
-  } catch ({ code, data }) {
-    res.status(code).send(data)
+  } catch (err) {
+    console.log(err)
   }
 })
 

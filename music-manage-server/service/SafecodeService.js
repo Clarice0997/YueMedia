@@ -51,7 +51,7 @@ async function generateSafeCode(type) {
   try {
     await setRedis(uuid, captcha.text)
   } catch (err) {
-    throw {
+    return {
       code: 500,
       data: {
         message: err
@@ -79,7 +79,7 @@ async function generateSafeCode(type) {
 async function validateSafeCode(type, answer, uuid) {
   // 判断参数是否合法
   if (!(type && answer && uuid)) {
-    throw {
+    return {
       code: 400,
       data: {
         message: '请求参数不合法！'
@@ -92,7 +92,7 @@ async function validateSafeCode(type, answer, uuid) {
   try {
     result = await getRedis(uuid)
   } catch (err) {
-    throw {
+    return {
       code: 500,
       data: {
         message: err
@@ -114,7 +114,7 @@ async function validateSafeCode(type, answer, uuid) {
     try {
       await delRedis(uuid)
     } catch (err) {
-      throw {
+      return {
         code: 500,
         data: {
           message: err

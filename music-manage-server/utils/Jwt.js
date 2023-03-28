@@ -7,9 +7,11 @@ const jwt = require('jsonwebtoken')
  * @returns
  */
 const generateJsonWebToken = async payload => {
-  return await jwt.sign(payload, process.env.JWT_key, { expiresIn: 3600 }, (err, token) => {
-    if (err) throw new Error(err)
-    return `Bearer ${token}`
+  return new Promise((resolve, reject) => {
+    jwt.sign(payload, process.env.JWT_key, { expiresIn: 3600 }, (err, token) => {
+      if (err) reject(err)
+      resolve(`Bearer ${token}`)
+    })
   })
 }
 
