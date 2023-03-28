@@ -10,7 +10,7 @@ router.post('/account/login', async (req, res) => {
   const { username, password } = req.body
   // Service
   try {
-    const { code, data } = await loginService(username, password)
+    const { code, data } = await loginService(username, password, req.ip)
     // response
     res.status(code).send(data)
   } catch (err) {

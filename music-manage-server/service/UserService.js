@@ -3,11 +3,39 @@ const { hashSync, compareSync } = require('bcrypt')
 const { mysqlHandler } = require('../db/mysql')
 const { v4: uuidv4 } = require('uuid')
 const { generateJsonWebToken } = require('../utils/Jwt')
+const { LoginRecord } = require('../dbModel/loginRecordModel')
 
-async function loginService(username, password) {
+/**
+ * Save loginRecord
+ * @param {*} uno
+ * @param {*} username
+ * @param {*} loginIp
+ */
+async function loginRecord(uno, username, loginIp) {
+  try {
+    const loginRecord = new LoginRecord({
+      uno,
+      username,
+      loginTime: new Date(),
+      loginIp
+    })
+    await loginRecord.save()
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+/**
+ * loginService
+ * @param {*} username
+ * @param {*} password
+ * @param {*} ip
+ * @returns
+ */
+async function loginService(username, password, ip) {
   // 判断参数是否存在
   if (!(username && password)) {
-    throw {
+    return {
       code: 400,
       data: {
         message: '请求参数不完整！'
@@ -29,7 +57,7 @@ async function loginService(username, password) {
   let flag = compareSync(password, user[0].password)
   if (flag) {
     let token = await generateJsonWebToken({ uno: user[0].uno, username: user[0].username, nickname: user[0].nickname, status: user[0].status, type: user[0].type })
-    console.log(token)
+    await loginRecord(user[0].uno, user[0].username, ip)
     return {
       code: 200,
       data: {
@@ -47,6 +75,11 @@ async function loginService(username, password) {
   }
 }
 
+/**
+ * registerService
+ * @param {*} param0
+ * @returns
+ */
 async function registerService({ username, password, nickname, phone, email }) {
   // 判断参数是否存在
   if (!(username && password && nickname && phone && email)) {
