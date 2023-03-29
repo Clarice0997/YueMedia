@@ -1,11 +1,14 @@
 <template>
-  <el-form ref="registerForm" :model="registerForm" :rules="registerRules" size="medium" @keypress.native="preventSpecialChars">
+  <el-form ref="registerForm" :model="registerForm" :rules="registerRules" size="medium" @keydown.enter.native="clickRegisterHandler" @keypress.native="preventSpecialChars">
     <h1>加入我们</h1>
     <el-form-item prop="username">
       <el-input v-model="registerForm.username" placeholder="账号" clearable prefix-icon="el-icon-user"></el-input>
     </el-form-item>
     <el-form-item prop="password">
       <el-input v-model="registerForm.password" placeholder="密码" show-password prefix-icon="el-icon-lock"></el-input>
+    </el-form-item>
+    <el-form-item prop="checkPassword">
+      <el-input v-model="registerForm.checkPassword" placeholder="确认密码" show-password prefix-icon="el-icon-lock"></el-input>
     </el-form-item>
     <el-form-item prop="nickname">
       <el-input v-model="registerForm.nickname" placeholder="昵称" clearable prefix-icon="el-icon-user"></el-input>
@@ -22,6 +25,9 @@
 </template>
 
 <script>
+import { registerAPI } from '@/apis/loginAPI'
+import router from '@/router'
+
 export default {
   name: 'MusicManageSystemRegister',
 
@@ -29,11 +35,12 @@ export default {
     return {
       // 表单数据对象
       registerForm: {
-        username: '',
-        password: '',
-        nickname: '',
-        phone: '',
-        email: ''
+        username: 'admin',
+        password: '123456',
+        checkPassword: '123456',
+        nickname: 'test11',
+        phone: '18887192372',
+        email: '117895792173@qq.com'
       },
       // 禁用特殊字符
       specialChars: [39, 34, 59, 92, 44, 61, 40, 41, 60, 62, 123, 125, 91, 93, 43, 45, 47, 92, 37, 35, 124, 32],
@@ -66,6 +73,25 @@ export default {
             min: 6,
             max: 20,
             message: '登录密码长度在6-20字符之间',
+            trigger: 'blur'
+          }
+        ],
+        checkPassword: [
+          // 必填项校验
+          {
+            required: true,
+            message: '请输入确认密码',
+            trigger: 'blur'
+          },
+          // 密码比对
+          {
+            validator: (rule, value, callback) => {
+              if (value !== this.registerForm.password) {
+                callback(new Error('两次输入密码不一致!'))
+              } else {
+                callback()
+              }
+            },
             trigger: 'blur'
           }
         ],
@@ -124,7 +150,48 @@ export default {
 
   methods: {
     // 点击登录按钮处理函数
-    clickRegisterHandler() {},
+    clickRegisterHandler() {
+      // 校验注册表单是否合法
+      this.$refs.registerForm.validate(async valid => {
+        if (valid) {
+          // Loading遮罩
+          this.fullscreenLoading = true
+          // 加载按钮
+          this.btnLoading = true
+          // 调用注册接口
+          registerAPI(this.registerForm)
+            .then(async ({ data }) => {
+              // 注册成功弹窗
+              this.$message({
+                message: data.message,
+                type: 'success',
+                duration: 1500,
+                onClose: () => {
+                  router.replace('/login/login')
+                }
+              })
+            })
+            .catch(({ response }) => {
+              // 提示错误弹窗
+              this.$message({
+                message: response.data.message,
+                type: 'error',
+                duration: 2000
+              })
+            })
+            .finally(() => {
+              // 重置表单
+              this.registerForm = this.$options.data().registerForm
+              // 停止加载按钮
+              this.btnLoading = false
+              // 停止全屏遮罩
+              this.fullscreenLoading = false
+            })
+        } else {
+          return false
+        }
+      })
+    },
     // 禁止输入特殊字符
     preventSpecialChars(event) {
       if (this.specialChars.includes(event.keyCode)) {

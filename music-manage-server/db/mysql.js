@@ -45,6 +45,7 @@ const mysqlHandler = async (sql, value) => {
       await MySQLConnectionPool.getConnection(async (err, connection) => {
         if (err) throw new Error(err)
         await connection.query(sql, value, async (err, result) => {
+          console.log(sql)
           if (err) throw new Error(err)
           let data = await transformResult(result)
           connection.release()
