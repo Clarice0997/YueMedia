@@ -28,6 +28,8 @@ app.use(bodyParser.json())
 app.use('/apis/user', require('./controller/UserController'))
 // 验证码路由
 app.use('/apis/safecode', require('./controller/SafecodeController'))
+// Vue路由
+app.use('/apis/routes', require('./controller/RoutesController'))
 
 // 监听端口
 app.listen(process.env.PORT, err => {

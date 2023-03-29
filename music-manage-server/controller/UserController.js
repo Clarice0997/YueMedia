@@ -39,6 +39,8 @@ router.post('/account/register', async (req, res) => {
 /**
  * 身份校验接口
  */
-router.get('/verify', auth)
+router.get('/verify', auth, async (req, res) => {
+  await res.status(200).send({ message: '身份验证成功', code: 200 })
+})
 
 module.exports = router

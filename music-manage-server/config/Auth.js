@@ -7,6 +7,7 @@ const auth = async (req, res, next) => {
   const authorization = req.headers.authorization
   // 判断 JWT 是否存在
   if (!authorization) {
+    console.log('校验失败=>' + req.originalUrl)
     res.status(401).send({
       message: '身份验证失败'
     })
@@ -16,16 +17,17 @@ const auth = async (req, res, next) => {
   try {
     const JsonWebToken = await decryptJsonWebToken(authorization.split(' ').pop())
     if (JsonWebToken) {
-      console.log('校验通过=>' + req.path)
-      res.status(200).send({
-        message: '身份验证成功'
-      })
+      console.log('校验通过=>' + req.originalUrl)
+      req.authorization = JsonWebToken
+      await next()
     } else {
+      console.log('校验失败=>' + req.originalUrl)
       res.status(401).send({
         message: '身份验证失败'
       })
     }
   } catch (error) {
+    console.log('校验失败=>' + req.originalUrl)
     res.status(401).send({
       message: '身份验证失败'
     })
