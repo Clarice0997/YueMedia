@@ -32,7 +32,9 @@ export default {
   height: 100vh;
   position: fixed;
   z-index: -100;
-  background-image: url('@/assets/image/bg.jpg');
+  background-size: cover !important;
+  background-attachment: fixed !important;
+  background: url('@/assets/image/bg.jpg'), no-repeat;
 }
 .container {
   width: 100vw;

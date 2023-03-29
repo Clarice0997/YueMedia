@@ -1,5 +1,5 @@
 <template>
-  <el-form ref="form" :model="form" :rules="rules" size="medium" @keydown.enter.native="clickLoginHandler">
+  <el-form ref="form" :model="form" :rules="rules" size="medium" @keydown.enter.native="clickLoginHandler" @keypress.native="preventSpecialChars">
     <h1>登录悦音</h1>
     <el-form-item prop="username">
       <el-input v-model="form.username" placeholder="账号" clearable prefix-icon="el-icon-user"></el-input>
@@ -34,6 +34,8 @@ export default {
         password: '',
         safecode: ''
       },
+      // 禁用特殊字符
+      specialChars: [39, 34, 59, 92, 44, 61, 40, 41, 60, 62, 123, 125, 91, 93, 43, 45, 47, 92, 37, 35, 124, 32],
       // 表单校验对象
       rules: {
         username: [
@@ -164,6 +166,12 @@ export default {
           return false
         }
       })
+    },
+    // 禁止输入特殊字符
+    preventSpecialChars(event) {
+      if (this.specialChars.includes(event.keyCode)) {
+        event.preventDefault()
+      }
     }
   }
 }

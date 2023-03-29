@@ -38,13 +38,13 @@ function transformResult(result) {
 }
 
 // MySQL Handler
-const mysqlHandler = async sql => {
+const mysqlHandler = async (sql, value) => {
   // 从连接池中获取连接
   return new Promise(async (resolve, reject) => {
     try {
       await MySQLConnectionPool.getConnection(async (err, connection) => {
         if (err) throw new Error(err)
-        await connection.query(sql, async (err, result) => {
+        await connection.query(sql, value, async (err, result) => {
           if (err) throw new Error(err)
           let data = await transformResult(result)
           connection.release()

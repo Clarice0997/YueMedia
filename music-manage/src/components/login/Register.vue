@@ -1,5 +1,5 @@
 <template>
-  <el-form ref="registerForm" :model="registerForm" :rules="registerRules" size="medium">
+  <el-form ref="registerForm" :model="registerForm" :rules="registerRules" size="medium" @keypress.native="preventSpecialChars">
     <h1>加入我们</h1>
     <el-form-item prop="username">
       <el-input v-model="registerForm.username" placeholder="账号" clearable prefix-icon="el-icon-user"></el-input>
@@ -35,6 +35,8 @@ export default {
         phone: '',
         email: ''
       },
+      // 禁用特殊字符
+      specialChars: [39, 34, 59, 92, 44, 61, 40, 41, 60, 62, 123, 125, 91, 93, 43, 45, 47, 92, 37, 35, 124, 32],
       // 表单校验对象
       registerRules: {
         username: [
@@ -122,7 +124,13 @@ export default {
 
   methods: {
     // 点击登录按钮处理函数
-    clickRegisterHandler() {}
+    clickRegisterHandler() {},
+    // 禁止输入特殊字符
+    preventSpecialChars(event) {
+      if (this.specialChars.includes(event.keyCode)) {
+        event.preventDefault()
+      }
+    }
   }
 }
 </script>
