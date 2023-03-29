@@ -32,3 +32,11 @@ export const validateSafeCodeAPI = async answer => {
     }
   })
 }
+
+/**
+ * 验证登录有效性
+ * @returns
+ */
+export const verify = async () => {
+  return request.get('/apis/user/verify')
+}

@@ -26,7 +26,7 @@ const routes = [
       },
       {
         path: 'register',
-        component: () => import(/* webpackChunkName: "loginComponent" */ '@/components/login/Register.vue'),
+        component: () => import(/* webpackChunkName: "registerComponent" */ '@/components/login/Register.vue'),
         meta: {
           title: '注册页面'
         }
@@ -36,7 +36,7 @@ const routes = [
   {
     path: '/home',
     name: '主页',
-    component: () => import(/* webpackChunkName: "loginComponent" */ '@/views/Home'),
+    component: () => import(/* webpackChunkName: "homeComponent" */ '@/views/Home'),
     meta: {
       title: '主页',
       requireAuth: true

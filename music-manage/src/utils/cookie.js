@@ -2,16 +2,16 @@
 /* global $cookies */
 
 // 获取校验token
-export async function getCookie(key) {
+export function getCookie(key) {
   return $cookies.get(key)
 }
 
 // 保存校验token
-export async function setCookie(key, value) {
+export function setCookie(key, value) {
   $cookies.set(key, value, { expires: '7D' })
 }
 
 // 删除校验token
-export async function deleteCookie(key) {
+export function deleteCookie(key) {
   $cookies.remove(key)
 }

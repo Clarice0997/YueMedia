@@ -1,6 +1,7 @@
 // import module
 const router = require('express').Router()
 const { loginService, registerService } = require('../service/UserService')
+const { auth } = require('../config/Auth')
 
 /**
  * 用户登录
@@ -34,5 +35,10 @@ router.post('/account/register', async (req, res) => {
     console.log(err)
   }
 })
+
+/**
+ * 身份校验接口
+ */
+router.get('/verify', auth)
 
 module.exports = router

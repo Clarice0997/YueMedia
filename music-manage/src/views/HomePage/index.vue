@@ -4,7 +4,7 @@
 
 <script>
 export default {
-  name: 'MusicManageSystemHomeView',
+  name: 'MusicManageSystemHomePageView',
 
   data() {
     return {}

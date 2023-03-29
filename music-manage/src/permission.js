@@ -1,9 +1,10 @@
 // import modules
 import router from './router'
-import { getCookie, setCookie } from '@/utils/cookie'
+import { getCookie, setCookie, deleteCookie } from '@/utils/cookie'
 import { Message } from 'element-ui'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
+import { verify } from '@/apis/loginAPI'
 
 // 配置Nprogress项 关闭右上角螺旋加载提示
 NProgress.configure({ showSpinner: false })
@@ -25,6 +26,15 @@ router.beforeEach(async (to, from, next) => {
     }
   }
 
+  // 判断 Token 是否有效，失效则清空 Token
+  verify().catch(async ({ response }) => {
+    if (response.data.code != 200) {
+      hasToken = undefined
+      await deleteCookie('Access-Token')
+      await localStorage.removeItem('Access-Token')
+    }
+  })
+
   // 判断跳转界面是否需要权限
   if (to.matched.some(record => record.meta.requireAuth)) {
     if (hasToken) {
@@ -32,6 +42,11 @@ router.beforeEach(async (to, from, next) => {
       next()
       NProgress.done()
     } else {
+      Message({
+        message: '登录已过期，请重新登录',
+        type: 'warning',
+        duration: 1500
+      })
       next('/login')
       NProgress.done()
     }
@@ -50,6 +65,8 @@ router.beforeEach(async (to, from, next) => {
       })
       NProgress.done()
     }
+  } else {
+    next()
   }
 })
 // 如果路由地址不用校验则放行

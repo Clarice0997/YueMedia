@@ -10,13 +10,16 @@ const auth = async (req, res, next) => {
     res.status(401).send({
       message: '身份验证失败'
     })
+    return
   }
   // 判断 JWT 是否合法
   try {
-    const JsonWebToken = await decryptJsonWebToken(authorization)
+    const JsonWebToken = await decryptJsonWebToken(authorization.split(' ').pop())
     if (JsonWebToken) {
-      req.JsonWebToken = JsonWebToken
-      await next()
+      console.log('校验通过=>' + req.path)
+      res.status(200).send({
+        message: '身份验证成功'
+      })
     } else {
       res.status(401).send({
         message: '身份验证失败'
