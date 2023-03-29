@@ -1,4 +1,4 @@
-// 导入封装axios对象
+// 导入封装 axios 对象
 import request from '@/utils/request.js'
 
 /**

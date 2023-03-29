@@ -17,13 +17,13 @@ import './utils/request'
 // 引入 VueCookie 处理模块
 Vue.use(VueCookies)
 
-// permission控制
-import './permission'
-
 // 引入 Font Awesome
 import '@fortawesome/fontawesome-free/css/all.css'
 
 Vue.config.productionTip = false
+
+// permission控制
+import './permission'
 
 new Vue({
   router,

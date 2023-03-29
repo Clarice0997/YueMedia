@@ -5,11 +5,13 @@ import { Message } from 'element-ui'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 import { verify } from '@/apis/loginAPI'
+import { getRoutesAPI } from '@/apis/routesAPI'
+import store from './store'
 
 // 配置Nprogress项 关闭右上角螺旋加载提示
 NProgress.configure({ showSpinner: false })
 
-// 全局路由前置
+// 全局路由前置 （鉴权）
 router.beforeEach(async (to, from, next) => {
   // 启动 NProgress 加载
   NProgress.start()
@@ -39,41 +41,69 @@ router.beforeEach(async (to, from, next) => {
   if (to.matched.some(record => record.meta.requireAuth)) {
     if (hasToken) {
       // 存在 Token 则放行，否则跳转登录页
-      next()
       NProgress.done()
+      return next()
     } else {
       Message({
         message: '登录已过期，请重新登录',
         type: 'warning',
         duration: 1500
       })
-      next('/login')
       NProgress.done()
+      return next('/login')
     }
   } else if (to.path.includes('login')) {
     // 跳转登录页，判断是否已经登录
     // 登录则重定向首页，未登录则放行
     if (!hasToken) {
-      next()
       NProgress.done()
+      return next()
     } else {
-      next('/home')
       Message({
         message: '用户已登录，无需登录',
         type: 'warning',
         duration: 1500
       })
       NProgress.done()
+      return next('/home')
     }
   } else {
-    next()
+    return next()
   }
 })
-// 如果路由地址不用校验则放行
-// else {
-//   next()
-//   NProgress.done()
-// }
+
+// 全局路由前置 （动态路由）
+router.beforeEach(async (to, from, next) => {
+  if (to.path.includes('login')) {
+    return next()
+  }
+  if (store.getters['router/getDynamicRoutes'].length === 0) {
+    // 获取动态路由菜单
+    const {
+      data: { routes }
+    } = await getRoutesAPI()
+    // 处理返回路由对象
+    const Routes = await routes.map(route => {
+      return {
+        path: route.path,
+        name: route.name,
+        redirect: route.redirect ? route.redirect : undefined,
+        component: () => import(`@/${route.component}`),
+        meta: JSON.parse(route.meta)
+      }
+    })
+    // 保存返回路由对象
+    await store.dispatch('router/asyncAddRoutes', Routes)
+    // 插入路由对象
+    store.getters['router/getDynamicRoutes'].forEach(async route => {
+      await router.addRoute(route)
+    })
+    console.log(router)
+    router.replace(to.path)
+  } else {
+    return next()
+  }
+})
 
 // 全局路由后置
 router.afterEach(() => {
