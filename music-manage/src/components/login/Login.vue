@@ -30,8 +30,8 @@ export default {
     return {
       // 表单数据对象
       form: {
-        username: 'admin',
-        password: '123456',
+        username: '',
+        password: '',
         safecode: ''
       },
       // 禁用特殊字符

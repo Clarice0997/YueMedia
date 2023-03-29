@@ -1,18 +1,15 @@
-import Vue from 'vue'
-
-// 引入axios模块
 import axios from 'axios'
-
-// 引入获取token函数
-// import { getToken } from '@/utils/auth'
-
-// 导入加载条
+import { getCookie } from '@/utils/cookie'
 import NProgress from 'nprogress'
+import 'nprogress/nprogress.css'
+
+// 配置Nprogress项 关闭右上角螺旋加载提示
+NProgress.configure({ showSpinner: false })
 
 // 默认设置校验码
-// axios.defaults.headers.common.Authorization = getToken()
+axios.defaults.headers.common.Authorization = `Bearer ${getCookie('Access-Token')}`
 // 设置默认请求格式
-// axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
+axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
 // 允许axios携带cookie
 axios.defaults.withCredentials = true
 
@@ -25,11 +22,11 @@ const request = axios.create({
 
 // 请求拦截器
 request.interceptors.request.use(
-  config => {
+  async config => {
     // 开启进度条
     NProgress.start()
     // 请求拦截添加校验码
-    // config.headers.Authorization = getToken()
+    config.headers.Authorization = `Bearer ${getCookie('Access-Token')}`
     return config
   },
   error => {
