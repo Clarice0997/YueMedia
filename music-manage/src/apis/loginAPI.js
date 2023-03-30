@@ -34,9 +34,17 @@ export const validateSafeCodeAPI = async answer => {
 }
 
 /**
- * 验证登录有效性
+ * 验证登录有效性 API
  * @returns
  */
 export const verify = async () => {
   return request.get('/apis/user/verify')
+}
+
+/**
+ * 获取用户个人信息 API
+ * @returns
+ */
+export const getProfile = async () => {
+  return request.get('/apis/user/account/profile')
 }

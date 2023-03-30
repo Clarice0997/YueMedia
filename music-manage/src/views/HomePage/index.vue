@@ -1,5 +1,5 @@
 <template>
-  <div>HomePage</div>
+  <el-card shadow="hover" class="top-card"> </el-card>
 </template>
 
 <script>
@@ -16,4 +16,9 @@ export default {
 }
 </script>
 
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+.top-card {
+  margin: 10px;
+  flex-grow: 1;
+}
+</style>

@@ -4,7 +4,7 @@ import { getCookie, setCookie, deleteCookie } from '@/utils/cookie'
 import { Message } from 'element-ui'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
-import { verify } from '@/apis/loginAPI'
+import { verify, getProfile } from '@/apis/loginAPI'
 import { getRoutesAPI } from '@/apis/routesAPI'
 import store from './store'
 import { routeParser } from '@/utils/routeParser'
@@ -30,13 +30,16 @@ router.beforeEach(async (to, from, next) => {
   }
 
   // 判断 Token 是否有效，失效则清空 Token
-  verify().catch(async ({ response }) => {
-    if (response.data.code != 200) {
-      hasToken = undefined
-      await deleteCookie('Access-Token')
-      await localStorage.removeItem('Access-Token')
-    }
-  })
+  if (hasToken) {
+    verify().catch(async ({ response }) => {
+      if (response.data.code != 200) {
+        hasToken = undefined
+        await deleteCookie('Access-Token')
+        await localStorage.removeItem('Access-Token')
+        return next('/login/login')
+      }
+    })
+  }
 
   // 判断跳转界面是否需要权限
   if (to.matched.some(record => record.meta.requireAuth)) {
@@ -110,11 +113,30 @@ router.beforeEach(async (to, from, next) => {
     store.getters['dynamicRoutes/getDynamicRoutes'].forEach(route => {
       router.addRoute(route)
     })
+    console.log(router.getRoutes())
     console.table(store.getters['dynamicRoutes/getRoutes'])
     console.log(router)
     router.replace(to.path)
+  } else if (to.path === '/') {
+    return next('/login')
   } else {
     return next()
+  }
+})
+
+// 全局路由前置 （获取用户信息）
+router.beforeEach(async (to, from, next) => {
+  if (to.matched.some(record => record.meta.requireAuth)) {
+    if (!store.state.userProfile.userData) {
+      const {
+        data: { data }
+      } = await getProfile()
+      await store.dispatch('userProfile/saveUserData', data)
+      next()
+    }
+    next()
+  } else {
+    next()
   }
 })
 

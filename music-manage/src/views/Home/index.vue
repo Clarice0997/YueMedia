@@ -27,10 +27,13 @@
           </el-menu>
         </el-aside>
         <el-main>
-          <keep-alive>
-            <router-view></router-view>
-          </keep-alive>
-          <p class="footer">版权所有@快递管理系统 2021-2022</p>
+          <div class="page-bg"></div>
+          <div class="main-container">
+            <keep-alive>
+              <router-view></router-view>
+            </keep-alive>
+          </div>
+          <p class="footer">版权所有@悦音 2023</p>
         </el-main>
       </el-container>
     </el-container>
@@ -60,12 +63,11 @@ export default {
       })
       .map(route => {
         return {
-          index: route.path,
+          index: `${store.getters['dynamicRoutes/getDynamicRoutes'][0].path}/${route.path}`,
           icon: route.meta.icon,
           title: route.meta.title
         }
       })
-    console.log(this.menuList)
   },
 
   methods: {
@@ -169,7 +171,24 @@ export default {
   }
   .el-menu-item {
     padding-left: 30px !important;
+    i {
+      margin-right: 5px;
+      width: 24px;
+      text-align: center;
+      font-size: 18px;
+      vertical-align: middle;
+    }
   }
+}
+.page-bg {
+  display: block;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  background-size: cover !important;
+  background-attachment: fixed !important;
+  background: url('@/assets/image/bg.jpg'), no-repeat;
 }
 .el-main {
   height: calc(100vh - 60px);
@@ -181,7 +200,13 @@ export default {
   flex-direction: column;
   justify-content: space-between;
 }
+.main-container {
+  z-index: 2;
+  height: 100%;
+  display: flex;
+}
 .footer {
+  z-index: 2;
   height: 60px;
   line-height: 60px;
 }
