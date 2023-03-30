@@ -15,6 +15,7 @@ router.get('/', auth, async (req, res) => {
     // response
     res.status(code).send({ ...data, code })
   } catch (error) {
+    res.status(500).send(error)
     console.log(err)
   }
 })

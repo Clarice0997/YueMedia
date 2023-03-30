@@ -27,6 +27,7 @@ router.get('/', async (req, res) => {
     }
   } catch (err) {
     console.log(err)
+    res.status(500).send(err)
   }
 })
 
@@ -46,6 +47,7 @@ router.get('/validate', async (req, res) => {
     res.status(code).send({ ...data, code })
   } catch (err) {
     console.log(err)
+    res.status(500).send(err)
   }
 })
 

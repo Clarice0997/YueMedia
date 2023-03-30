@@ -23,6 +23,10 @@ app.use(express.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
+// 绑定静态资源文件夹
+// http://localhost:3000/
+app.use(express.static('static'))
+
 // 路由
 // 登录注册路由
 app.use('/apis/user', require('./controller/UserController'))
@@ -30,6 +34,8 @@ app.use('/apis/user', require('./controller/UserController'))
 app.use('/apis/safecode', require('./controller/SafecodeController'))
 // Vue路由
 app.use('/apis/routes', require('./controller/RoutesController'))
+// 音乐路由
+app.use('/apis/music', require('./controller/MusicController'))
 
 // 监听端口
 app.listen(process.env.PORT, err => {

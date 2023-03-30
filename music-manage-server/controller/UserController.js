@@ -18,6 +18,7 @@ router.post('/account/login', async (req, res) => {
     res.status(code).send({ ...data, code })
   } catch (err) {
     console.log(err)
+    res.status(500).send(err)
   }
 })
 
@@ -33,6 +34,7 @@ router.post('/account/register', async (req, res) => {
     res.status(code).send({ ...data, code })
   } catch (err) {
     console.log(err)
+    res.status(500).send(err)
   }
 })
 
