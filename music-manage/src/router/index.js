@@ -15,7 +15,7 @@ const routes = [
     path: '/login',
     name: 'login',
     component: login,
-    redirect: '/login/login',
+    redirect: () => import('@/views/Login'),
     children: [
       {
         path: 'login',
@@ -32,16 +32,16 @@ const routes = [
         }
       }
     ]
-  },
-  {
-    path: '/home',
-    name: '主页',
-    component: () => import(/* webpackChunkName: "homeComponent" */ '@/views/Home'),
-    meta: {
-      title: '主页',
-      requireAuth: true
-    }
   }
+  // {
+  //   path: '/home',
+  //   name: '主页',
+  //   component: () => import(/* webpackChunkName: "homeComponent" */ '@/views/Home'),
+  //   meta: {
+  //     title: '主页',
+  //     requireAuth: true
+  //   }
+  // }
 ]
 
 const router = new VueRouter({

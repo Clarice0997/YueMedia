@@ -165,11 +165,9 @@ export default {
               this.$message({
                 message: data.message,
                 type: 'success',
-                duration: 1500,
-                onClose: () => {
-                  router.replace('/login/login')
-                }
+                duration: 1500
               })
+              router.replace('/login/login')
             })
             .catch(({ response }) => {
               // 提示错误弹窗

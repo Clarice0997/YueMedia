@@ -138,11 +138,9 @@ export default {
               this.$message({
                 message: data.message,
                 type: 'success',
-                duration: 1500,
-                onClose: () => {
-                  router.replace('/home')
-                }
+                duration: 1500
               })
+              router.replace('/home')
             })
             .catch(({ response }) => {
               // 提示错误弹窗

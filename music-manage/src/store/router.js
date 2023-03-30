@@ -1,6 +1,10 @@
-export const router = {
+// import modules
+import router from '@/router'
+
+export const dynamicRoutes = {
   namespaced: true,
   state: {
+    staticRoutes: router.options.routes,
     dynamicRoutes: []
   },
   mutations: {
@@ -11,6 +15,10 @@ export const router = {
     // 批量添加路由
     addRoutes(state, routes) {
       state.dynamicRoutes = state.dynamicRoutes.concat(routes)
+    },
+    // 清空路由
+    clearRoutes(state) {
+      state.dynamicRoutes.length = 0
     }
   },
   actions: {
@@ -31,12 +39,25 @@ export const router = {
           resolve()
         }, 1000)
       })
+    },
+    // 异步清空路由
+    asyncClearRoutes({ commit }) {
+      return new Promise(resolve => {
+        setTimeout(() => {
+          commit('clearRoutes')
+          resolve()
+        }, 1000)
+      })
     }
   },
   getters: {
     // 获取动态路由配置
     getDynamicRoutes(state) {
       return state.dynamicRoutes
+    },
+    // 获取路由配置
+    getRoutes(state) {
+      return [...state.staticRoutes, ...state.dynamicRoutes]
     }
   }
 }

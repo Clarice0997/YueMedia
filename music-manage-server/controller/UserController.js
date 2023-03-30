@@ -40,7 +40,20 @@ router.post('/account/register', async (req, res) => {
  * 身份校验接口
  */
 router.get('/verify', auth, async (req, res) => {
-  await res.status(200).send({ message: '身份验证成功', code: 200 })
+  res.status(200).send({ message: '身份验证成功', code: 200 })
+})
+
+/**
+ * 获取用户信息接口
+ */
+router.get('/account/profile', auth, async (req, res) => {
+  // 获取 authorization
+  const authorization = req.authorization
+  // 返回用户数据
+  res.status(200).send({
+    message: '用户数据获取成功',
+    data: authorization
+  })
 })
 
 module.exports = router

@@ -7,6 +7,7 @@ import 'nprogress/nprogress.css'
 import { verify } from '@/apis/loginAPI'
 import { getRoutesAPI } from '@/apis/routesAPI'
 import store from './store'
+import { routeParser } from '@/utils/routeParser'
 
 // 配置Nprogress项 关闭右上角螺旋加载提示
 NProgress.configure({ showSpinner: false })
@@ -74,30 +75,42 @@ router.beforeEach(async (to, from, next) => {
 
 // 全局路由前置 （动态路由）
 router.beforeEach(async (to, from, next) => {
+  // 登录页面放行
   if (to.path.includes('login')) {
     return next()
   }
-  if (store.getters['router/getDynamicRoutes'].length === 0) {
+
+  // 判断 Vuex 中是否存在路由数据
+  if (store.getters['dynamicRoutes/getDynamicRoutes'].length === 0) {
     // 获取动态路由菜单
     const {
       data: { routes }
     } = await getRoutesAPI()
     // 处理返回路由对象
     const Routes = await routes.map(route => {
-      return {
+      const originRoute = {
         path: route.path,
         name: route.name,
         redirect: route.redirect ? route.redirect : undefined,
         component: () => import(`@/${route.component}`),
-        meta: JSON.parse(route.meta)
+        meta: JSON.parse(route.meta),
+        children: []
       }
+      // 为元路由对象添加标签
+      if (route.parent_name) {
+        originRoute.meta.parentName = route.parent_name
+      } else {
+        originRoute.meta.isParentRoute = true
+      }
+      return originRoute
     })
-    // 保存返回路由对象
-    await store.dispatch('router/asyncAddRoutes', Routes)
-    // 插入路由对象
-    store.getters['router/getDynamicRoutes'].forEach(async route => {
-      await router.addRoute(route)
+    // 保存返回路由树
+    await store.dispatch('dynamicRoutes/asyncAddRoutes', await routeParser(Routes))
+    // 插入路由树
+    store.getters['dynamicRoutes/getDynamicRoutes'].forEach(route => {
+      router.addRoute(route)
     })
+    console.table(store.getters['dynamicRoutes/getRoutes'])
     console.log(router)
     router.replace(to.path)
   } else {
