@@ -71,6 +71,8 @@ router.beforeEach(async (to, from, next) => {
       NProgress.done()
       return next('/home')
     }
+  } else if (to.path === '/') {
+    return next('/login/login')
   } else {
     return next()
   }
@@ -79,7 +81,7 @@ router.beforeEach(async (to, from, next) => {
 // 全局路由前置 （动态路由）
 router.beforeEach(async (to, from, next) => {
   // 登录页面放行
-  if (to.path.includes('login')) {
+  if (to.path === '/' || to.path.includes('login')) {
     return next()
   }
 

@@ -29,9 +29,7 @@
         <el-main>
           <div class="page-bg"></div>
           <div class="main-container">
-            <keep-alive>
-              <router-view></router-view>
-            </keep-alive>
+            <router-view></router-view>
           </div>
           <p class="footer">版权所有@悦音 2023</p>
         </el-main>
@@ -41,7 +39,9 @@
 </template>
 
 <script>
+// import modules
 import store from '@/store'
+import { deleteCookie } from '@/utils/cookie'
 
 export default {
   name: 'MusicManageSystemHomeView',
@@ -72,19 +72,18 @@ export default {
 
   methods: {
     clickLogoutHandler() {
-      //   // 清除登录索引 和 用户信息
-      //   this.$store.dispatch('resetUser')
-      //   deleteCookie('userInfo')
-      //   // 清除Token
-      //   deleteToken()
-      //   // 退出登录弹窗
-      //   this.$message({
-      //     message: '退出登录成功',
-      //     type: 'success',
-      //     duration: 2000
-      //   })
-      //   // 跳转登录页
-      //   this.$router.replace('/login')
+      // 清除登录索引 和 用户信息
+      this.$store.dispatch('userProfile/clearUserData')
+      deleteCookie('Access-Token')
+      localStorage.removeItem('Access-Token')
+      // 退出登录弹窗
+      this.$message({
+        message: '退出登录成功',
+        type: 'success',
+        duration: 2000
+      })
+      // 跳转登录页
+      this.$router.replace('/login/login')
     },
     // 收缩导航栏按钮点击事件
     toggleClick() {
@@ -110,9 +109,11 @@ export default {
   flex-direction: row;
   justify-content: space-between;
   padding: 0;
+
   .logo-container {
     width: 350px;
     display: flex;
+
     h3 {
       width: 300px;
       font-size: 20px;
@@ -120,9 +121,11 @@ export default {
       text-align: center;
       line-height: 60px;
     }
+
     .toggle-container {
       width: 50px;
       height: 100%;
+
       i {
         font-size: 28px;
         display: block;
@@ -131,11 +134,13 @@ export default {
         line-height: 60px;
         cursor: pointer;
       }
+
       i:hover {
         color: #c1ff5c;
       }
     }
   }
+
   .user-container {
     width: 150px;
     display: flex;
@@ -144,33 +149,42 @@ export default {
     text-align: center;
     line-height: 60px;
     margin-right: 20px;
+
     .userInfo {
       width: 75px;
     }
+
     .logout {
       width: 75px;
     }
+
     i {
       transition: color 0.15s linear;
       cursor: pointer;
     }
+
     i:hover {
       color: #c1ff5c;
     }
   }
 }
+
 .body-container {
   height: auto;
 }
+
 .el-aside {
   transition: 0.5s;
   height: calc(100vh - 60px);
   background-color: #545c64;
+
   .el-menu {
     border-right: 0;
   }
+
   .el-menu-item {
     padding-left: 30px !important;
+
     i {
       margin-right: 5px;
       width: 24px;
@@ -180,6 +194,7 @@ export default {
     }
   }
 }
+
 .page-bg {
   display: block;
   position: fixed;
@@ -190,6 +205,7 @@ export default {
   background-attachment: fixed !important;
   background: url('@/assets/image/bg.jpg'), no-repeat;
 }
+
 .el-main {
   height: calc(100vh - 60px);
   background-color: #e9eef3;
@@ -200,11 +216,13 @@ export default {
   flex-direction: column;
   justify-content: space-between;
 }
+
 .main-container {
   z-index: 2;
   height: 100%;
   display: flex;
 }
+
 .footer {
   z-index: 2;
   height: 60px;

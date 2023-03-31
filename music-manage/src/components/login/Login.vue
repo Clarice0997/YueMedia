@@ -8,12 +8,12 @@
       <el-input v-model="form.password" placeholder="密码" show-password prefix-icon="el-icon-lock"></el-input>
     </el-form-item>
     <div class="safecode-container">
-      <img :src="captchaSrc" class="safecode-img" @click="clickRefreshCaptcha" />
+      <img :src="captchaSrc" class="safecode-img" @click="clickRefreshCaptcha" alt="验证码" />
       <el-form-item prop="safecode">
         <el-input v-model="form.safecode" placeholder="验证码"></el-input>
       </el-form-item>
     </div>
-    <el-button class="login-button" type="primary" v-loading.fullscreen="fullscreenLoading" :loading="btnLoading" @click="clickLoginHandler">立即登录</el-button>
+    <el-button class="login-button" type="primary" v-loading.fullscreen="fullscreenLoading" :loading="btnLoading" @click="clickLoginHandler">立即登录 </el-button>
     <router-link to="/login/register">立即注册</router-link>
   </el-form>
 </template>
@@ -138,7 +138,7 @@ export default {
               this.$message({
                 message: data.message,
                 type: 'success',
-                duration: 1500
+                duration: 1000
               })
               router.replace('/home')
             })
@@ -179,11 +179,13 @@ export default {
 .safecode-container {
   display: grid;
   grid-template-columns: 30% 70%;
+
   img {
     height: 100%;
     background-color: #eef7f8;
     cursor: pointer;
   }
+
   .el-form-item {
     margin: 0;
     padding-left: 5px;

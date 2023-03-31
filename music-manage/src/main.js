@@ -4,7 +4,6 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 import VueCookies from 'vue-cookies'
-import echarts from 'echarts'
 
 // 重置 css 样式
 import '@/assets/css/reset.css'
@@ -20,9 +19,6 @@ Vue.use(VueCookies)
 
 // 引入 Font Awesome
 import '@fortawesome/fontawesome-free/css/all.css'
-
-// 引入 Echarts
-Vue.prototype.$echarts = echarts
 
 // permission控制
 import './permission'
