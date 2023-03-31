@@ -2,6 +2,7 @@
 const router = require('express').Router()
 const { auth } = require('../config/Auth')
 const { getLoginRecordService } = require('../service/DataService')
+const errorHandler = require('../config/ErrorCatcher')
 
 /**
  * @api {GET} /apis/data/login/record 获取登录记录数据接口
@@ -11,19 +12,14 @@ const { getLoginRecordService } = require('../service/DataService')
  * @apiPermission Admin
  * @apiHeader {String} Authorization JWT鉴权
  */
-router.get('/login/record', auth, async (req, res) => {
+router.get('/login/record', auth, async (req, res, next) => {
   try {
     // Service
     const { code, data } = await getLoginRecordService()
     // response
     res.status(code).send({ ...data, code })
   } catch (error) {
-    res.status(500).send({
-      code: 500,
-      data: {
-        message: error.message
-      }
-    })
+    errorHandler(error, req, res, next)
   }
 })
 

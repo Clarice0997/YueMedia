@@ -2,6 +2,7 @@
 const router = require('express').Router()
 const { loginService, registerService } = require('../service/UserService')
 const { auth } = require('../config/Auth')
+const errorHandler = require('../config/ErrorCatcher')
 
 /**
  * @api {POST} /apis/user/account/login 用户登录接口
@@ -12,7 +13,7 @@ const { auth } = require('../config/Auth')
  * @apiBody {String} username 账户名
  * @apiBody {String} password 密码
  */
-router.post('/account/login', async (req, res) => {
+router.post('/account/login', async (req, res, next) => {
   // 解构请求体
   const { username, password } = req.body
   // Service
@@ -22,9 +23,8 @@ router.post('/account/login', async (req, res) => {
     // set JsonWebToken
     if (data.token) res.cookie('Access-Token', data.token)
     res.status(code).send({ ...data, code })
-  } catch (err) {
-    console.log(err)
-    res.status(500).send(err)
+  } catch (error) {
+    errorHandler(error, req, res, next)
   }
 })
 
@@ -40,16 +40,15 @@ router.post('/account/login', async (req, res) => {
  * @apiBody {String} phone 电话号码
  * @apiBody {String} email 邮箱
  */
-router.post('/account/register', async (req, res) => {
+router.post('/account/register', async (req, res, next) => {
   const body = req.body
   // Service
   try {
     const { code, data } = await registerService(body)
     // response
     res.status(code).send({ ...data, code })
-  } catch (err) {
-    console.log(err)
-    res.status(500).send(err)
+  } catch (error) {
+    errorHandler(error, req, res, next)
   }
 })
 

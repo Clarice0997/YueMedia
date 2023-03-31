@@ -4,6 +4,7 @@ const { auth } = require('../config/Auth')
 const multer = require('multer')
 const path = require('path')
 const { uploadMusicService, uploadMusicCoverService, uploadMusicDataService } = require('../service/MusicService')
+const errorHandler = require('../config/ErrorCatcher')
 
 // 音乐文件上传配置
 const musicUpload = multer({
@@ -21,7 +22,7 @@ const musicUpload = multer({
  * @apiHeader {String} Content-Type multipart/form-data
  * @apiBody {Buffer} musicFile 音乐文件
  */
-router.post('/upload/music', auth, musicUpload.single('musicFile'), async (req, res) => {
+router.post('/upload/music', auth, musicUpload.single('musicFile'), async (req, res, next) => {
   try {
     // 获取上传文件
     const musicFile = req.file
@@ -30,12 +31,7 @@ router.post('/upload/music', auth, musicUpload.single('musicFile'), async (req, 
     // response
     res.status(code).send({ ...data, code })
   } catch (error) {
-    res.status(500).send({
-      code: 500,
-      data: {
-        message: error.message
-      }
-    })
+    errorHandler(error, req, res, next)
   }
 })
 
@@ -66,7 +62,7 @@ const musicCoverUpload = multer({
  * @apiBody {String} musicName 音乐文件名
  * @apiBody {String} [originCoverName] 原始音乐封面文件名
  */
-router.post('/upload/music/cover', auth, musicCoverUpload.single('musicCoverFile'), async (req, res) => {
+router.post('/upload/music/cover', auth, musicCoverUpload.single('musicCoverFile'), async (req, res, next) => {
   try {
     // 获取上传封面图
     const musicCoverFile = req.file
@@ -79,16 +75,16 @@ router.post('/upload/music/cover', auth, musicCoverUpload.single('musicCoverFile
     // response
     res.status(code).send({ ...data, code })
   } catch (error) {
-    res.status(500).send({
-      code: 500,
-      data: {
-        message: error.message
-      }
-    })
+    errorHandler(error, req, res, next)
   }
 })
 
 // 上传音乐数据接口
-router.post('/upload/music/data', auth, async (req, res) => {})
+router.post('/upload/music/data', auth, async (req, res, next) => {
+  try {
+  } catch (error) {
+    errorHandler(error, req, res, next)
+  }
+})
 
 module.exports = router

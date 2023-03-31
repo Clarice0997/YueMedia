@@ -1,7 +1,6 @@
-// 导入路由
+// import modules
 const router = require('express').Router()
-
-// 导入 Service
+const errorHandler = require('../config/ErrorCatcher')
 const { generateSafeCode, validateSafeCode } = require('../service/SafecodeService')
 
 /**
@@ -12,7 +11,7 @@ const { generateSafeCode, validateSafeCode } = require('../service/SafecodeServi
  * @apiPermission All
  * @apiParam {String} [type] 验证码类型（数字|字符串）
  */
-router.get('/', async (req, res) => {
+router.get('/', async (req, res, next) => {
   // 解构获取 type
   const { type } = req.query
 
@@ -30,9 +29,8 @@ router.get('/', async (req, res) => {
     } else {
       res.status(code).send({ ...data, code })
     }
-  } catch (err) {
-    console.log(err)
-    res.status(500).send(err)
+  } catch (error) {
+    errorHandler(error, req, res, next)
   }
 })
 
@@ -46,7 +44,7 @@ router.get('/', async (req, res) => {
  * @apiHeader {String} uuid Cookie&验证码id
  * @apiHeader {String} type Cookie&验证码类型
  */
-router.get('/validate', async (req, res) => {
+router.get('/validate', async (req, res, next) => {
   // 解构获取参数
   const { answer } = req.query
   // 获取 Cookie 中的 uuid 和 type
@@ -57,9 +55,8 @@ router.get('/validate', async (req, res) => {
     const { code, data } = await validateSafeCode(type, answer, uuid)
     // response
     res.status(code).send({ ...data, code })
-  } catch (err) {
-    console.log(err)
-    res.status(500).send(err)
+  } catch (error) {
+    errorHandler(error, req, res, next)
   }
 })
 
