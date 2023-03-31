@@ -24,8 +24,12 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
 // 绑定静态资源文件夹
-// http://localhost:3000/
+// 静态资源地址：http://localhost:3000/
 app.use(express.static('static'))
+
+// 绑定 apidoc 文档
+// 接口文档地址：http://localhost:3000/apidoc
+app.use('/apidoc', express.static('apidoc'))
 
 // 扫描文件夹，删除过期临时文件
 require('./config/DelTempFile')

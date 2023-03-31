@@ -5,7 +5,12 @@ const router = require('express').Router()
 const { generateSafeCode, validateSafeCode } = require('../service/SafecodeService')
 
 /**
- * 获取验证码接口
+ * @api {GET} /apis/safecode 获取验证码接口
+ * @apiName GetSafeCode
+ * @apiGroup SafeCode
+ * @apiName SafeCode/GetSafeCode
+ * @apiPermission All
+ * @apiParam {String} [type] 验证码类型（数字|字符串）
  */
 router.get('/', async (req, res) => {
   // 解构获取 type
@@ -32,7 +37,14 @@ router.get('/', async (req, res) => {
 })
 
 /**
- * 验证验证码接口
+ * @api {GET} /apis/safecode/validate 验证验证码接口
+ * @apiName ValidateSafeCode
+ * @apiGroup SafeCode
+ * @apiName SafeCode/ValidateSafeCode
+ * @apiPermission All
+ * @apiParam {String} answer 验证码答案
+ * @apiHeader {String} uuid Cookie&验证码id
+ * @apiHeader {String} type Cookie&验证码类型
  */
 router.get('/validate', async (req, res) => {
   // 解构获取参数

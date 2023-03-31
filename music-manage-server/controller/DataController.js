@@ -3,7 +3,14 @@ const router = require('express').Router()
 const { auth } = require('../config/Auth')
 const { getLoginRecordService } = require('../service/DataService')
 
-// 获取登录记录接口
+/**
+ * @api {GET} /apis/data/login/record 获取登录记录数据接口
+ * @apiName GetLoginRecord
+ * @apiGroup Data
+ * @apiName Data/GetLoginRecord
+ * @apiPermission Admin
+ * @apiHeader {String} Authorization JWT鉴权
+ */
 router.get('/login/record', auth, async (req, res) => {
   try {
     // Service

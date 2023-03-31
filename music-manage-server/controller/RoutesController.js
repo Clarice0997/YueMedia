@@ -4,7 +4,12 @@ const { auth } = require('../config/Auth')
 const { getRoutesService } = require('../service/RoutesService')
 
 /**
- * 获取路由对象接口
+ * @api {GET} /apis/routes 获取动态路由接口
+ * @apiName GetRoutes
+ * @apiGroup Routes
+ * @apiName Routes/GetRoutes
+ * @apiPermission User
+ * @apiHeader {String} Authorization JWT鉴权
  */
 router.get('/', auth, async (req, res) => {
   // 获取 authorization

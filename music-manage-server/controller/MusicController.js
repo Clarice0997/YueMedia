@@ -11,7 +11,16 @@ const musicUpload = multer({
 })
 
 // TODO: 文件上传错误处理
-// 上传音乐文件接口
+/**
+ * @api {POST} /apis/music/upload/music 音乐文件上传接口
+ * @apiName UploadMusicFile
+ * @apiGroup Music
+ * @apiName Music/UploadMusicFile
+ * @apiPermission Admin
+ * @apiHeader {String} Authorization JWT鉴权
+ * @apiHeader {String} Content-Type multipart/form-data
+ * @apiBody {Buffer} musicFile 音乐文件
+ */
 router.post('/upload/music', auth, musicUpload.single('musicFile'), async (req, res) => {
   try {
     // 获取上传文件
@@ -45,7 +54,18 @@ const musicCoverUpload = multer({
 })
 
 // TODO: 文件上传错误处理
-// 上传封面图片接口
+/**
+ * @api {POST} /apis/music/upload/music/cover 音乐封面上传接口
+ * @apiName UploadMusicCover
+ * @apiGroup Music
+ * @apiName Music/UploadMusicCover
+ * @apiPermission Admin
+ * @apiHeader {String} Authorization JWT鉴权
+ * @apiHeader {String} Content-Type multipart/form-data
+ * @apiBody {Buffer} musicCoverFile 音乐封面文件
+ * @apiBody {String} musicName 音乐文件名
+ * @apiBody {String} [originCoverName] 原始音乐封面文件名
+ */
 router.post('/upload/music/cover', auth, musicCoverUpload.single('musicCoverFile'), async (req, res) => {
   try {
     // 获取上传封面图
