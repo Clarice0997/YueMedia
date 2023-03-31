@@ -1,7 +1,7 @@
 <template>
   <el-card shadow="hover" class="top-card">
-    <div ref="loginRecordChart" id="loginRecordChart" style="height: 400px"></div>
-    <div ref="userRecordChart" id="userRecordChart" style="height: 400px"></div>
+    <div ref="loginRecordChart" id="loginRecordChart" style="height: 400px; width: 100%"></div>
+    <div ref="userRecordChart" id="userRecordChart" style="height: 400px; width: 100%"></div>
   </el-card>
 </template>
 
@@ -16,6 +16,7 @@ export default {
 
   data() {
     return {
+      loginChart: {},
       loginRecordChartOption: {},
       userRecordChartOption: {}
     }
@@ -35,7 +36,7 @@ export default {
         const dates = Object.keys(data)
         const counts = Object.values(data)
         // 渲染 Echart 图标
-        const chart = echarts.init(this.$refs.loginRecordChart, 'macarons')
+        this.loginChart = echarts.init(this.$refs.loginRecordChart, 'macarons')
         this.loginRecordChartOption = {
           title: {
             text: '用户登录趋势表',
@@ -79,7 +80,7 @@ export default {
             }
           ]
         }
-        chart.setOption(this.loginRecordChartOption)
+        this.loginChart.setOption(this.loginRecordChartOption, true)
       } catch (e) {
         // 异常处理
         console.log(e.message)
@@ -91,6 +92,12 @@ export default {
           })
         }
       }
+    },
+    redrawChart() {
+      // TODO: 自适应重绘 Echart（未成功）
+      this.$nextTick(() => {
+        this.loginChart.resize()
+      })
     }
   }
 }

@@ -29,12 +29,13 @@
         <el-main>
           <div class="page-bg"></div>
           <div class="main-container">
-            <router-view></router-view>
+            <router-view ref="mainView"></router-view>
           </div>
           <p class="footer">版权所有@悦音 2023</p>
         </el-main>
       </el-container>
     </el-container>
+    <a-player :music="audio[0]" :list="audio" :volume="0.4" listFolded repeat="repeat-all" />
   </div>
 </template>
 
@@ -42,6 +43,7 @@
 // import modules
 import store from '@/store'
 import { deleteCookie } from '@/utils/cookie'
+import APlayer from 'vue-aplayer'
 
 export default {
   name: 'MusicManageSystemHomeView',
@@ -51,8 +53,20 @@ export default {
       toggleClass: 'el-icon-s-fold',
       menuList: [],
       toggleIndex: false,
-      asideWidth: '300px'
+      asideWidth: '300px',
+      audio: [
+        {
+          title: "m'Lover",
+          artist: 'Kishi Bashi',
+          src: 'https://m801.music.126.net/20230331200630/194e1944fae6cd9083eac2bc78cf49f7/jdyyaac/obj/w5rDlsOJwrLDjj7CmsOj/4993721255/2a85/9e16/a6fb/a67218bc9285620f98fa3d23eca5d35b.m4a',
+          pic: 'http://p2.music.126.net/Qy3LqUA7_Ox-h5ayai-BMQ==/109951165497169984.jpg?param=130y130'
+        }
+      ]
     }
+  },
+
+  components: {
+    APlayer
   },
 
   mounted() {
@@ -87,6 +101,8 @@ export default {
     },
     // 收缩导航栏按钮点击事件
     toggleClick() {
+      // 重绘 Echart
+      this.$refs.mainView.redrawChart()
       if (this.toggleIndex) {
         this.toggleIndex = false
         this.asideWidth = '300px'
@@ -227,5 +243,12 @@ export default {
   z-index: 2;
   height: 60px;
   line-height: 60px;
+}
+
+.aplayer {
+  position: fixed;
+  right: 0px;
+  bottom: 0px;
+  z-index: 10;
 }
 </style>

@@ -10,6 +10,7 @@ const musicUpload = multer({
   limits: { fileSize: 100000000, files: 1 }
 })
 
+// TODO: 文件上传错误处理
 // 上传音乐文件接口
 router.post('/upload/music', auth, musicUpload.single('musicFile'), async (req, res) => {
   try {
@@ -43,6 +44,7 @@ const musicCoverUpload = multer({
   }
 })
 
+// TODO: 文件上传错误处理
 // 上传封面图片接口
 router.post('/upload/music/cover', auth, musicCoverUpload.single('musicCoverFile'), async (req, res) => {
   try {
