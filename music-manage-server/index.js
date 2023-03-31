@@ -27,6 +27,9 @@ app.use(bodyParser.json())
 // http://localhost:3000/
 app.use(express.static('static'))
 
+// 扫描文件夹，删除过期临时文件
+require('./config/DelTempFile')
+
 // 路由
 // 登录注册路由
 app.use('/apis/user', require('./controller/UserController'))

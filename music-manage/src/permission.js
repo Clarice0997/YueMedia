@@ -32,7 +32,7 @@ router.beforeEach(async (to, from, next) => {
   // 判断 Token 是否有效，失效则清空 Token
   if (hasToken) {
     verify().catch(async ({ response }) => {
-      if (response.data.code != 200) {
+      if (response.data.code !== 200) {
         hasToken = undefined
         await deleteCookie('Access-Token')
         await localStorage.removeItem('Access-Token')

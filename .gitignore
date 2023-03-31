@@ -19,3 +19,5 @@ bin-release/
 
 **/node_modules
 **/static
+**/.idea
+**/.vscode
