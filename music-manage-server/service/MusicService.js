@@ -31,17 +31,19 @@ const uploadMusicService = async musicFile => {
     console.log(metadata)
     // 判断音乐封面是否存在
     let coverData
+    let musicCoverName
     if (metadata.common.picture.length > 0) {
+      musicCoverName = `${musicName}.jpg`
       // 获取音乐封面图
       coverData = metadata.common.picture[0].data
       // 生成音乐封面存储地址
-      const coverPath = path.join(__dirname, '..', 'static', TEMP_COVER_FOLDER, `${musicName}.jpg`)
+      const coverPath = path.join(__dirname, '..', 'static', TEMP_COVER_FOLDER, musicCoverName)
       // 临时存储音乐封面
       fs.writeFileSync(coverPath, coverData)
     }
     // 生成音乐文件存储地址
     const musicFileName = musicName + path.extname(musicFile.originalname)
-    const musicPath = path.join(__dirname, '..', 'static', TEMP_MUSIC_FOLDER, `${musicFileName}`)
+    const musicPath = path.join(__dirname, '..', 'static', TEMP_MUSIC_FOLDER, musicFileName)
     // 临时存储音乐文件
     fs.writeFileSync(musicPath, musicFile.buffer)
     // 返回成功消息对象
@@ -57,7 +59,7 @@ const uploadMusicService = async musicFile => {
           codec: metadata.format.container,
           size: musicFile.buffer.length
         },
-        coverName: `${musicName}.jpg`,
+        coverName: musicCoverName,
         musicName: musicFileName
       }
     }

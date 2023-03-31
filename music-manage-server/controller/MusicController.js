@@ -52,6 +52,8 @@ router.post('/upload/music/cover', auth, musicCoverUpload.single('musicCoverFile
     const musicCoverFile = req.file
     // 获取原封面图名（可选）
     const { musicName, originCoverName } = req.body
+    // 没有 musicName 则抛错
+    if (!musicName) throw new Error('参数不合法')
     // Service
     const { data, code } = await uploadMusicCoverService(musicCoverFile, musicName, originCoverName)
     // response
