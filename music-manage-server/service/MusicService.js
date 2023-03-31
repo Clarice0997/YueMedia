@@ -17,7 +17,7 @@ const rename = promisify(fs.rename)
 
 /**
  * 上传音乐文件
- * @param {*} musicFile
+ * @param musicFile
  * @returns
  */
 const uploadMusicService = async musicFile => {
@@ -28,6 +28,7 @@ const uploadMusicService = async musicFile => {
     const musicName = musicMD5 + Date.now()
     // 获取音乐文件元数据
     const metadata = await mm.parseBuffer(musicFile.buffer)
+    console.log(metadata)
     // 判断音乐封面是否存在
     let coverData
     if (metadata.common.picture.length > 0) {
@@ -47,7 +48,15 @@ const uploadMusicService = async musicFile => {
     return {
       code: 200,
       data: {
-        meta: { ...metadata.common, picture: undefined },
+        meta: {
+          ...metadata.common,
+          picture: undefined,
+          track: undefined,
+          disk: undefined,
+          movementIndex: undefined,
+          codec: metadata.format.container,
+          size: musicFile.buffer.length
+        },
         coverName: `${musicName}.jpg`,
         musicName: musicFileName
       }
@@ -63,7 +72,42 @@ const uploadMusicService = async musicFile => {
   }
 }
 
-const uploadMusicCoverService = async () => {}
+/**
+ * 上传音乐封面
+ * @param musicCoverFile
+ * @param musicName
+ * @param originCoverName
+ * @returns {Promise<{code: number, data: {message: string, picture: string}}|{code: number, data: {message}}>}
+ */
+const uploadMusicCoverService = async (musicCoverFile, musicName, originCoverName) => {
+  try {
+    console.log(musicName, originCoverName)
+    // 如果存在原封面文件，则删除原封面文件
+    if (originCoverName) {
+      const originCoverPath = path.join(__dirname, '..', 'static', TEMP_COVER_FOLDER, originCoverName)
+      await unlink(originCoverPath)
+    }
+    // 将音乐文件写入临时文件夹
+    const coverPath = path.join(__dirname, '..', 'static', TEMP_COVER_FOLDER, `${musicName}${path.extname(musicCoverFile.originalname)}`)
+    fs.writeFileSync(coverPath, musicCoverFile.buffer)
+    // 返回成功消息对象
+    return {
+      code: 200,
+      data: {
+        message: '封面图片上传成功',
+        picture: `${musicName}${path.extname(musicCoverFile.originalname)}`
+      }
+    }
+  } catch (error) {
+    console.log(error)
+    return {
+      code: 500,
+      data: {
+        message: error.message
+      }
+    }
+  }
+}
 
 const uploadMusicDataService = async () => {}
 

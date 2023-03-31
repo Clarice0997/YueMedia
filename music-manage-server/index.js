@@ -39,6 +39,8 @@ app.use('/apis/safecode', require('./controller/SafecodeController'))
 app.use('/apis/routes', require('./controller/RoutesController'))
 // 音乐路由
 app.use('/apis/music', require('./controller/MusicController'))
+// 数据路由
+app.use('/apis/data', require('./controller/DataController'))
 
 // 监听端口
 app.listen(process.env.PORT, err => {
