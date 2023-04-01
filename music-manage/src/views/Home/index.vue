@@ -18,7 +18,7 @@
         </div>
       </el-header>
       <el-container class="body-container">
-        <el-aside :width="asideWidth">
+        <el-aside :width="asideWidth" ref="elAside">
           <el-menu v-for="(item, index) in menuList" :key="index" :default-active="$route.path" background-color="#545c64" text-color="#fff" active-text-color="#ffd04b" router>
             <el-menu-item :index="item.index">
               <i :class="item.icon"></i>
@@ -29,7 +29,9 @@
         <el-main>
           <div class="page-bg"></div>
           <div class="main-container">
-            <router-view ref="mainView"></router-view>
+            <keep-alive>
+              <router-view></router-view>
+            </keep-alive>
           </div>
           <p class="footer">版权所有@悦音 2023</p>
         </el-main>
@@ -113,8 +115,6 @@ export default {
     },
     // 收缩导航栏按钮点击事件
     toggleClick() {
-      // 重绘 Echart
-      // this.$refs.mainView.redrawChart()
       if (this.toggleIndex) {
         this.toggleIndex = false
         this.asideWidth = '300px'
@@ -124,6 +124,21 @@ export default {
         this.asideWidth = '0px'
         this.toggleClass = 'el-icon-s-unfold'
       }
+      // 判断当前是否处于首页 重绘 Echarts (解决方案)
+      // if (this.$router.currentRoute.fullPath === '/home/homepage') {
+      //   let isTransitioning = true
+      //   // 监听过渡效果结束事件
+      //   this.$nextTick(() => {
+      //     const elAside = this.$refs.elAside.$el
+      //     // 添加过渡效果的监听器
+      //     elAside.addEventListener('transitionend', () => {
+      //       if (isTransitioning) {
+      //         store.dispatch('dataCharts/redrawEcharts')
+      //         isTransitioning = false
+      //       }
+      //     })
+      //   })
+      // }
     }
   }
 }

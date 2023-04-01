@@ -1,0 +1,37 @@
+import router from '@/router'
+
+export const dataCharts = {
+  namespaced: true,
+  state: {
+    charts: {}
+  },
+  mutations: {
+    // 添加 Echart 对象
+    ADD_ECHART(state, { chartName, chart }) {
+      state.charts[chartName] = chart
+    },
+    // 清空 Echart 对象
+    CLEAR_ECHARTS(state) {
+      state.charts.length = 0
+    },
+    // 重绘 Echart
+    REDRAW_ECHARTS(state) {
+      if (router.currentRoute.fullPath === '/home/homepage' && state.charts) {
+        for (const chart in state.charts) {
+          state.charts[chart].resize()
+        }
+      }
+    }
+  },
+  actions: {
+    addEchart: ({ commit }, { chartName, chart }) => {
+      commit('ADD_ECHART', { chartName, chart })
+    },
+    clearEcharts: ({ commit }) => {
+      commit('CLEAR_ECHARTS')
+    },
+    redrawEcharts: ({ commit }) => {
+      commit('REDRAW_ECHARTS')
+    }
+  }
+}

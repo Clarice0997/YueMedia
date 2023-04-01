@@ -34,6 +34,9 @@ app.use('/apidoc', express.static('apidoc'))
 // 扫描文件夹，删除过期临时文件
 require('./config/DelTempFile')
 
+// 使用 morgan 中间件记录日志
+app.use(require('./config/morganLog'))
+
 // 路由
 // 登录注册路由
 app.use('/apis/user', require('./controller/UserController'))

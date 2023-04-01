@@ -1,7 +1,6 @@
 <template>
   <el-card shadow="hover" class="top-card">
     <div ref="loginRecordChart" id="loginRecordChart" style="height: 400px; width: 100%"></div>
-    <div ref="userRecordChart" id="userRecordChart" style="height: 400px; width: 100%"></div>
   </el-card>
 </template>
 
@@ -10,20 +9,31 @@
 // 必须采用 import * as 方式导入，否则 init 会报错
 import * as echarts from 'echarts'
 import { getLoginRecordAPI } from '@/apis/dataAPI'
+import store from '@/store'
+import { throttle } from 'lodash'
+import { mapState } from 'vuex'
 
 export default {
   name: 'MusicManageSystemHomePageView',
 
   data() {
     return {
-      loginChart: {},
       loginRecordChartOption: {},
       userRecordChartOption: {}
     }
   },
 
+  computed: {
+    ...mapState('dataCharts', ['charts'])
+  },
+
   mounted() {
     this.initLoginRecordChart()
+    this.resizeObserverCharts()
+  },
+
+  beforeDestroy() {
+    store.dispatch('dataCharts/clearEcharts')
   },
 
   methods: {
@@ -36,7 +46,7 @@ export default {
         const dates = Object.keys(data)
         const counts = Object.values(data)
         // 渲染 Echart 图标
-        this.loginChart = echarts.init(this.$refs.loginRecordChart, 'macarons')
+        const loginChart = echarts.init(this.$refs.loginRecordChart, 'macarons', { resize: true })
         this.loginRecordChartOption = {
           title: {
             text: '用户登录趋势表',
@@ -80,7 +90,8 @@ export default {
             }
           ]
         }
-        this.loginChart.setOption(this.loginRecordChartOption, true)
+        loginChart.setOption(this.loginRecordChartOption, true)
+        store.dispatch('dataCharts/addEchart', { chartName: 'loginChart', chart: loginChart })
       } catch (e) {
         // 异常处理
         console.log(e.message)
@@ -93,11 +104,14 @@ export default {
         }
       }
     },
-    redrawChart() {
-      // TODO: 自适应重绘 Echart（未成功）
-      this.$nextTick(() => {
-        this.loginChart.resize()
-      })
+    resizeObserverCharts() {
+      const chartContainer = this.$refs.loginRecordChart
+      const resizeObserver = new ResizeObserver(
+        throttle(() => {
+          store.dispatch('dataCharts/redrawEcharts')
+        }, 1000)
+      )
+      resizeObserver.observe(chartContainer)
     }
   }
 }
