@@ -2,8 +2,11 @@
 const ErrorModel = require('../dbModel/errorRecordModel')
 
 // 错误日志
-const errorHandler = (err, req, res, next) => {
+const errorHandler = (err, req, res) => {
+  console.log('Normal Error')
   console.log(err)
+  console.log(err.name)
+  console.log(err.message)
   // Log the error to MongoDB
   const error = new ErrorModel({
     name: err.name,
@@ -16,4 +19,22 @@ const errorHandler = (err, req, res, next) => {
   res.status(500).json({ code: 500, message: '服务器内部错误' })
 }
 
-module.exports = errorHandler
+// Multer 错误日志
+const multerErrorHandler = (err, req, res) => {
+  console.log('Multer Error')
+  console.log(err)
+  console.log(err.name)
+  console.log(err.message)
+  // Log the Multer error to MongoDB
+  const error = new ErrorModel({
+    name: err.name,
+    message: err.message,
+    stack: err.stack
+  })
+  error.save()
+
+  // Send Multer error response to client
+  res.status(500).json({ code: 400, message: err.message })
+}
+
+module.exports = { errorHandler, multerErrorHandler }

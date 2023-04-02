@@ -2,7 +2,7 @@
 const router = require('express').Router()
 const { auth } = require('../config/Auth')
 const { getRoutesService } = require('../service/RoutesService')
-const errorHandler = require('../config/ErrorCatcher')
+const { errorHandler } = require('../config/ErrorCatcher')
 
 /**
  * @api {GET} /apis/routes 获取动态路由接口
@@ -12,7 +12,7 @@ const errorHandler = require('../config/ErrorCatcher')
  * @apiPermission User
  * @apiHeader {String} Authorization JWT鉴权
  */
-router.get('/', auth, async (req, res, next) => {
+router.get('/', auth, async (req, res) => {
   // 获取 authorization
   const authorization = req.authorization
   // Service
@@ -21,7 +21,7 @@ router.get('/', auth, async (req, res, next) => {
     // response
     res.status(code).send({ ...data, code })
   } catch (error) {
-    errorHandler(error, req, res, next)
+    errorHandler(error, req, res)
   }
 })
 

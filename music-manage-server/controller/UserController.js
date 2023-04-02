@@ -2,7 +2,7 @@
 const router = require('express').Router()
 const { loginService, registerService } = require('../service/UserService')
 const { auth } = require('../config/Auth')
-const errorHandler = require('../config/ErrorCatcher')
+const { errorHandler } = require('../config/ErrorCatcher')
 
 /**
  * @api {POST} /apis/user/account/login 用户登录接口
@@ -13,7 +13,7 @@ const errorHandler = require('../config/ErrorCatcher')
  * @apiBody {String} username 账户名
  * @apiBody {String} password 密码
  */
-router.post('/account/login', async (req, res, next) => {
+router.post('/account/login', async (req, res) => {
   // 解构请求体
   const { username, password } = req.body
   // Service
@@ -24,7 +24,7 @@ router.post('/account/login', async (req, res, next) => {
     if (data.token) res.cookie('Access-Token', data.token)
     res.status(code).send({ ...data, code })
   } catch (error) {
-    errorHandler(error, req, res, next)
+    errorHandler(error, req, res)
   }
 })
 
@@ -40,7 +40,7 @@ router.post('/account/login', async (req, res, next) => {
  * @apiBody {String} phone 电话号码
  * @apiBody {String} email 邮箱
  */
-router.post('/account/register', async (req, res, next) => {
+router.post('/account/register', async (req, res) => {
   const body = req.body
   // Service
   try {
@@ -48,7 +48,7 @@ router.post('/account/register', async (req, res, next) => {
     // response
     res.status(code).send({ ...data, code })
   } catch (error) {
-    errorHandler(error, req, res, next)
+    errorHandler(error, req, res)
   }
 })
 
