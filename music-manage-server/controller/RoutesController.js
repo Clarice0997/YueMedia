@@ -2,7 +2,7 @@
 const router = require('express').Router()
 const { auth } = require('../config/Auth')
 const { getRoutesService } = require('../service/RoutesService')
-const { errorHandler } = require('../config/ErrorCatcher')
+const { errorHandler } = require('../utils/ErrorCatcher')
 
 /**
  * @api {GET} /apis/routes 获取动态路由接口

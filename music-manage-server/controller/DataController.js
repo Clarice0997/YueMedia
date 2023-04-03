@@ -2,7 +2,7 @@
 const router = require('express').Router()
 const { auth } = require('../config/Auth')
 const { getLoginRecordService } = require('../service/DataService')
-const { errorHandler } = require('../config/ErrorCatcher')
+const { errorHandler } = require('../utils/ErrorCatcher')
 
 /**
  * @api {GET} /apis/data/login/record 获取登录记录数据接口

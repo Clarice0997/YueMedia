@@ -37,4 +37,18 @@ const multerErrorHandler = (err, req, res) => {
   res.status(500).json({ code: 400, message: err.message })
 }
 
-module.exports = { errorHandler, multerErrorHandler }
+// Service 错误日志
+const ServiceErrorHandler = err => {
+  console.log('Service Error')
+  console.log(err)
+  console.log(err.name)
+  console.log(err.message)
+  const error = new ErrorModel({
+    name: err.name,
+    message: err.message,
+    stack: err.stack
+  })
+  error.save()
+}
+
+module.exports = { errorHandler, multerErrorHandler, ServiceErrorHandler }

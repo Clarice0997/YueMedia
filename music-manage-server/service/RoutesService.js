@@ -1,5 +1,6 @@
 // import modules
 const { mysqlHandler } = require('../db/mysql')
+const { ServiceErrorHandler } = require('../utils/ErrorCatcher')
 
 /**
  * 获取路由对象 Service
@@ -17,6 +18,7 @@ const getRoutesService = async ({ type }) => {
       }
     }
   } catch (error) {
+    ServiceErrorHandler(error)
     return {
       code: 500,
       data: {

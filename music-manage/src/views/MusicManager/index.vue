@@ -86,11 +86,11 @@ export default {
     },
     clickConfirmInsertMusicHandler() {},
     // 音乐文件上传成功回调
-    uploadMusicFileSuccessHook({ coverName, musicName, meta }) {
+    uploadMusicFileSuccessHook({ coverName, musicName, meta, songId }) {
       // 文件已上传索引
       this.isMusicUploaded = true
       // 保存音乐元数据
-      this.musicData = { ...meta, coverName, musicName }
+      this.musicData = { ...meta, coverName, musicName, songId }
       // 成功上传通知
       this.$notify({
         title: '音乐文件已成功上传',

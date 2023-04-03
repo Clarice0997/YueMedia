@@ -4,19 +4,20 @@ const { auth } = require('../config/Auth')
 const multer = require('multer')
 const path = require('path')
 const { uploadMusicService, uploadMusicCoverService, uploadMusicDataService } = require('../service/MusicService')
-const { errorHandler, multerErrorHandler } = require('../config/ErrorCatcher')
+const { errorHandler, multerErrorHandler } = require('../utils/ErrorCatcher')
+const { MulterError } = require('multer')
 
 // 音乐文件上传配置
 const musicUpload = multer({
   limits: { fileSize: 100000000, files: 1 },
   fileFilter: function (req, file, cb) {
     const filetypes = /mp3|wav|flac|aac|m4a|ogg|wma|aiff|ape|alac|dsd/
-    const mimetype = filetypes.test(file.mimetype)
+    const mimetype = filetypes.test(file.mimetype) || file.mimetype === 'audio/mpeg'
     const extname = filetypes.test(path.extname(file.originalname))
     if (mimetype && extname) {
       return cb(null, true)
     } else {
-      cb(new Error('仅允许MP3，WAV，FLAC，AAC，M4A，OGG，WMA，AIFF，APE，ALAC，DSD 格式的文件'))
+      cb(new MulterError('仅允许MP3，WAV，FLAC，AAC，M4A，OGG，WMA，AIFF，APE，ALAC，DSD 格式的文件'))
     }
   }
 })
@@ -71,7 +72,7 @@ const musicCoverUpload = multer({
     if (mimetype && extname) {
       return cb(null, true)
     }
-    cb(new Error('仅允许 JPEG, JPG, PNG 格式的文件'))
+    cb(new MulterError('仅允许 JPEG, JPG, PNG 格式的文件'))
   }
 })
 
@@ -109,8 +110,6 @@ router.post(
       const musicCoverFile = req.file
       // 获取原封面图名（可选）
       const { musicName, originCoverName } = req.body
-      // 没有 musicName 则抛错
-      if (!musicName) throw new Error('参数不合法')
       // Service
       const { data, code } = await uploadMusicCoverService(musicCoverFile, musicName, originCoverName)
       // response
@@ -125,7 +124,7 @@ router.post(
 router.post('/upload/music/data', auth, async (req, res) => {
   try {
     // Service
-    const { data, code } = await uploadMusicDataService()
+    const { data, code } = await uploadMusicDataService(req.body)
     // response
     res.status(code).send({ ...data, code })
   } catch (error) {

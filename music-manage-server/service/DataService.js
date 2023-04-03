@@ -1,5 +1,6 @@
 // import modules
 const { LoginRecord } = require('../dbModel/loginRecordModel')
+const { ServiceErrorHandler } = require('../utils/ErrorCatcher')
 
 /**
  * getLoginRecord Service
@@ -31,6 +32,7 @@ const getLoginRecordService = async () => {
       }
     }
   } catch (error) {
+    ServiceErrorHandler(error)
     return {
       code: 500,
       data: {
