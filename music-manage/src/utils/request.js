@@ -41,13 +41,13 @@ request.interceptors.request.use(
 request.interceptors.response.use(
   response => {
     // 响应正常，直接返回响应数据
-    return Promise.resolve(response)
+    return response
   },
   async error => {
     if (error.response.status === 401) {
       await deleteCookie('Access-Token')
       await localStorage.removeItem('Access-Token')
-      router.replace('/')
+      router.replace('/login/login')
     }
     return Promise.reject(error)
   }

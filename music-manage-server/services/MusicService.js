@@ -182,7 +182,7 @@ const uploadMusicDataService = async data => {
     return {
       code: 200,
       data: {
-        message: '插入成功'
+        message: '插入音乐数据成功'
       }
     }
   } catch (error) {

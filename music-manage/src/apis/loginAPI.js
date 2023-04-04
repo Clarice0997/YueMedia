@@ -38,7 +38,7 @@ export const validateSafeCodeAPI = async answer => {
  * @returns
  */
 export const verify = async () => {
-  return request.get('/apis/user/verify')
+  return request.get(`/apis/user/verify?timestamp=${Date.now()}`)
 }
 
 /**

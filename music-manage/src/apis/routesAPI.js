@@ -6,5 +6,5 @@ import request from '@/utils/request.js'
  * @returns
  */
 export const getRoutesAPI = async () => {
-  return request.get('/apis/routes')
+  return request.get(`/apis/routes?timestamp=${Date.now()}`)
 }

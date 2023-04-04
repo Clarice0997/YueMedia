@@ -11,7 +11,7 @@
       <el-form ref="insertMusicForm" :model="insertMusicForm" :rules="insertMusicFormRules" label-position="top">
         <!-- 上传音乐文件 -->
         <el-form-item label="上传音乐文件" prop="musicFile">
-          <el-upload class="uploadMusic" :show-file-list="false" :disabled="isMusicUploaded" :on-success="uploadMusicFileSuccessHook" :limit="1" drag name="musicFile" with-credentials :headers="{ Authorization }" action="http://localhost:3000/apis/music/upload/music">
+          <el-upload class="uploadMusic" ref="uploadMusic" :show-file-list="false" :disabled="isMusicUploaded" :on-success="uploadMusicFileSuccessHook" :limit="1" drag name="musicFile" with-credentials :headers="{ Authorization }" action="http://localhost:3000/apis/music/upload/music">
             <i class="el-icon-upload"></i>
             <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
             <div class="el-upload__tip" slot="tip" style="margin: 0">音乐文件大小不超过 100 MB</div>
@@ -38,6 +38,7 @@
             action="http://localhost:3000/apis/music/upload/music/cover"
             list-type="picture-card"
             style="float: right"
+            ref="uploadCover"
           >
             <i class="el-icon-plus"></i>
           </el-upload>
@@ -62,7 +63,7 @@
       <div slot="footer" class="dialog-footer">
         <el-button @click="clickCloseInsertMusicDialogHandler">取 消</el-button>
         <el-button type="warning">重 置</el-button>
-        <el-button type="primary" :disabled="!isMusicUploaded" @click="clickConfirmInsertMusicHandler">确 定 </el-button>
+        <el-button type="primary" :disabled="!isMusicUploaded" v-loading.fullscreen="fullscreenLoading" :loading="uploadBtnLoading" @click="clickConfirmInsertMusicHandler">确 定 </el-button>
       </div>
     </el-dialog>
   </div>
@@ -70,6 +71,7 @@
 
 <script>
 import { getCookie } from '@/utils/cookie'
+import { UploadMusicDataAPI } from '@/apis/musicAPI'
 
 export default {
   name: 'MusicManageSystemMusicManagerView',
@@ -155,7 +157,9 @@ export default {
       coverImage: '',
       isMusicUploaded: false,
       isMusicCoverExist: false,
-      updateMusicCover: {}
+      updateMusicCover: {},
+      fullscreenLoading: false,
+      uploadBtnLoading: false
     }
   },
 
@@ -177,8 +181,43 @@ export default {
     clickConfirmInsertMusicHandler() {
       this.$refs.insertMusicForm.validate(async valid => {
         if (valid) {
-          // TODO: 对接音乐数据上传接口
-          console.log('校验成功')
+          // Loading
+          this.fullscreenLoading = true
+          this.uploadBtnLoading = true
+          UploadMusicDataAPI({ ...this.insertMusicForm, year: new Date(this.insertMusicForm.year).getFullYear() })
+            .then(({ data }) => {
+              // 成功弹窗
+              this.$notify({
+                message: data.message,
+                type: 'success',
+                duration: 2000
+              })
+            })
+            .catch(({ response }) => {
+              // 提示错误弹窗
+              this.$notify({
+                message: response.data.message,
+                type: 'error',
+                duration: 2000
+              })
+            })
+            .finally(() => {
+              // 重置表单
+              this.insertMusicForm = this.$options.data().insertMusicForm
+              // Loading
+              this.fullscreenLoading = false
+              this.uploadBtnLoading = false
+              // hide dialog
+              this.dialogInsertMusicFormVisible = false
+              // clearFile
+              this.$refs.uploadMusic.clearFiles()
+              this.$refs.uploadCover.clearFiles()
+              // reset
+              this.isMusicUploaded = false
+              this.isMusicCoverExist = false
+              this.updateMusicCover = {}
+              this.coverImage = ''
+            })
         } else {
           return false
         }

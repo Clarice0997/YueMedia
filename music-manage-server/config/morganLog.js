@@ -11,17 +11,19 @@ const morganLog = morgan(logFormat, {
       try {
         const parts = message.trim().split(' ')
 
+        const contentLength = parts[3] === '-' ? null : parseInt(parts[3])
+
         const logObject = {
           method: parts[0],
           url: parts[1],
           status: parseInt(parts[2]),
-          contentLength: parseInt(parts[3]),
-          responseTime: `${parseFloat(parts[4])}`
+          contentLength: contentLength,
+          responseTime: parseFloat(parts[4])
         }
 
         require('../models/apiRecordModel').create(logObject)
       } catch (error) {
-        console.error(error)
+        console.log(error)
       }
     }
   }

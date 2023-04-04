@@ -54,7 +54,7 @@ router.beforeEach(async (to, from, next) => {
         duration: 1500
       })
       NProgress.done()
-      return next('/login')
+      return next('/login/login')
     }
   } else if (to.path.includes('login')) {
     // 跳转登录页，判断是否已经登录
@@ -117,7 +117,7 @@ router.beforeEach(async (to, from, next) => {
     })
     router.replace(to.path)
   } else if (to.path === '/') {
-    return next('/login')
+    return next('/login/login')
   } else {
     return next()
   }
