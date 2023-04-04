@@ -1,5 +1,5 @@
 // import modules
-const { LoginRecord } = require('../dbModel/loginRecordModel')
+const { LoginRecord } = require('../models/loginRecordModel')
 const { ServiceErrorHandler } = require('../utils/ErrorCatcher')
 
 /**

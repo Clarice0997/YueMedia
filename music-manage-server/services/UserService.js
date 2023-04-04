@@ -1,9 +1,9 @@
 // import modules
 const { hashSync, compareSync } = require('bcrypt')
-const { mysqlHandler } = require('../db/mysql')
+const { mysqlHandler } = require('../config/mysql')
 const { v4: uuidv4 } = require('uuid')
 const { generateJsonWebToken } = require('../utils/Jwt')
-const { LoginRecord } = require('../dbModel/loginRecordModel')
+const { LoginRecord } = require('../models/loginRecordModel')
 const { ServiceErrorHandler } = require('../utils/ErrorCatcher')
 
 /**

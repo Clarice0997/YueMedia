@@ -3,7 +3,7 @@ const path = require('path')
 const fs = require('fs')
 const { generateMD5 } = require('../utils/MD5.js')
 const mm = require('music-metadata')
-const { mysqlHandler } = require('../db/mysql')
+const { mysqlHandler } = require('../config/mysql')
 const ffmpeg = require('fluent-ffmpeg')
 const ffmpegError = require('../utils/ffmpegError')
 const { spawnSync } = require('child_process')
@@ -125,6 +125,11 @@ const uploadMusicCoverService = async (musicCoverFile, musicName, originCoverNam
   }
 }
 
+/**
+ * 上传音乐数据
+ * @param data
+ * @returns {Promise<{code: number, data: {message}}|{code: number, data: {message: string}}>}
+ */
 const uploadMusicDataService = async data => {
   try {
     // 获取音乐数据上传所需参数
@@ -168,7 +173,7 @@ const uploadMusicDataService = async data => {
     } else {
       musicCoverFileName = `${songId}.jpg`
       const musicCoverFileNamePath = path.join(__dirname, '..', 'static', COVER_FOLDER, musicCoverFileName)
-      fs.copyFileSync(path.join(__dirname, '..', 'static', 'cover.jpg'), musicCoverFileNamePath)
+      fs.copyFileSync(path.join(__dirname, '..', 'public', 'cover.jpg'), musicCoverFileNamePath)
     }
 
     // 准备数据 插入数据库

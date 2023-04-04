@@ -19,7 +19,7 @@ const morganLog = morgan(logFormat, {
           responseTime: `${parseFloat(parts[4])}`
         }
 
-        require('../dbModel/apiRecordModel').create(logObject)
+        require('../models/apiRecordModel').create(logObject)
       } catch (error) {
         console.error(error)
       }

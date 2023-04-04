@@ -1,7 +1,7 @@
 // import modules
 const router = require('express').Router()
 const { errorHandler } = require('../utils/ErrorCatcher')
-const { generateSafeCode, validateSafeCode } = require('../service/SafecodeService')
+const { generateSafeCode, validateSafeCode } = require('../services/SafecodeService')
 
 /**
  * @api {GET} /apis/safecode 获取验证码接口

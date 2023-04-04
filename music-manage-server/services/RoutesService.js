@@ -1,5 +1,5 @@
 // import modules
-const { mysqlHandler } = require('../db/mysql')
+const { mysqlHandler } = require('../config/mysql')
 const { ServiceErrorHandler } = require('../utils/ErrorCatcher')
 
 /**

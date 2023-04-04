@@ -60,20 +60,8 @@ export default {
         {
           title: 'Little Snowflake',
           artist: '花近 feat. ryuryu',
-          src: 'http://localhost:3000/music/eaa0b64708126a14e1598c1456a50a421680275216089.mp3',
-          pic: 'http://localhost:3000/cover/eaa0b64708126a14e1598c1456a50a421680275216089.jpg'
-        },
-        {
-          title: 'primrose',
-          artist: '花近 feat. ryuryu',
-          src: 'http://localhost:3000/music/ffff6a5ba4fab403f8fb2a397f5b95901680277528096.mp3',
-          pic: 'http://localhost:3000/cover/ffff6a5ba4fab403f8fb2a397f5b95901680277528096.jpg'
-        },
-        {
-          title: '白い花',
-          artist: '花近 feat. ryuryu',
-          src: 'http://localhost:3000/music/3a5f95d0be758dbfeb6f93905e0d22541680277538267.mp3',
-          pic: 'http://localhost:3000/cover/3a5f95d0be758dbfeb6f93905e0d22541680277538267.jpg'
+          src: 'http://localhost:3000/music/eaa0b64708126a14e1598c1456a50a421680533414029.mp3',
+          pic: 'http://localhost:3000/cover/eaa0b64708126a14e1598c1456a50a421680533414029.jpg'
         }
       ]
     }

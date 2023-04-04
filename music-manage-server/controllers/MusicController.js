@@ -3,7 +3,7 @@ const router = require('express').Router()
 const { auth } = require('../config/Auth')
 const multer = require('multer')
 const path = require('path')
-const { uploadMusicService, uploadMusicCoverService, uploadMusicDataService } = require('../service/MusicService')
+const { uploadMusicService, uploadMusicCoverService, uploadMusicDataService } = require('../services/MusicService')
 const { errorHandler, multerErrorHandler } = require('../utils/ErrorCatcher')
 const { MulterError } = require('multer')
 

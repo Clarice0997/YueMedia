@@ -1,5 +1,5 @@
 // import module
-const { redisHandler } = require('../db/redis')
+const { redisHandler } = require('../config/redis')
 
 /**
  * Redis Get
@@ -16,8 +16,11 @@ async function getRedis(key) {
 
 /**
  * Redis Set
- * @param {*} key
- * @param {*} value
+ * @param key
+ * @param value
+ * @param flag
+ * @param timeout
+ * @returns {Promise<void>}
  */
 async function setRedis(key, value, flag = 'EX', timeout = 600) {
   try {

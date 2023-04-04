@@ -1,7 +1,7 @@
 // import modules
 const router = require('express').Router()
 const { auth } = require('../config/Auth')
-const { getLoginRecordService } = require('../service/DataService')
+const { getLoginRecordService } = require('../services/DataService')
 const { errorHandler } = require('../utils/ErrorCatcher')
 
 /**

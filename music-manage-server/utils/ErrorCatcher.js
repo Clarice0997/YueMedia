@@ -1,5 +1,5 @@
 // import modules
-const ErrorModel = require('../dbModel/errorRecordModel')
+const ErrorModel = require('../models/errorRecordModel')
 
 // 错误日志
 const errorHandler = (err, req, res) => {
