@@ -7,7 +7,7 @@ const { mysqlHandler } = require('../config/mysql')
 const ffmpeg = require('fluent-ffmpeg')
 const ffmpegError = require('../utils/ffmpegError')
 const { spawnSync } = require('child_process')
-const { ServiceErrorHandler } = require('../utils/ErrorCatcher')
+const { ServiceErrorHandler } = require('../middlewares/ErrorCatcher')
 
 // 存储文件位置常量
 const TEMP_MUSIC_FOLDER = process.env.TEMP_MUSIC_FOLDER
@@ -33,7 +33,7 @@ const uploadMusicService = async musicFile => {
     // 判断音乐封面是否存在
     let coverData
     let musicCoverName
-    // 音乐封面存在存储音乐封面
+    // 音乐封面存在存储音乐封面 如果不存在则采用默认音乐封面
     if (metadata.common.picture) {
       if (metadata.common.picture.length > 0) {
         musicCoverName = `${musicName}.jpg`
@@ -44,6 +44,12 @@ const uploadMusicService = async musicFile => {
         // 临时存储音乐封面
         fs.writeFileSync(coverPath, coverData)
       }
+    } else {
+      musicCoverName = `${musicName}.jpg`
+      // 生成音乐封面存储地址
+      const coverPath = path.join(__dirname, '..', 'static', TEMP_COVER_FOLDER, musicCoverName)
+      // 临时存储音乐封面
+      fs.copyFileSync(path.join(__dirname, '..', 'public', 'cover.jpg'), coverPath)
     }
     // 生成音乐文件存储地址
     const musicFileName = musicName + path.extname(musicFile.originalname)
@@ -90,7 +96,7 @@ const uploadMusicService = async musicFile => {
 const uploadMusicCoverService = async (musicCoverFile, musicName, originCoverName) => {
   try {
     // 判断参数是否齐全
-    if (!musicName) {
+    if (!(musicName && originCoverName)) {
       return {
         code: 400,
         data: {
@@ -98,12 +104,10 @@ const uploadMusicCoverService = async (musicCoverFile, musicName, originCoverNam
         }
       }
     }
-    // 如果存在原封面文件，则删除原封面文件
-    if (originCoverName) {
-      const originCoverPath = path.join(__dirname, '..', 'static', TEMP_COVER_FOLDER, originCoverName)
-      fs.unlinkSync(originCoverPath)
-    }
-    // 将音乐文件写入临时文件夹
+    // 删除原封面文件
+    const originCoverPath = path.join(__dirname, '..', 'static', TEMP_COVER_FOLDER, originCoverName)
+    fs.unlinkSync(originCoverPath)
+    // 将新音乐封面文件写入临时文件夹
     const coverPath = path.join(__dirname, '..', 'static', TEMP_COVER_FOLDER, `${musicName}${path.extname(musicCoverFile.originalname)}`)
     fs.writeFileSync(coverPath, musicCoverFile.buffer)
     // 返回成功消息对象
@@ -133,9 +137,9 @@ const uploadMusicCoverService = async (musicCoverFile, musicName, originCoverNam
 const uploadMusicDataService = async data => {
   try {
     // 获取音乐数据上传所需参数
-    let { songId, songName, songSize, musicCodec, musicCoverFileName, musicFileName, singerName, albumName } = data
+    let { songId, songName, songSize, musicCodec, musicCoverFileName, musicFileName, singerName, albumName, year } = data
     // 判断参数是否齐全
-    if (!(songId && songName && songSize && musicCodec && musicFileName)) {
+    if (!(songId && songName && songSize && musicCodec && musicCoverFileName && musicFileName)) {
       return {
         code: 400,
         data: {
@@ -150,7 +154,6 @@ const uploadMusicDataService = async data => {
       const outputPath = path.join(__dirname, '..', 'static', PLAY_MUSIC_FOLDER, playFileName)
       // 异步进程转码同步
       const result = spawnSync('ffmpeg', ['-i', inputPath, '-c:a', 'libmp3lame', outputPath])
-
       // 等待转码结束判断是否成功 标准输出流和错误输出流
       if (result.status === 0) {
         console.log(result.stdout.toString())
@@ -164,21 +167,16 @@ const uploadMusicDataService = async data => {
       // 复制文件到播放文件夹
       fs.copyFileSync(inputPath, outputPath)
     }
+
     // 持久化临时文件夹中的临时音乐文件和音乐封面
     // 剪切临时音乐文件夹中的音乐文件到持久化音乐文件夹
     fs.renameSync(path.join(__dirname, '..', 'static', TEMP_MUSIC_FOLDER, musicFileName), path.join(__dirname, '..', 'static', MUSIC_FOLDER, musicFileName))
-    // 如果存在音乐封面则剪切到持久化音乐封面文件夹 否则使用默认音乐封面
-    if (musicCoverFileName) {
-      fs.renameSync(path.join(__dirname, '..', 'static', TEMP_COVER_FOLDER, musicCoverFileName), path.join(__dirname, '..', 'static', COVER_FOLDER, musicCoverFileName))
-    } else {
-      musicCoverFileName = `${songId}.jpg`
-      const musicCoverFileNamePath = path.join(__dirname, '..', 'static', COVER_FOLDER, musicCoverFileName)
-      fs.copyFileSync(path.join(__dirname, '..', 'public', 'cover.jpg'), musicCoverFileNamePath)
-    }
+    // 剪切临时音乐封面文件夹中的音乐封面到持久化音乐封面文件夹
+    fs.renameSync(path.join(__dirname, '..', 'static', TEMP_COVER_FOLDER, musicCoverFileName), path.join(__dirname, '..', 'static', COVER_FOLDER, musicCoverFileName))
 
     // 准备数据 插入数据库
-    const query = 'insert into music(song_id,song_name,song_size,music_codec,play_file_name,music_cover_file_name,origin_file_name,singer_name,album_name) values(?,?,?,?,?,?,?,?,?)'
-    const params = [songId, songName, songSize, musicCodec, playFileName, musicCoverFileName, musicFileName, singerName ? singerName : null, albumName ? albumName : null]
+    const query = 'insert into music(song_id,song_name,song_size,music_codec,play_file_name,music_cover_file_name,origin_file_name,singer_name,album_name,year) values(?,?,?,?,?,?,?,?,?,?)'
+    const params = [songId, songName, songSize, musicCodec, playFileName, musicCoverFileName, musicFileName, singerName ? singerName : null, albumName ? albumName : null, year ? year : null]
     await mysqlHandler(query, params)
 
     return {

@@ -2,7 +2,7 @@
 const svgCaptcha = require('svg-captcha')
 const { v4: uuidv4 } = require('uuid')
 const { getRedis, setRedis, delRedis } = require('../utils/RedisHandler')
-const { ServiceErrorHandler } = require('../utils/ErrorCatcher')
+const { ServiceErrorHandler } = require('../middlewares/ErrorCatcher')
 
 // Math 验证码生成相关参数
 const MathCaptchaConfig = {

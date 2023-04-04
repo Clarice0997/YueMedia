@@ -11,8 +11,10 @@
       <el-form ref="insertMusicForm" :model="insertMusicForm" :rules="insertMusicFormRules" label-position="top">
         <!-- 上传音乐文件 -->
         <el-form-item label="上传音乐文件" prop="musicFile">
-          <el-upload class="uploadMusic" :show-file-list="false" :on-success="uploadMusicFileSuccessHook" :limit="1" drag name="musicFile" with-credentials :headers="{ Authorization }" action="http://localhost:3000/apis/music/upload/music">
+          <el-upload class="uploadMusic" :show-file-list="false" :disabled="isMusicUploaded" :on-success="uploadMusicFileSuccessHook" :limit="1" drag name="musicFile" with-credentials :headers="{ Authorization }" action="http://localhost:3000/apis/music/upload/music">
             <i class="el-icon-upload"></i>
+            <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+            <div class="el-upload__tip" slot="tip" style="margin: 0">音乐文件大小不超过 100 MB</div>
           </el-upload>
         </el-form-item>
         <!-- 上传封面文件 -->
@@ -40,10 +42,27 @@
             <i class="el-icon-plus"></i>
           </el-upload>
         </el-form-item>
+        <!-- 歌曲名称 -->
+        <el-form-item label="歌曲名称" prop="songName">
+          <el-input v-model="insertMusicForm.songName" placeholder="输入歌曲名称" clearable :disabled="!isMusicUploaded"></el-input>
+        </el-form-item>
+        <!-- 歌手名 -->
+        <el-form-item label="歌手名" prop="singerName">
+          <el-input v-model="insertMusicForm.singerName" placeholder="输入歌手名" clearable :disabled="!isMusicUploaded"></el-input>
+        </el-form-item>
+        <!-- 专辑名 -->
+        <el-form-item label="专辑名" prop="albumName">
+          <el-input v-model="insertMusicForm.albumName" placeholder="输入歌曲专辑名" clearable :disabled="!isMusicUploaded"></el-input>
+        </el-form-item>
+        <!-- 歌曲年份 -->
+        <el-form-item label="歌曲年份" prop="year">
+          <el-date-picker v-model="insertMusicForm.year" type="year" format="yyyy" value-format="timestamp" :disabled="!isMusicUploaded" placeholder="选择歌曲年份"></el-date-picker>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="clickCloseInsertMusicDialogHandler">取 消</el-button>
-        <el-button type="primary" :disabled="disabledInsertMusic" @click="clickConfirmInsertMusicHandler">确 定 </el-button>
+        <el-button type="warning">重 置</el-button>
+        <el-button type="primary" :disabled="!isMusicUploaded" @click="clickConfirmInsertMusicHandler">确 定 </el-button>
       </div>
     </el-dialog>
   </div>
@@ -58,10 +77,81 @@ export default {
   data() {
     return {
       dialogInsertMusicFormVisible: false,
-      disabledInsertMusic: true,
-      insertMusicForm: {},
-      insertMusicFormRules: {},
-      musicData: {},
+      insertMusicForm: {
+        musicFile: false,
+        coverFile: false,
+        songId: '',
+        songName: '',
+        songSize: 0,
+        musicCodec: '',
+        musicCoverFileName: '',
+        musicFileName: '',
+        singerName: '',
+        albumName: '',
+        year: ''
+      },
+      insertMusicFormRules: {
+        musicFile: [
+          // 音乐文件上传校验
+          {
+            validator: (rule, value, callback) => {
+              if (value) {
+                callback()
+              } else {
+                callback(new Error('音乐文件未上传'))
+              }
+            },
+            trigger: 'blur'
+          }
+        ],
+        coverFile: [
+          // 音乐封面上传校验
+          {
+            validator: (rule, value, callback) => {
+              if (value) {
+                callback()
+              } else {
+                callback(new Error('音乐封面未上传'))
+              }
+            },
+            trigger: 'blur'
+          }
+        ],
+        songName: [
+          // 必填项校验
+          {
+            required: true,
+            message: '请输入歌曲名称',
+            trigger: 'blur'
+          },
+          {
+            max: 100,
+            message: '长度过长',
+            trigger: 'blur'
+          }
+        ],
+        singerName: [
+          {
+            max: 100,
+            message: '长度过长',
+            trigger: 'blur'
+          }
+        ],
+        albumName: [
+          {
+            max: 100,
+            message: '长度过长',
+            trigger: 'blur'
+          }
+        ],
+        year: [
+          {
+            required: true,
+            message: '请选择歌曲年份',
+            trigger: 'blur'
+          }
+        ]
+      },
       coverImage: '',
       isMusicUploaded: false,
       isMusicCoverExist: false,
@@ -84,30 +174,49 @@ export default {
     clickCloseInsertMusicDialogHandler() {
       this.dialogInsertMusicFormVisible = false
     },
-    clickConfirmInsertMusicHandler() {},
+    clickConfirmInsertMusicHandler() {
+      this.$refs.insertMusicForm.validate(async valid => {
+        if (valid) {
+          // TODO: 对接音乐数据上传接口
+          console.log('校验成功')
+        } else {
+          return false
+        }
+      })
+    },
     // 音乐文件上传成功回调
     uploadMusicFileSuccessHook({ coverName, musicName, meta, songId }) {
       // 文件已上传索引
       this.isMusicUploaded = true
       // 保存音乐元数据
-      this.musicData = { ...meta, coverName, musicName, songId }
+      const musicData = { ...meta, coverName, musicName, songId }
+      // 保存音乐数据到表单文件
+      this.insertMusicForm = {
+        albumName: musicData.album ? musicData.album : '',
+        singerName: musicData.artists ? musicData.artists.join('/') : '',
+        songName: musicData.title ? musicData.title : '',
+        coverFile: true,
+        musicFile: true,
+        musicCodec: musicData.codec,
+        musicCoverFileName: coverName,
+        musicFileName: musicName,
+        songId: songId,
+        songSize: musicData.size,
+        year: musicData.year ? new Date().setFullYear(musicData.year) : new Date()
+      }
       // 成功上传通知
       this.$notify({
         title: '音乐文件已成功上传',
         type: 'success'
       })
-      // 判断是否存在音乐封面
-      if (coverName) {
-        this.isMusicCoverExist = true
-        this.coverImage = `${process.env.VUE_APP_REQUEST_URL}/tempCover/${coverName}?time=${Date.now()}`
-        this.updateMusicCover = {
-          musicName: musicName.split('.').shift(),
-          originCoverName: coverName
-        }
-      } else {
-        this.updateMusicCover = {
-          musicName: musicName.split('.').shift()
-        }
+      // 音乐封面
+      this.isMusicCoverExist = true
+      // 预览音乐封面
+      this.coverImage = `${process.env.VUE_APP_REQUEST_URL}/tempCover/${coverName}?time=${Date.now()}`
+      // 用于替换封面
+      this.updateMusicCover = {
+        musicName: songId,
+        originCoverName: coverName
       }
     },
     // 音乐封面上传成功回调
@@ -119,6 +228,8 @@ export default {
       })
       // 音乐封面上传索引
       this.isMusicCoverExist = true
+      this.insertMusicForm.coverFile = true
+      this.insertMusicForm.musicCoverFileName = picture
       // 上传音乐封面显示
       this.coverImage = `${process.env.VUE_APP_REQUEST_URL}/tempCover/${picture}?time=${Date.now()}`
     }
@@ -140,5 +251,9 @@ export default {
 .top-card,
 .body-card {
   margin: 10px;
+}
+
+.el-date-editor.el-input {
+  width: 100%;
 }
 </style>

@@ -1,7 +1,8 @@
 import axios from 'axios'
-import { getCookie } from '@/utils/cookie'
+import { deleteCookie, getCookie } from '@/utils/cookie'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
+import router from '@/router'
 
 // 配置Nprogress项 关闭右上角螺旋加载提示
 NProgress.configure({ showSpinner: false })
@@ -20,7 +21,7 @@ const request = axios.create({
   timeout: 5000
 })
 
-// 请求拦截器
+// 请求拦截器（携带Authorization，开启加载条）
 request.interceptors.request.use(
   async config => {
     // 开启进度条
@@ -36,7 +37,23 @@ request.interceptors.request.use(
   }
 )
 
-// 响应拦截器
+// 响应拦截器（判断响应状态，如果未通过校验则跳转登陆页）
+request.interceptors.response.use(
+  response => {
+    // 响应正常，直接返回响应数据
+    return Promise.resolve(response)
+  },
+  async error => {
+    if (error.response.status === 401) {
+      await deleteCookie('Access-Token')
+      await localStorage.removeItem('Access-Token')
+      router.replace('/')
+    }
+    return Promise.reject(error)
+  }
+)
+
+// 响应拦截器（关闭进度条）
 request.interceptors.response.use(
   response => {
     // 关闭进度条

@@ -115,9 +115,6 @@ router.beforeEach(async (to, from, next) => {
     store.getters['dynamicRoutes/getDynamicRoutes'].forEach(route => {
       router.addRoute(route)
     })
-    console.log(router.getRoutes())
-    console.table(store.getters['dynamicRoutes/getRoutes'])
-    console.log(router)
     router.replace(to.path)
   } else if (to.path === '/') {
     return next('/login')

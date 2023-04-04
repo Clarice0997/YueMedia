@@ -1,6 +1,6 @@
 // import modules
 const { mysqlHandler } = require('../config/mysql')
-const { ServiceErrorHandler } = require('../utils/ErrorCatcher')
+const { ServiceErrorHandler } = require('../middlewares/ErrorCatcher')
 
 /**
  * 获取路由对象 Service

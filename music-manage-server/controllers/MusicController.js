@@ -1,10 +1,10 @@
 // import modules
 const router = require('express').Router()
-const { auth } = require('../config/Auth')
+const { auth } = require('../middlewares/Auth')
 const multer = require('multer')
 const path = require('path')
 const { uploadMusicService, uploadMusicCoverService, uploadMusicDataService } = require('../services/MusicService')
-const { errorHandler, multerErrorHandler } = require('../utils/ErrorCatcher')
+const { errorHandler, multerErrorHandler } = require('../middlewares/ErrorCatcher')
 const { MulterError } = require('multer')
 
 // 音乐文件上传配置
@@ -86,7 +86,7 @@ const musicCoverUpload = multer({
  * @apiHeader {String} Content-Type multipart/form-data
  * @apiBody {Buffer} musicCoverFile 音乐封面文件
  * @apiBody {String} musicName 音乐文件名
- * @apiBody {String} [originCoverName] 原始音乐封面文件名
+ * @apiBody {String} originCoverName 原始音乐封面文件名
  */
 router.post(
   '/upload/music/cover',
@@ -120,7 +120,23 @@ router.post(
   }
 )
 
-// 上传音乐数据接口
+/**
+ * @api {POST} /apis/music/upload/music/data 上传音乐数据接口
+ * @apiName UploadMusicData
+ * @apiGroup Music
+ * @apiName Music/UploadMusicData
+ * @apiPermission Admin
+ * @apiHeader {String} Authorization JWT鉴权
+ * @apiBody {String} songId 音乐ID
+ * @apiBody {String} songName 音乐名
+ * @apiBody {Number} songSize 音乐大小(Byte)
+ * @apiBody {String} musicCodec 音乐编码格式
+ * @apiBody {String} musicCoverFileName 音乐封面文件名
+ * @apiBody {String} musicFileName 音乐文件名
+ * @apiBody {String} [singerName] 音乐歌手名
+ * @apiBody {String} [albumName] 音乐专辑名
+ * @apiBody {Number} [year] 年份
+ */
 router.post('/upload/music/data', auth, async (req, res) => {
   try {
     // Service
@@ -131,5 +147,9 @@ router.post('/upload/music/data', auth, async (req, res) => {
     errorHandler(error, req, res)
   }
 })
+
+// TODO: 清除临时音乐文件接口（重置）
+
+// TODO: 获取音乐列表接口（分页|不分页结合）（返回数据包括歌曲权限）
 
 module.exports = router

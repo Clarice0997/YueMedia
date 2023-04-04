@@ -1,6 +1,6 @@
 // import modules
 const { LoginRecord } = require('../models/loginRecordModel')
-const { ServiceErrorHandler } = require('../utils/ErrorCatcher')
+const { ServiceErrorHandler } = require('../middlewares/ErrorCatcher')
 
 /**
  * getLoginRecord Service

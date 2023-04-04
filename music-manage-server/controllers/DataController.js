@@ -1,8 +1,8 @@
 // import modules
 const router = require('express').Router()
-const { auth } = require('../config/Auth')
+const { auth } = require('../middlewares/Auth')
 const { getLoginRecordService } = require('../services/DataService')
-const { errorHandler } = require('../utils/ErrorCatcher')
+const { errorHandler } = require('../middlewares/ErrorCatcher')
 
 /**
  * @api {GET} /apis/data/login/record 获取登录记录数据接口

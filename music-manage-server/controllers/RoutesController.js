@@ -1,8 +1,8 @@
 // import modules
 const router = require('express').Router()
-const { auth } = require('../config/Auth')
+const { auth } = require('../middlewares/Auth')
 const { getRoutesService } = require('../services/RoutesService')
-const { errorHandler } = require('../utils/ErrorCatcher')
+const { errorHandler } = require('../middlewares/ErrorCatcher')
 
 /**
  * @api {GET} /apis/routes 获取动态路由接口

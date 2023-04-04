@@ -1,6 +1,6 @@
 // import modules
 const router = require('express').Router()
-const { errorHandler } = require('../utils/ErrorCatcher')
+const { errorHandler } = require('../middlewares/ErrorCatcher')
 const { generateSafeCode, validateSafeCode } = require('../services/SafecodeService')
 
 /**

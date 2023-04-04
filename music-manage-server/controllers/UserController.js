@@ -1,8 +1,8 @@
 // import module
 const router = require('express').Router()
 const { loginService, registerService } = require('../services/UserService')
-const { auth } = require('../config/Auth')
-const { errorHandler } = require('../utils/ErrorCatcher')
+const { auth } = require('../middlewares/Auth')
+const { errorHandler } = require('../middlewares/ErrorCatcher')
 
 /**
  * @api {POST} /apis/user/account/login 用户登录接口
