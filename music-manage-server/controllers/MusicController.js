@@ -148,8 +148,16 @@ router.post('/upload/music/data', auth, async (req, res) => {
   }
 })
 
-// TODO: 清除临时音乐文件接口（重置）
+// TODO: 清除临时音乐文件&音乐封面文件接口（重置）
 
 // TODO: 获取音乐列表接口（分页|不分页结合）（返回数据包括歌曲权限）
+
+// TODO: 获取音乐数量接口
+
+// TODO: 获取音乐接口
+
+// TODO: 下载音乐接口
+
+// TODO: 批量下载音乐接口
 
 module.exports = router

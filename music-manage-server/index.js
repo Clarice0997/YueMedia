@@ -25,7 +25,7 @@ app.use(bodyParser.json())
 
 // 绑定静态资源文件夹
 // 静态资源地址：http://localhost:3000/
-app.use(express.static('static'))
+app.use(express.static('../static'))
 
 // 绑定 apidoc 文档
 // 接口文档地址：http://localhost:3000/apidoc

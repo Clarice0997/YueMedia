@@ -52,7 +52,7 @@
           </template>
         </el-table-column>
         <!-- 操作列  -->
-        <el-table-column label="操作">
+        <el-table-column label="操作" fixed="right" width="350">
           <template slot-scope="scope">
             <el-button type="danger" size="mini" @click="handleAuthorize(scope.$index, scope.row)">授权 </el-button>
             <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>

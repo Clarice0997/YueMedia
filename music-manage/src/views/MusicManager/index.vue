@@ -3,21 +3,24 @@
     <!-- 顶部操作区卡片 -->
     <el-card shadow="hover" class="top-card">
       <el-button type="success" icon="el-icon-plus" @click="clickInsertMusicHandler">新增歌曲</el-button>
+      <el-button type="success" icon="el-icon-takeaway-box">批量导入</el-button>
       <el-button type="warning" icon="el-icon-takeaway-box">批量导出</el-button>
       <el-button type="danger" icon="el-icon-delete">批量删除</el-button>
     </el-card>
     <!-- 新增音乐对话框 -->
-    <el-dialog title="新增歌曲" :visible.sync="dialogInsertMusicFormVisible" append-to-body>
+    <el-dialog title="新增歌曲" :visible.sync="dialogInsertMusicFormVisible" append-to-body @close="resetUploadMusicForm">
       <el-form ref="insertMusicForm" :model="insertMusicForm" :rules="insertMusicFormRules" label-position="top">
         <!-- 上传音乐文件 -->
+        <!-- TODO: 上传文件类型限定 -->
         <el-form-item label="上传音乐文件" prop="musicFile">
-          <el-upload class="uploadMusic" ref="uploadMusic" :show-file-list="false" :disabled="isMusicUploaded" :on-success="uploadMusicFileSuccessHook" :limit="1" drag name="musicFile" with-credentials :headers="{ Authorization }" action="http://localhost:3000/apis/music/upload/music">
+          <el-upload class="uploadMusic" ref="uploadMusic" :disabled="isMusicUploaded" :on-success="uploadMusicFileSuccessHook" :limit="1" drag name="musicFile" with-credentials :headers="{ Authorization }" action="http://localhost:3000/apis/music/upload/music">
             <i class="el-icon-upload"></i>
             <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
             <div class="el-upload__tip" slot="tip" style="margin: 0">音乐文件大小不超过 100 MB</div>
           </el-upload>
         </el-form-item>
         <!-- 上传封面文件 -->
+        <!-- TODO: 上传文件类型限定 -->
         <el-form-item label="上传封面文件" prop="coverFile">
           <div style="width: 148px; height: 148px; display: inline-block; border: 1px dashed #c0ccda; border-radius: 6px">
             <el-image :src="coverImage" style="width: 148px; height: 148px">
@@ -62,7 +65,7 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="clickCloseInsertMusicDialogHandler">取 消</el-button>
-        <el-button type="warning">重 置</el-button>
+        <el-button type="warning" :disabled="!isMusicUploaded">重 置</el-button>
         <el-button type="primary" :disabled="!isMusicUploaded" v-loading.fullscreen="fullscreenLoading" :loading="uploadBtnLoading" @click="clickConfirmInsertMusicHandler">确 定 </el-button>
       </div>
     </el-dialog>
@@ -145,13 +148,6 @@ export default {
             message: '长度过长',
             trigger: 'blur'
           }
-        ],
-        year: [
-          {
-            required: true,
-            message: '请选择歌曲年份',
-            trigger: 'blur'
-          }
         ]
       },
       coverImage: '',
@@ -176,7 +172,7 @@ export default {
       this.dialogInsertMusicFormVisible = true
     },
     clickCloseInsertMusicDialogHandler() {
-      this.dialogInsertMusicFormVisible = false
+      this.resetUploadMusicForm()
     },
     clickConfirmInsertMusicHandler() {
       this.$refs.insertMusicForm.validate(async valid => {
@@ -202,21 +198,7 @@ export default {
               })
             })
             .finally(() => {
-              // 重置表单
-              this.insertMusicForm = this.$options.data().insertMusicForm
-              // Loading
-              this.fullscreenLoading = false
-              this.uploadBtnLoading = false
-              // hide dialog
-              this.dialogInsertMusicFormVisible = false
-              // clearFile
-              this.$refs.uploadMusic.clearFiles()
-              this.$refs.uploadCover.clearFiles()
-              // reset
-              this.isMusicUploaded = false
-              this.isMusicCoverExist = false
-              this.updateMusicCover = {}
-              this.coverImage = ''
+              this.resetUploadMusicForm()
             })
         } else {
           return false
@@ -271,6 +253,25 @@ export default {
       this.insertMusicForm.musicCoverFileName = picture
       // 上传音乐封面显示
       this.coverImage = `${process.env.VUE_APP_REQUEST_URL}/tempCover/${picture}?time=${Date.now()}`
+    },
+    // 重置音乐上传dialog
+    resetUploadMusicForm() {
+      console.log(1)
+      // 重置表单
+      this.insertMusicForm = this.$options.data().insertMusicForm
+      // Loading
+      this.fullscreenLoading = false
+      this.uploadBtnLoading = false
+      // hide dialog
+      this.dialogInsertMusicFormVisible = false
+      // clearFile
+      this.$refs.uploadMusic.clearFiles()
+      this.$refs.uploadCover.clearFiles()
+      // reset
+      this.isMusicUploaded = false
+      this.isMusicCoverExist = false
+      this.updateMusicCover = {}
+      this.coverImage = ''
     }
   }
 }
