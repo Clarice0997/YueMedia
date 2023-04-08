@@ -19,29 +19,20 @@ const routes = [
     children: [
       {
         path: 'login',
-        component: () => import(/* webpackChunkName: "loginComponent" */ '@/components/login/Login.vue'),
+        component: () => import(/* webpackChunkName: "loginComponent" */ '@/components/login/loginForm.vue'),
         meta: {
           title: '登录页面'
         }
       },
       {
         path: 'register',
-        component: () => import(/* webpackChunkName: "registerComponent" */ '@/components/login/Register.vue'),
+        component: () => import(/* webpackChunkName: "registerComponent" */ '@/components/login/registerForm.vue'),
         meta: {
           title: '注册页面'
         }
       }
     ]
   }
-  // {
-  //   path: '/home',
-  //   name: '主页',
-  //   component: () => import(/* webpackChunkName: "homeComponent" */ '@/views/Home'),
-  //   meta: {
-  //     title: '主页',
-  //     requireAuth: true
-  //   }
-  // }
 ]
 
 const router = new VueRouter({
