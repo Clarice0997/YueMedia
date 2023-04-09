@@ -43,8 +43,8 @@ export default {
           data: { data }
         } = await getLoginRecordAPI()
         // 解构键值
-        const dates = Object.keys(data)
-        const counts = Object.values(data)
+        const dates = data.map(item => item.date)
+        const counts = data.map(item => item.count)
         // 渲染 Echart 图标
         const loginChart = echarts.init(this.$refs.loginRecordChart, 'macarons', { resize: true })
         this.loginRecordChartOption = {

@@ -50,7 +50,7 @@ router.beforeEach(async (to, from, next) => {
     } else {
       Message({
         message: '登录已过期，请重新登录',
-        type: 'warning',
+        type: 'error',
         duration: 1500
       })
       NProgress.done()

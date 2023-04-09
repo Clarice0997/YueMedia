@@ -28,7 +28,7 @@ export const dynamicRoutes = {
         setTimeout(() => {
           commit('addRoute', route)
           resolve()
-        }, 1000)
+        }, 200)
       })
     },
     // 异步批量添加路由
@@ -37,7 +37,7 @@ export const dynamicRoutes = {
         setTimeout(() => {
           commit('addRoutes', routes)
           resolve()
-        }, 1000)
+        }, 200)
       })
     },
     // 异步清空路由
@@ -46,7 +46,7 @@ export const dynamicRoutes = {
         setTimeout(() => {
           commit('clearRoutes')
           resolve()
-        }, 1000)
+        }, 200)
       })
     }
   },
