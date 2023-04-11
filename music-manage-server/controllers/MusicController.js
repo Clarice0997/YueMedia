@@ -3,7 +3,7 @@ const router = require('express').Router()
 const { auth } = require('../middlewares/Auth')
 const multer = require('multer')
 const path = require('path')
-const { uploadMusicService, uploadMusicCoverService, uploadMusicDataService } = require('../services/MusicService')
+const { uploadMusicService, uploadMusicCoverService, uploadMusicDataService, deleteTempMusicService } = require('../services/MusicService')
 const { errorHandler, multerErrorHandler } = require('../middlewares/ErrorCatcher')
 const { MulterError } = require('multer')
 
@@ -149,17 +149,44 @@ router.post('/upload/music/data', auth, async (req, res) => {
 })
 
 // TODO: 清除临时音乐文件 & 音乐封面文件接口（重置）
+/**
+ * @api {DELETE} /apis/music/upload/music/temp 删除临时音乐数据接口
+ * @apiName DeleteTempMusicData
+ * @apiGroup Music
+ * @apiName Music/DeleteTempMusicData
+ * @apiPermission Admin
+ * @apiHeader {String} Authorization JWT鉴权
+ * @apiBody {String} musicName 音乐文件名
+ * @apiBody {String} coverName 封面文件名
+ */
+router.delete('/upload/music/temp', auth, async (req, res) => {
+  try {
+    // 获取临时音乐 ID
+    const { musicName, coverName } = req.body
+    // Service
+    const { data, code } = await deleteTempMusicService(musicName, coverName)
+    // response
+    res.status(code).send({ ...data, code })
+  } catch (error) {
+    errorHandler(error, req, res)
+  }
+})
 
 // TODO: 获取音乐列表接口（分页|不分页结合）（返回数据包括歌曲权限）
+router.get('/', auth, async (req, res) => {})
 
 // TODO: 获取音乐数量接口
+router.get('/count', auth, async (req, res) => {})
 
 // TODO: 获取音乐接口
+router.get('/:mid', auth, async (req, res) => {})
 
 // TODO: 下载音乐接口
-
-// TODO: 普通音乐上传音乐文件（需要审核）
+router.get('/download', auth, async (req, res) => {})
 
 // TODO: 批量下载音乐接口
+router.get('/download/batch', auth, async (req, res) => {})
+
+// TODO: 普通音乐上传音乐文件（需要审核）
 
 module.exports = router

@@ -196,4 +196,44 @@ const uploadMusicDataService = async data => {
   }
 }
 
-module.exports = { uploadMusicService, uploadMusicCoverService, uploadMusicDataService }
+/**
+ * 删除临时音乐文件数据
+ * @param musicName
+ * @param coverName
+ * @returns {Promise<{code: number, data: {message}}|{code: number, data: {message: string}}>}
+ */
+const deleteTempMusicService = async (musicName, coverName) => {
+  try {
+    // 数据校验
+    if (!(musicName && coverName)) {
+      return {
+        code: 400,
+        data: {
+          message: '参数不合法'
+        }
+      }
+    }
+    // 删除临时音乐文件和临时封面文件
+    const tempMusicFile = path.join(__dirname, '..', '..', 'static', TEMP_MUSIC_FOLDER, musicName)
+    const tempCoverFile = path.join(__dirname, '..', '..', 'static', TEMP_COVER_FOLDER, coverName)
+    fs.unlinkSync(tempMusicFile)
+    fs.unlinkSync(tempCoverFile)
+
+    return {
+      code: 200,
+      data: {
+        message: '删除临时数据成功'
+      }
+    }
+  } catch (error) {
+    ServiceErrorHandler(error)
+    return {
+      code: 500,
+      data: {
+        message: error.message
+      }
+    }
+  }
+}
+
+module.exports = { uploadMusicService, uploadMusicCoverService, uploadMusicDataService, deleteTempMusicService }

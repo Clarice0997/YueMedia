@@ -44,7 +44,6 @@ export default {
       this.dialogInsertMusicFormVisible = true
     },
     hideInsertMusicDialogHandler() {
-      console.log(1)
       this.dialogInsertMusicFormVisibleData = false
     }
   }
