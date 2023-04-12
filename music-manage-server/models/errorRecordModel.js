@@ -7,8 +7,7 @@ const errorSchema = new mongoose.Schema({
     required: true
   },
   message: {
-    type: String,
-    required: true
+    type: String
   },
   stack: {
     type: String,

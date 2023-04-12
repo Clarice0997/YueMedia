@@ -6,6 +6,10 @@ const app = express()
 // 导入环境变量
 require('dotenv').config()
 
+// 默认静态文件位置（可配置，默认与项目文件平级）
+const path = require('path')
+process.env.DEFAULT_STATIC_PATH = path.join(__dirname, '..', 'static')
+
 // 连接 MySQL 数据库
 require('./config/mysql')
 

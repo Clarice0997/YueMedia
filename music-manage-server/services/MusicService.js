@@ -15,6 +15,7 @@ const TEMP_COVER_FOLDER = process.env.TEMP_COVER_FOLDER
 const PLAY_MUSIC_FOLDER = process.env.PLAY_MUSIC_FOLDER
 const MUSIC_FOLDER = process.env.MUSIC_FOLDER
 const COVER_FOLDER = process.env.COVER_FOLDER
+const DEFAULT_STATIC_PATH = process.env.DEFAULT_STATIC_PATH
 
 /**
  * 上传音乐文件
@@ -40,20 +41,20 @@ const uploadMusicService = async musicFile => {
         // 获取音乐封面图
         coverData = metadata.common.picture[0].data
         // 生成音乐封面存储地址
-        const coverPath = path.join(__dirname, '..', '..', 'static', TEMP_COVER_FOLDER, musicCoverName)
+        const coverPath = path.join(DEFAULT_STATIC_PATH, TEMP_COVER_FOLDER, musicCoverName)
         // 临时存储音乐封面
         fs.writeFileSync(coverPath, coverData)
       }
     } else {
       musicCoverName = `${musicName}.jpg`
       // 生成音乐封面存储地址
-      const coverPath = path.join(__dirname, '..', '..', 'static', TEMP_COVER_FOLDER, musicCoverName)
+      const coverPath = path.join(DEFAULT_STATIC_PATH, TEMP_COVER_FOLDER, musicCoverName)
       // 临时存储音乐封面
       fs.copyFileSync(path.join(__dirname, '..', 'public', 'cover.jpg'), coverPath)
     }
     // 生成音乐文件存储地址
     const musicFileName = musicName + path.extname(musicFile.originalname)
-    const musicPath = path.join(__dirname, '..', '..', 'static', TEMP_MUSIC_FOLDER, musicFileName)
+    const musicPath = path.join(DEFAULT_STATIC_PATH, TEMP_MUSIC_FOLDER, musicFileName)
     // 临时存储音乐文件
     fs.writeFileSync(musicPath, musicFile.buffer)
     // 返回成功消息对象
@@ -105,10 +106,10 @@ const uploadMusicCoverService = async (musicCoverFile, musicName, originCoverNam
       }
     }
     // 删除原封面文件
-    const originCoverPath = path.join(__dirname, '..', '..', 'static', TEMP_COVER_FOLDER, originCoverName)
+    const originCoverPath = path.join(DEFAULT_STATIC_PATH, TEMP_COVER_FOLDER, originCoverName)
     fs.unlinkSync(originCoverPath)
     // 将新音乐封面文件写入临时文件夹
-    const coverPath = path.join(__dirname, '..', '..', 'static', TEMP_COVER_FOLDER, `${musicName}${path.extname(musicCoverFile.originalname)}`)
+    const coverPath = path.join(DEFAULT_STATIC_PATH, TEMP_COVER_FOLDER, `${musicName}${path.extname(musicCoverFile.originalname)}`)
     fs.writeFileSync(coverPath, musicCoverFile.buffer)
     // 返回成功消息对象
     return {
@@ -150,8 +151,8 @@ const uploadMusicDataService = async data => {
     // 判断音乐文件是否需要转码 供播放使用
     let playFileName = `${songId}.mp3`
     if (musicCodec !== 'MPEG') {
-      const inputPath = path.join(__dirname, '..', '..', 'static', TEMP_MUSIC_FOLDER, musicFileName)
-      const outputPath = path.join(__dirname, '..', '..', 'static', PLAY_MUSIC_FOLDER, playFileName)
+      const inputPath = path.join(DEFAULT_STATIC_PATH, TEMP_MUSIC_FOLDER, musicFileName)
+      const outputPath = path.join(DEFAULT_STATIC_PATH, PLAY_MUSIC_FOLDER, playFileName)
       // 异步进程转码同步
       const result = spawnSync('ffmpeg', ['-i', inputPath, '-c:a', 'libmp3lame', outputPath])
       // 等待转码结束判断是否成功 标准输出流和错误输出流
@@ -162,17 +163,17 @@ const uploadMusicDataService = async data => {
         throw new ffmpegError(result.stderr.toString('utf8'))
       }
     } else {
-      const inputPath = path.join(__dirname, '..', '..', 'static', TEMP_MUSIC_FOLDER, musicFileName)
-      const outputPath = path.join(__dirname, '..', '..', 'static', PLAY_MUSIC_FOLDER, musicFileName)
+      const inputPath = path.join(DEFAULT_STATIC_PATH, TEMP_MUSIC_FOLDER, musicFileName)
+      const outputPath = path.join(DEFAULT_STATIC_PATH, PLAY_MUSIC_FOLDER, musicFileName)
       // 复制文件到播放文件夹
       fs.copyFileSync(inputPath, outputPath)
     }
 
     // 持久化临时文件夹中的临时音乐文件和音乐封面
     // 剪切临时音乐文件夹中的音乐文件到持久化音乐文件夹
-    fs.renameSync(path.join(__dirname, '..', '..', 'static', TEMP_MUSIC_FOLDER, musicFileName), path.join(__dirname, '..', '..', 'static', MUSIC_FOLDER, musicFileName))
+    fs.renameSync(path.join(DEFAULT_STATIC_PATH, TEMP_MUSIC_FOLDER, musicFileName), path.join(DEFAULT_STATIC_PATH, MUSIC_FOLDER, musicFileName))
     // 剪切临时音乐封面文件夹中的音乐封面到持久化音乐封面文件夹
-    fs.renameSync(path.join(__dirname, '..', '..', 'static', TEMP_COVER_FOLDER, musicCoverFileName), path.join(__dirname, '..', '..', 'static', COVER_FOLDER, musicCoverFileName))
+    fs.renameSync(path.join(DEFAULT_STATIC_PATH, TEMP_COVER_FOLDER, musicCoverFileName), path.join(DEFAULT_STATIC_PATH, COVER_FOLDER, musicCoverFileName))
 
     // 准备数据 插入数据库
     const query = 'insert into music(song_id,song_name,song_size,music_codec,play_file_name,music_cover_file_name,origin_file_name,singer_name,album_name,year) values(?,?,?,?,?,?,?,?,?,?)'
@@ -214,10 +215,20 @@ const deleteTempMusicService = async (musicName, coverName) => {
       }
     }
     // 删除临时音乐文件和临时封面文件
-    const tempMusicFile = path.join(__dirname, '..', '..', 'static', TEMP_MUSIC_FOLDER, musicName)
-    const tempCoverFile = path.join(__dirname, '..', '..', 'static', TEMP_COVER_FOLDER, coverName)
-    fs.unlinkSync(tempMusicFile)
-    fs.unlinkSync(tempCoverFile)
+    const tempMusicFile = path.join(DEFAULT_STATIC_PATH, TEMP_MUSIC_FOLDER, musicName)
+    const tempCoverFile = path.join(DEFAULT_STATIC_PATH, TEMP_COVER_FOLDER, coverName)
+    // 判断文件是否存在再删除
+    if (fs.existsSync(tempMusicFile) && fs.existsSync(tempCoverFile)) {
+      fs.unlinkSync(tempMusicFile)
+      fs.unlinkSync(tempCoverFile)
+    } else {
+      return {
+        code: 404,
+        data: {
+          message: '临时文件不存在'
+        }
+      }
+    }
 
     return {
       code: 200,

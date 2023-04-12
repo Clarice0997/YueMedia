@@ -156,13 +156,13 @@ router.post('/upload/music/data', auth, async (req, res) => {
  * @apiName Music/DeleteTempMusicData
  * @apiPermission Admin
  * @apiHeader {String} Authorization JWT鉴权
- * @apiBody {String} musicName 音乐文件名
- * @apiBody {String} coverName 封面文件名
+ * @apiParam {String} musicName 音乐文件名
+ * @apiParam {String} coverName 封面文件名
  */
 router.delete('/upload/music/temp', auth, async (req, res) => {
   try {
     // 获取临时音乐 ID
-    const { musicName, coverName } = req.body
+    const { musicName, coverName } = req.query
     // Service
     const { data, code } = await deleteTempMusicService(musicName, coverName)
     // response

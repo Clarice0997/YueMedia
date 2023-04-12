@@ -57,7 +57,7 @@
     </el-form>
     <div slot="footer" class="dialog-footer">
       <el-button @click="clickCloseInsertMusicDialogHandler">取 消</el-button>
-      <el-button type="warning" :disabled="!isMusicUploaded">重 置</el-button>
+      <el-button type="warning" :disabled="!isMusicUploaded" v-loading.fullscreen="fullscreenLoading" :loading="resetBtnLoading" @click="clickResetInsertMusicHandler">重 置 </el-button>
       <el-button type="primary" :disabled="!isMusicUploaded" v-loading.fullscreen="fullscreenLoading" :loading="uploadBtnLoading" @click="clickConfirmInsertMusicHandler">确 定 </el-button>
     </div>
   </el-dialog>
@@ -65,7 +65,7 @@
 
 <script>
 import { getCookie } from '@/utils/cookie'
-import { UploadMusicDataAPI } from '@/apis/musicAPI'
+import { uploadMusicDataAPI, deleteTempMusicAPI } from '@/apis/musicAPI'
 
 export default {
   name: 'uploadMusicDialog',
@@ -152,7 +152,8 @@ export default {
       isMusicCoverExist: false,
       updateMusicCover: {},
       fullscreenLoading: false,
-      uploadBtnLoading: false
+      uploadBtnLoading: false,
+      resetBtnLoading: false
     }
   },
   computed: {
@@ -175,7 +176,7 @@ export default {
           // Loading
           this.fullscreenLoading = true
           this.uploadBtnLoading = true
-          UploadMusicDataAPI({ ...this.insertMusicForm, year: new Date(this.insertMusicForm.year).getFullYear() })
+          uploadMusicDataAPI({ ...this.insertMusicForm, year: new Date(this.insertMusicForm.year).getFullYear() })
             .then(({ data }) => {
               // 成功弹窗
               this.$notify({
@@ -249,7 +250,7 @@ export default {
       // 上传音乐封面显示
       this.coverImage = `${process.env.VUE_APP_REQUEST_URL}/tempCover/${picture}?time=${Date.now()}`
     },
-    // 重置音乐上传dialog
+    // 重置音乐上传 dialog
     resetUploadMusicForm() {
       // 重置表单
       this.insertMusicForm = this.$options.data().insertMusicForm
@@ -269,6 +270,43 @@ export default {
       this.isMusicCoverExist = false
       this.updateMusicCover = {}
       this.coverImage = ''
+    },
+    // 删除临时音乐文件
+    async deleteTempMusic() {
+      try {
+        const {
+          data: { message }
+        } = await deleteTempMusicAPI(this.insertMusicForm.musicFileName, this.insertMusicForm.musicCoverFileName)
+        // 成功弹窗
+        this.$notify({
+          title: message,
+          type: 'success',
+          duration: 2000
+        })
+      } catch (error) {
+        console.log(error)
+      }
+    },
+    // 点击重置按钮处理事件
+    async clickResetInsertMusicHandler() {
+      // Loading
+      this.fullscreenLoading = true
+      this.resetBtnLoading = true
+      // 清除临时文件
+      await this.deleteTempMusic()
+      // 重置表单
+      this.insertMusicForm = this.$options.data().insertMusicForm
+      // clearFile
+      this.$refs.uploadMusic.clearFiles()
+      this.$refs.uploadCover.clearFiles()
+      // reset
+      this.isMusicUploaded = false
+      this.isMusicCoverExist = false
+      this.updateMusicCover = {}
+      this.coverImage = ''
+      // Loading Complete
+      this.fullscreenLoading = false
+      this.resetBtnLoading = false
     }
   }
 }
