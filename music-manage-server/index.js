@@ -52,6 +52,8 @@ app.use('/apis/routes', require('./controllers/RoutesController'))
 app.use('/apis/music', require('./controllers/MusicController'))
 // 数据路由
 app.use('/apis/data', require('./controllers/DataController'))
+// 音乐转换路由
+app.use('/apis/convert', require('./controllers/MusicConvertController'))
 
 // 监听端口
 app.listen(process.env.PORT, err => {

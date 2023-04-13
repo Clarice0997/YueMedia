@@ -8,6 +8,7 @@ const ffmpeg = require('fluent-ffmpeg')
 const ffmpegError = require('../utils/ffmpegError')
 const { spawnSync } = require('child_process')
 const { ServiceErrorHandler } = require('../middlewares/ErrorCatcher')
+const { ncmCracker } = require('../utils/music/ncmCracker')
 
 // 存储文件位置常量
 const TEMP_MUSIC_FOLDER = process.env.TEMP_MUSIC_FOLDER
@@ -20,60 +21,117 @@ const DEFAULT_STATIC_PATH = process.env.DEFAULT_STATIC_PATH
 /**
  * 上传音乐文件
  * @param musicFile
- * @returns
+ * @param mimetype
+ * @returns {Promise<{code: number, data: {message}}|{code: number, data: {meta: {encodedby?: string, copyright?: string, year?: number, tvShow?: string, releasetype?: string[], albumartistsort?: string, originalalbum?: string, musicbrainz_discid?: string, peakLevel?: number, releasestatus?: string, movementIndex: undefined, work?: string, grouping?: string, script?: string, movementTotal?: number, size, podcasturl?: string, titlesort?: string, subtitle?: string[], mixer?: string[], originalartist?: string, djmixer?: string[], musicbrainz_albumid?: string, artist?: string, composersort?: string, catalognumber?: string[], artists?: string[], replaygain_track_gain?: IRatio, genre?: string[], musicip_fingerprint?: string, key?: string, replaygain_album_gain?: IRatio, albumsort?: string, website?: string, musicbrainz_artistid?: string[], discogs_release_id?: number, composer?: string[], conductor?: string[], picture: undefined, tvEpisodeId?: string, stik?: number, discsubtitle?: string[], musicbrainz_albumartistid?: string[], musicip_puid?: string, movement?: string, date?: string, tvSeason?: number, notes?: string[], lyricist?: string[], replaygain_album_peak?: IRatio, keywords?: string[], musicbrainz_recordingid?: string, rating?: IRating[], originaldate?: string, language?: string, totaldiscs?: string, releasecountry?: string, acoustid_id?: string, discogs_label_id?: number, totaltracks?: string, barcode?: string, musicbrainz_releasegroupid?: string, discogs_votes?: number, replaygain_track_peak_ratio?: number, remixer?: string[], tvShowSort?: string, tvNetwork?: string, arranger?: string[], license?: string, codec: string, disk: undefined, discogs_master_release_id?: number, producer?: string[], discogs_rating?: number, musicbrainz_trackid?: string, averageLevel?: number, albumartist?: string, replaygain_track_minmax?: number[], longDescription?: string, podcastId?: string, mood?: string, showMovement?: boolean, hdVideo?: number, description?: string[], "performer:instrument"?: string[], media?: string, title?: string, replaygain_undo?: {leftChannel: number, rightChannel: number}, podcast?: boolean, track: undefined, musicbrainz_workid?: string, lyrics?: string[], bpm?: number, encodersettings: undefined, album?: string, technician?: string[], isrc?: string[], musicbrainz_trmid?: string, label?: string[], gapless?: boolean, engineer?: string[], tvEpisode?: number, originalyear?: number, acoustid_fingerprint?: string, discogs_artist_id?: number[], replaygain_track_peak?: IRatio, compilation?: boolean, replaygain_track_gain_ratio?: number, comment: undefined, asin?: string, writer?: string[], artistsort?: string, category?: string[]}, songId: string, musicName, coverName: string}}|{code, data: {message}}|{code: number, data: {meta: {encodedby?: string, copyright?: string, year?: number, tvShow?: string, releasetype?: string[], albumartistsort?: string, originalalbum?: string, musicbrainz_discid?: string, peakLevel?: number, releasestatus?: string, movementIndex: undefined, work?: string, grouping?: string, script?: string, movementTotal?: number, size, podcasturl?: string, titlesort?: string, subtitle?: string[], mixer?: string[], originalartist?: string, djmixer?: string[], musicbrainz_albumid?: string, artist?: string, composersort?: string, catalognumber?: string[], artists?: string[], replaygain_track_gain?: IRatio, genre?: string[], musicip_fingerprint?: string, key?: string, replaygain_album_gain?: IRatio, albumsort?: string, website?: string, musicbrainz_artistid?: string[], discogs_release_id?: number, composer?: string[], conductor?: string[], picture: undefined, tvEpisodeId?: string, stik?: number, discsubtitle?: string[], musicbrainz_albumartistid?: string[], musicip_puid?: string, movement?: string, date?: string, tvSeason?: number, notes?: string[], lyricist?: string[], replaygain_album_peak?: IRatio, keywords?: string[], musicbrainz_recordingid?: string, rating?: IRating[], originaldate?: string, language?: string, totaldiscs?: string, releasecountry?: string, acoustid_id?: string, discogs_label_id?: number, totaltracks?: string, barcode?: string, musicbrainz_releasegroupid?: string, discogs_votes?: number, replaygain_track_peak_ratio?: number, remixer?: string[], tvShowSort?: string, tvNetwork?: string, arranger?: string[], license?: string, codec: string, disk: undefined, discogs_master_release_id?: number, producer?: string[], discogs_rating?: number, musicbrainz_trackid?: string, averageLevel?: number, albumartist?: string, replaygain_track_minmax?: number[], longDescription?: string, podcastId?: string, mood?: string, showMovement?: boolean, hdVideo?: number, description?: string[], "performer:instrument"?: string[], media?: string, title?: string, replaygain_undo?: {leftChannel: number, rightChannel: number}, podcast?: boolean, track: undefined, musicbrainz_workid?: string, lyrics?: string[], bpm?: number, encodersettings: undefined, album?: string, technician?: string[], isrc?: string[], musicbrainz_trmid?: string, label?: string[], gapless?: boolean, engineer?: string[], tvEpisode?: number, originalyear?: number, acoustid_fingerprint?: string, discogs_artist_id?: number[], replaygain_track_peak?: IRatio, compilation?: boolean, replaygain_track_gain_ratio?: number, comment: undefined, asin?: string, writer?: string[], artistsort?: string, category?: string[]}, songId: string, musicName: string, coverName: string}}>}
  */
-const uploadMusicService = async musicFile => {
+const uploadMusicService = async (musicFile, mimetype) => {
   try {
     // 根据音乐文件生成 MD5
     const musicMD5 = await generateMD5(musicFile.buffer)
     // 定义音乐保存名
     const musicName = musicMD5 + Date.now()
-    // 获取音乐文件元数据
-    const metadata = await mm.parseBuffer(musicFile.buffer)
-    console.log(metadata)
-    // 判断音乐封面是否存在
-    let coverData
-    let musicCoverName
-    // 音乐封面存在存储音乐封面 如果不存在则采用默认音乐封面
-    if (metadata.common.picture) {
-      if (metadata.common.picture.length > 0) {
-        musicCoverName = `${musicName}.jpg`
-        // 获取音乐封面图
-        coverData = metadata.common.picture[0].data
+    // NCM 格式处理
+    if (mimetype === 'application/octet-stream') {
+      // 解码 NCM 转换为 MP3
+      const ncmData = await ncmCracker(musicFile, musicName)
+      if (ncmData.code) {
+        return {
+          code: ncmData.code,
+          data: {
+            message: ncmData.data.message
+          }
+        }
+      }
+      const { musicFileName, mp3Buffer, tempFilePath } = ncmData
+      // 获取音乐文件元数据
+      const metadata = await mm.parseBuffer(mp3Buffer)
+      // 判断音乐封面是否存在
+      let coverData
+      let musicCoverName = `${musicName}.jpg`
+      // 音乐封面存在存储音乐封面 如果不存在则采用默认音乐封面
+      if (metadata.common.picture) {
+        if (metadata.common.picture.length > 0) {
+          // 获取音乐封面图
+          coverData = metadata.common.picture[0].data
+          // 生成音乐封面存储地址
+          const coverPath = path.join(DEFAULT_STATIC_PATH, TEMP_COVER_FOLDER, musicCoverName)
+          // 临时存储音乐封面
+          fs.writeFileSync(coverPath, coverData)
+        }
+      } else {
         // 生成音乐封面存储地址
         const coverPath = path.join(DEFAULT_STATIC_PATH, TEMP_COVER_FOLDER, musicCoverName)
         // 临时存储音乐封面
-        fs.writeFileSync(coverPath, coverData)
+        fs.copyFileSync(path.join(__dirname, '..', 'public', 'cover.jpg'), coverPath)
+      }
+      // 删除临时 MP3 文件
+      fs.unlinkSync(tempFilePath)
+      // 返回成功消息对象
+      return {
+        code: 200,
+        data: {
+          meta: {
+            ...metadata.common,
+            comment: undefined,
+            picture: undefined,
+            track: undefined,
+            disk: undefined,
+            movementIndex: undefined,
+            encodersettings: undefined,
+            codec: metadata.format.container,
+            size: musicFile.buffer.length
+          },
+          songId: musicName,
+          coverName: musicCoverName,
+          musicName: musicFileName
+        }
       }
     } else {
-      musicCoverName = `${musicName}.jpg`
-      // 生成音乐封面存储地址
-      const coverPath = path.join(DEFAULT_STATIC_PATH, TEMP_COVER_FOLDER, musicCoverName)
-      // 临时存储音乐封面
-      fs.copyFileSync(path.join(__dirname, '..', 'public', 'cover.jpg'), coverPath)
-    }
-    // 生成音乐文件存储地址
-    const musicFileName = musicName + path.extname(musicFile.originalname)
-    const musicPath = path.join(DEFAULT_STATIC_PATH, TEMP_MUSIC_FOLDER, musicFileName)
-    // 临时存储音乐文件
-    fs.writeFileSync(musicPath, musicFile.buffer)
-    // 返回成功消息对象
-    return {
-      code: 200,
-      data: {
-        meta: {
-          ...metadata.common,
-          picture: undefined,
-          track: undefined,
-          disk: undefined,
-          movementIndex: undefined,
-          encodersettings: undefined,
-          codec: metadata.format.container,
-          size: musicFile.buffer.length
-        },
-        songId: musicName,
-        coverName: musicCoverName,
-        musicName: musicFileName
+      // 获取音乐文件元数据
+      const metadata = await mm.parseBuffer(musicFile.buffer)
+      // 判断音乐封面是否存在
+      let coverData
+      let musicCoverName = `${musicName}.jpg`
+      // 音乐封面存在存储音乐封面 如果不存在则采用默认音乐封面
+      if (metadata.common.picture) {
+        if (metadata.common.picture.length > 0) {
+          // 获取音乐封面图
+          coverData = metadata.common.picture[0].data
+          // 生成音乐封面存储地址
+          const coverPath = path.join(DEFAULT_STATIC_PATH, TEMP_COVER_FOLDER, musicCoverName)
+          // 临时存储音乐封面
+          fs.writeFileSync(coverPath, coverData)
+        }
+      } else {
+        // 生成音乐封面存储地址
+        const coverPath = path.join(DEFAULT_STATIC_PATH, TEMP_COVER_FOLDER, musicCoverName)
+        // 临时存储音乐封面
+        fs.copyFileSync(path.join(__dirname, '..', 'public', 'cover.jpg'), coverPath)
+      }
+      // 生成音乐文件存储地址
+      const musicFileName = musicName + path.extname(musicFile.originalname)
+      const musicPath = path.join(DEFAULT_STATIC_PATH, TEMP_MUSIC_FOLDER, musicFileName)
+      // 临时存储音乐文件
+      fs.writeFileSync(musicPath, musicFile.buffer)
+      // 返回成功消息对象
+      return {
+        code: 200,
+        data: {
+          meta: {
+            ...metadata.common,
+            comment: undefined,
+            picture: undefined,
+            track: undefined,
+            disk: undefined,
+            movementIndex: undefined,
+            encodersettings: undefined,
+            codec: metadata.format.container,
+            size: musicFile.buffer.length
+          },
+          songId: musicName,
+          coverName: musicCoverName,
+          musicName: musicFileName
+        }
       }
     }
   } catch (error) {

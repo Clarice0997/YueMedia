@@ -11,13 +11,18 @@ const { MulterError } = require('multer')
 const musicUpload = multer({
   limits: { fileSize: 100000000, files: 1 },
   fileFilter: function (req, file, cb) {
-    const filetypes = /mp3|wav|flac|aac|m4a|ogg|wma|aiff|ape|alac|dsd/
-    const mimetype = filetypes.test(file.mimetype) || file.mimetype === 'audio/mpeg'
-    const extname = filetypes.test(path.extname(file.originalname))
+    const allowedMimetypes = ['audio/mpeg', 'audio/wav', 'audio/flac', 'audio/aac', 'audio/ogg', 'audio/aiff', 'audio/alac', 'application/octet-stream']
+    const allowedFiletypes = ['mp3', 'wav', 'flac', 'aac', 'ogg', 'aiff', 'alac', 'ncm']
+
+    const mimetype = allowedMimetypes.indexOf(file.mimetype) !== -1
+    const extname = allowedFiletypes.indexOf(path.extname(file.originalname).toLowerCase().substring(1)) !== -1
+
+    req.mimetype = file.mimetype
+
     if (mimetype && extname) {
       return cb(null, true)
     } else {
-      cb(new MulterError('仅允许MP3，WAV，FLAC，AAC，M4A，OGG，WMA，AIFF，APE，ALAC，DSD 格式的文件'))
+      cb(new MulterError('仅允许 MP3，WAV，FLAC，NCM，AAC，OGG，AIFF，ALAC 格式的文件'))
     }
   }
 })
@@ -52,8 +57,10 @@ router.post(
     try {
       // 获取上传文件
       const musicFile = req.file
+      // 获取文件上传类型
+      const mimetype = req.mimetype
       // Service
-      const { code, data } = await uploadMusicService(musicFile)
+      const { code, data } = await uploadMusicService(musicFile, mimetype)
       // response
       res.status(code).send({ ...data, code })
     } catch (error) {

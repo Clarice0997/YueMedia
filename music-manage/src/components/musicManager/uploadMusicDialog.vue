@@ -3,9 +3,20 @@
   <el-dialog title="新增歌曲" :visible.sync="localDialogInsertMusicFormVisible" append-to-body @close="resetUploadMusicForm">
     <el-form ref="insertMusicForm" :model="insertMusicForm" :rules="insertMusicFormRules" label-position="top">
       <!-- 上传音乐文件 -->
-      <!-- TODO: 上传文件类型限定 -->
       <el-form-item label="上传音乐文件" prop="musicFile">
-        <el-upload class="uploadMusic" ref="uploadMusic" :disabled="isMusicUploaded" :on-success="uploadMusicFileSuccessHook" :limit="1" drag name="musicFile" with-credentials :headers="{ Authorization }" action="http://localhost:3000/apis/music/upload/music">
+        <el-upload
+          class="uploadMusic"
+          ref="uploadMusic"
+          :disabled="isMusicUploaded"
+          :before-upload="uploadMusicFileBeforeHook"
+          :on-success="uploadMusicFileSuccessHook"
+          :limit="1"
+          drag
+          name="musicFile"
+          with-credentials
+          :headers="{ Authorization }"
+          action="http://localhost:3000/apis/music/upload/music"
+        >
           <i class="el-icon-upload"></i>
           <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
           <div class="el-upload__tip" slot="tip" style="margin: 0">音乐文件大小不超过 100 MB</div>
@@ -200,6 +211,22 @@ export default {
           return false
         }
       })
+    },
+    // 音乐文件上传前回调
+    uploadMusicFileBeforeHook(file) {
+      const allowedMimetypes = ['audio/mpeg', 'audio/wav', 'audio/flac', 'audio/aac', 'audio/ogg', 'audio/aiff', 'audio/alac', 'application/octet-stream']
+      const isAllowedMusic = allowedMimetypes.indexOf(file.type) !== -1
+      const isLt100M = file.size / 1024 / 1024 < 100
+
+      if (!isAllowedMusic) {
+        this.$message.error('只能上传音乐文件（MP3/WAV/FLAC/NCM/AAC/OGG/AIFF/ALAC）')
+      }
+
+      if (!isLt100M) {
+        this.$message.error('上传文件大小不能超过 100MB')
+      }
+
+      return isAllowedMusic && isLt100M
     },
     // 音乐文件上传成功回调
     uploadMusicFileSuccessHook({ coverName, musicName, meta, songId }) {
