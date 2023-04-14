@@ -34,7 +34,7 @@ const multerErrorHandler = (err, req, res) => {
   error.save()
 
   // Send Multer error response to client
-  res.status(500).json({ code: 400, message: err.message })
+  res.status(400).json({ code: 400, message: err.message })
 }
 
 // Service 错误日志

@@ -38,6 +38,9 @@ app.use('/apidoc', express.static('./doc/apidoc'))
 // 扫描文件夹，删除过期临时文件
 require('./config/DelTempFile')
 
+// 初始化 Redis 装载数据
+require('./utils/redis/initRedis')
+
 // 使用 morgan 中间件记录日志
 app.use(require('./config/morganLog'))
 

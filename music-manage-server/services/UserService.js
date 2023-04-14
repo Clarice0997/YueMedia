@@ -5,6 +5,7 @@ const { v4: uuidv4 } = require('uuid')
 const { generateJsonWebToken } = require('../utils/Jwt')
 const { LoginRecord } = require('../models/loginRecordModel')
 const { ServiceErrorHandler } = require('../middlewares/ErrorCatcher')
+const { calculateLoginRecords } = require('../utils/redis/calculateLoginRecords')
 
 /**
  * Save loginRecord
@@ -66,6 +67,7 @@ async function loginService(username, password, ip) {
         type: user[0].type
       })
       await loginRecord(user[0].uno, user[0].username, ip)
+      calculateLoginRecords()
       return {
         code: 200,
         data: {

@@ -27,6 +27,10 @@ MySQLConnectionPool.on('release', () => {
   console.log('数据库连接释放')
 })
 
+MySQLConnectionPool.on('error', err => {
+  console.error('MySQL error: ', err)
+})
+
 // 判断连接池的启动状态
 if (MySQLConnectionPool) console.log(`MySQL has been connected. Database name: ${process.env.MySQLDatabase}`)
 
