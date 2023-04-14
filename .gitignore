@@ -21,3 +21,5 @@ bin-release/
 static
 **/.idea
 **/.vscode
+music-manage/dist
+music-manage/.env.production

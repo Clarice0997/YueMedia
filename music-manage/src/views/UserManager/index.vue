@@ -54,9 +54,9 @@
         <!-- 操作列  -->
         <el-table-column label="操作" fixed="right" width="350">
           <template slot-scope="scope">
-            <el-button type="danger" size="mini" @click="handleAuthorize(scope.$index, scope.row)">授权 </el-button>
+            <el-button type="danger" size="mini" @click="handleAuthorize(scope.$index, scope.row)">授权</el-button>
             <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-            <el-button type="warning" size="mini" @click="handleReset(scope.$index, scope.row)">重置密码 </el-button>
+            <el-button type="warning" size="mini" @click="handleReset(scope.$index, scope.row)">重置密码</el-button>
             <el-button type="success" size="mini" v-if="scope.row.audited !== '1'" @click="handleAudited(scope.$index, scope.row)">审核 </el-button>
           </template>
         </el-table-column>

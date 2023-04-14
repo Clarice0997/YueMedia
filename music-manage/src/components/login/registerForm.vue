@@ -19,7 +19,7 @@
     <el-form-item prop="email">
       <el-input v-model="registerForm.email" placeholder="邮箱" clearable prefix-icon="el-icon-suitcase"></el-input>
     </el-form-item>
-    <el-button class="login-button" type="primary" v-loading.fullscreen="fullscreenLoading" :loading="btnLoading" @click="clickRegisterHandler">立即注册</el-button>
+    <el-button class="login-button" type="primary" v-loading.fullscreen="fullscreenLoading" :loading="btnLoading" @click="clickRegisterHandler">立即注册 </el-button>
     <router-link to="/login/login">已有账号？立即登录</router-link>
   </el-form>
 </template>
@@ -203,6 +203,7 @@ export default {
 <style lang="less" scoped>
 .el-form {
   transition: 0.3s;
+
   .el-button {
     margin: 0;
   }

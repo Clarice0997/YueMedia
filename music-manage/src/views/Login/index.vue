@@ -36,6 +36,7 @@ export default {
   background-attachment: fixed !important;
   background: url('@/assets/image/bg.jpg'), no-repeat;
 }
+
 .container {
   width: 100vw;
   height: 100vh;
@@ -44,16 +45,19 @@ export default {
   grid-gap: 7rem;
   padding: 0 2rem;
 }
+
 .img {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+
   img {
     width: 400px;
     transition: 0.3s;
   }
 }
+
 .login-container {
   transition: 0.3s;
   display: flex;
@@ -62,6 +66,7 @@ export default {
   flex-direction: column;
   align-items: center;
 }
+
 .el-form {
   transition: 0.3s;
   width: 350px;
@@ -75,6 +80,7 @@ export default {
     font-size: 2rem;
     margin-bottom: 20px;
   }
+
   a {
     display: block;
     margin-top: 10px;
@@ -84,14 +90,17 @@ export default {
     font-size: 0.9rem;
     transition: 0.3s;
   }
+
   a:hover {
     color: #38d39f;
   }
+
   .login-button {
     width: 100%;
     border-radius: 10px;
     transition: 0.3s;
     margin-top: 22px;
+
     span {
       font-size: 1rem;
     }
@@ -113,6 +122,7 @@ export default {
   .img img {
     width: 350px;
   }
+
   .el-form {
     width: 300px;
   }
