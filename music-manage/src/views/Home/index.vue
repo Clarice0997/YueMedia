@@ -56,7 +56,14 @@ export default {
       menuList: [],
       toggleIndex: false,
       asideWidth: '300px',
-      audio: []
+      audio: [
+        {
+          title: 'Little Snowflake',
+          artist: '花近 feat. ryuryu',
+          src: `${process.env.VUE_APP_REQUEST_URL}/playMusic/eaa0b64708126a14e1598c1456a50a421680533414029.mp3`,
+          pic: `${process.env.VUE_APP_REQUEST_URL}/cover/eaa0b64708126a14e1598c1456a50a421680533414029.jpg`
+        }
+      ]
     }
   },
 
@@ -204,6 +211,10 @@ export default {
 
   .el-menu {
     border-right: 0;
+
+    ::-webkit-scrollbar {
+      display: none;
+    }
   }
 
   .el-menu-item {
