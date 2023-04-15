@@ -9,6 +9,9 @@ const errorSchema = new mongoose.Schema({
   message: {
     type: String
   },
+  ip: {
+    type: String
+  },
   stack: {
     type: String,
     required: true

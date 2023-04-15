@@ -2,7 +2,7 @@
 const morgan = require('morgan')
 
 // 定义 format 格式
-const logFormat = ':method :url :status :res[content-length] :response-time'
+const logFormat = ':method :url :remote-addr :status :res[content-length] :response-time'
 
 // 定义 morgan 中间件
 const morganLog = morgan(logFormat, {
@@ -11,14 +11,15 @@ const morganLog = morgan(logFormat, {
       try {
         const parts = message.trim().split(' ')
 
-        const contentLength = parts[3] === '-' ? null : parseInt(parts[3])
+        const contentLength = parts[4] === '-' ? null : parseInt(parts[4])
 
         const logObject = {
           method: parts[0],
           url: parts[1],
-          status: parseInt(parts[2]),
+          ip: parts[2],
+          status: parseInt(parts[3]),
           contentLength: contentLength,
-          responseTime: parseFloat(parts[4])
+          responseTime: parseFloat(parts[5])
         }
 
         require('../models/apiRecordModel').create(logObject)

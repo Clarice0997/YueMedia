@@ -139,7 +139,9 @@ async function registerService({ username, password, nickname, phone, email }) {
       }
     }
     // 注册新用户，新增用户数据
-    await mysqlHandler(`insert into users(uno,username,password,nickname,phone,email) values(?,?,?,?,?,?)`, [await uuidv4(), username, await hashSync(password, 10), nickname, phone, email])
+    const query = 'insert into users(uno,username,password,nickname,phone,email) values(?,?,?,?,?,?)'
+    const params = [await uuidv4(), username, await hashSync(password, 10), nickname, phone, email]
+    await mysqlHandler(query, params)
 
     // 成功注册返回
     return {

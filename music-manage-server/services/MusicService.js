@@ -193,7 +193,7 @@ const uploadMusicCoverService = async (musicCoverFile, musicName, originCoverNam
  * @param data
  * @returns {Promise<{code: number, data: {message}}|{code: number, data: {message: string}}>}
  */
-const uploadMusicDataService = async data => {
+const uploadMusicDataService = async (data, userData) => {
   try {
     // 获取音乐数据上传所需参数
     let { songId, songName, songSize, musicCodec, musicCoverFileName, musicFileName, singerName, albumName, year } = data
@@ -203,6 +203,15 @@ const uploadMusicDataService = async data => {
         code: 400,
         data: {
           message: '音乐数据上传参数不合法'
+        }
+      }
+    }
+    // 判断文件是否存在
+    if (!fs.existsSync(path.join(DEFAULT_STATIC_PATH, TEMP_MUSIC_FOLDER, musicFileName))) {
+      return {
+        code: 400,
+        data: {
+          message: '音乐文件不存在'
         }
       }
     }
@@ -234,8 +243,8 @@ const uploadMusicDataService = async data => {
     fs.renameSync(path.join(DEFAULT_STATIC_PATH, TEMP_COVER_FOLDER, musicCoverFileName), path.join(DEFAULT_STATIC_PATH, COVER_FOLDER, musicCoverFileName))
 
     // 准备数据 插入数据库
-    const query = 'insert into music(song_id,song_name,song_size,music_codec,play_file_name,music_cover_file_name,origin_file_name,singer_name,album_name,year) values(?,?,?,?,?,?,?,?,?,?)'
-    const params = [songId, songName, songSize, musicCodec, playFileName, musicCoverFileName, musicFileName, singerName ? singerName : null, albumName ? albumName : null, year ? year : null]
+    const query = 'insert into music(song_id,upload_by,song_name,song_size,music_codec,play_file_name,music_cover_file_name,origin_file_name,singer_name,album_name,year) values(?,?,?,?,?,?,?,?,?,?,?)'
+    const params = [songId, userData.uno, songName, songSize, musicCodec, playFileName, musicCoverFileName, musicFileName, singerName ? singerName : null, albumName ? albumName : null, year ? year : null]
     await mysqlHandler(query, params)
 
     return {

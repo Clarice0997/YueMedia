@@ -11,7 +11,7 @@ const MathCaptchaConfig = {
   width: 80,
   height: 32,
   color: true,
-  mathOperator: '+/-',
+  mathOperator: '+',
   mathMin: 10,
   mathMax: 50
 }

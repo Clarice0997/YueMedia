@@ -11,7 +11,8 @@ const errorHandler = (err, req, res) => {
   const error = new ErrorModel({
     name: err.name,
     message: err.message,
-    stack: err.stack
+    stack: err.stack,
+    ip: req.ip
   })
   error.save()
 
@@ -29,7 +30,8 @@ const multerErrorHandler = (err, req, res) => {
   const error = new ErrorModel({
     name: err.name,
     message: err.message,
-    stack: err.stack
+    stack: err.stack,
+    ip: req.ip
   })
   error.save()
 

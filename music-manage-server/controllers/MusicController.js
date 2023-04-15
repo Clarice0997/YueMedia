@@ -147,7 +147,7 @@ router.post(
 router.post('/upload/music/data', auth, async (req, res) => {
   try {
     // Service
-    const { data, code } = await uploadMusicDataService(req.body)
+    const { data, code } = await uploadMusicDataService(req.body, req.authorization)
     // response
     res.status(code).send({ ...data, code })
   } catch (error) {

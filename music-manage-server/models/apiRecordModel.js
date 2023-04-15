@@ -5,6 +5,7 @@ const LogSchema = new mongoose.Schema({
   method: String,
   url: String,
   status: Number,
+  ip: String,
   responseTime: Number,
   contentLength: Number,
   createdAt: {
