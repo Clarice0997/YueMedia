@@ -12,7 +12,7 @@ export const dataCharts = {
     },
     // 清空 Echart 对象
     CLEAR_ECHARTS(state) {
-      state.charts.length = 0
+      state.charts = {}
     },
     // 重绘 Echart
     REDRAW_ECHARTS(state) {

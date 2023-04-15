@@ -314,4 +314,80 @@ const deleteTempMusicService = async (musicName, coverName) => {
   }
 }
 
-module.exports = { uploadMusicService, uploadMusicCoverService, uploadMusicDataService, deleteTempMusicService }
+/**
+ * 获取个人音乐列表、音乐数量 Service
+ * @param pageNumber
+ * @param pageSize
+ * @param uno
+ * @returns {Promise<{code: number, data: {count: number, message: string}}|{code: number, data: {count: *, message: string}}|{code: number, data: {message: string}}|{code: number, data: {message}}|{code: number, data: {musicData: unknown, count: *}}>}
+ */
+const selectMusicListService = async (pageNumber, pageSize, uno) => {
+  try {
+    // 判断是否存在页码
+    if (typeof pageNumber == 'undefined') {
+      pageNumber = 1
+    }
+    // 判断是否存在页面条数限制
+    if (typeof pageSize == 'undefined') {
+      pageSize = 10
+    }
+    if (pageNumber <= 0 || pageSize <= 0 || !/\d+/gi.test(pageNumber) || !/\d+/gi.test(pageSize)) {
+      return {
+        code: 400,
+        data: {
+          message: '参数不合法'
+        }
+      }
+    }
+
+    // 查询数据条数
+    const [{ count }] = await mysqlHandler('select count(*) count from music where upload_by = ?', [uno])
+
+    // 判断是否存在上传音乐数据
+    if (count === 0) {
+      return {
+        code: 200,
+        data: {
+          message: '不存在上传音乐数据',
+          count: 0
+        }
+      }
+    }
+
+    // 判断查询数据是否超出范围
+    if (pageNumber * pageSize - pageSize >= count) {
+      return {
+        code: 200,
+        data: {
+          message: '数据超出范围',
+          count
+        }
+      }
+    }
+
+    // 查询数据
+    const musicData = await mysqlHandler('select * from music where upload_by = ? limit ?,?', [uno, (pageNumber - 1) * pageSize, Number(pageSize)])
+
+    // Return
+    return {
+      code: 200,
+      data: { musicData, count }
+    }
+  } catch (error) {
+    ServiceErrorHandler(error)
+    return {
+      code: 500,
+      data: {
+        message: error.message
+      }
+    }
+  }
+}
+
+module.exports = {
+  uploadMusicService,
+  uploadMusicCoverService,
+  uploadMusicDataService,
+  deleteTempMusicService,
+  selectMusicListService
+}

@@ -1,7 +1,7 @@
 // import modules
 
 // 文件分析
-const fileAnalysis = async file => {
+const analyseFileService = async file => {
   try {
     const { originalname, encoding, mimetype, size } = file
     return {
@@ -19,4 +19,4 @@ const fileAnalysis = async file => {
   }
 }
 
-module.exports = { fileAnalysis }
+module.exports = { analyseFileService }

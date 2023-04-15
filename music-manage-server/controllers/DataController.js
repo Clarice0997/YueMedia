@@ -1,6 +1,6 @@
 // import modules
 const router = require('express').Router()
-const { auth } = require('../middlewares/Auth')
+const { adminAuth } = require('../middlewares/Auth')
 const { getLoginRecordService } = require('../services/DataService')
 const { errorHandler } = require('../middlewares/ErrorCatcher')
 
@@ -12,7 +12,7 @@ const { errorHandler } = require('../middlewares/ErrorCatcher')
  * @apiPermission Admin
  * @apiHeader {String} Authorization JWT鉴权
  */
-router.get('/login/record', auth, async (req, res) => {
+router.get('/login/record', adminAuth, async (req, res) => {
   try {
     // Service
     const { code, data } = await getLoginRecordService()

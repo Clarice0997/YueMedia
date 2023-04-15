@@ -24,3 +24,18 @@ export const deleteTempMusicAPI = async (musicName, coverName) => {
 export const uploadMusicDataAPI = async data => {
   return request.post('/apis/music/upload/music/data', data)
 }
+
+/**
+ * 获取个人音乐列表、音乐数量 API
+ * @param pageNumber
+ * @param pageSize
+ * @returns
+ */
+export const selectMusicListAPI = async (pageNumber, pageSize) => {
+  return request.get('/apis/music', {
+    params: {
+      pageNumber,
+      pageSize
+    }
+  })
+}

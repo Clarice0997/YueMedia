@@ -28,11 +28,11 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
 // 绑定静态资源文件夹
-// 静态资源地址：http://localhost:3000/
+// 静态资源地址：http://localhost:3001
 app.use(express.static('../static'))
 
 // 绑定 apidoc 文档
-// 接口文档地址：http://localhost:3000/apidoc
+// 接口文档地址：http://localhost:3001/apidoc
 app.use('/apidoc', express.static('./doc/apidoc'))
 
 // 扫描文件夹，删除过期临时文件
@@ -57,6 +57,11 @@ app.use('/apis/music', require('./controllers/MusicController'))
 app.use('/apis/data', require('./controllers/DataController'))
 // 音乐转换路由
 app.use('/apis/convert', require('./controllers/MusicConvertController'))
+
+// 连接测试接口
+app.get('/', (req, res) => {
+  res.send('Connect success!')
+})
 
 // 监听端口
 app.listen(process.env.PORT, err => {

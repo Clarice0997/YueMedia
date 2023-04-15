@@ -12,6 +12,8 @@
 </template>
 
 <script>
+import { selectMusicListAPI } from '@/apis/musicAPI'
+
 export default {
   name: 'MusicManageSystemMusicManagerView',
 
@@ -32,7 +34,9 @@ export default {
     }
   },
 
-  mounted() {},
+  async mounted() {
+    await selectMusicListAPI()
+  },
 
   components: {
     // 懒加载组件

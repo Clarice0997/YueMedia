@@ -37,7 +37,7 @@ async function loginRecord(uno, username, loginIp) {
 async function loginService(username, password, ip) {
   try {
     // 判断参数是否存在
-    if (!(username && password)) {
+    if (!username || !password) {
       return {
         code: 400,
         data: {
@@ -48,7 +48,7 @@ async function loginService(username, password, ip) {
     // 获取 MySQL 用户信息，判断用户是否存在
     // 防止暴力破解
     const user = await mysqlHandler(`select * from users where username = ?`, [username])
-    if (user === false) {
+    if (user.length === 0) {
       return {
         code: 400,
         data: {
@@ -112,7 +112,7 @@ async function registerService({ username, password, nickname, phone, email }) {
     }
 
     // 判断用户是否已被注册
-    if ((await mysqlHandler(`select * from users where username = ?`, [username])) !== false) {
+    if ((await mysqlHandler(`select * from users where username = ?`, [username])).length !== 0) {
       return {
         code: 409,
         data: {
@@ -121,7 +121,7 @@ async function registerService({ username, password, nickname, phone, email }) {
       }
     }
     // 判断电话是否已被使用
-    if ((await mysqlHandler(`select * from users where phone = ?`, [phone])) !== false) {
+    if ((await mysqlHandler(`select * from users where phone = ?`, [phone])).length !== 0) {
       return {
         code: 409,
         data: {
@@ -130,7 +130,7 @@ async function registerService({ username, password, nickname, phone, email }) {
       }
     }
     // 判断邮箱是否已被使用
-    if ((await mysqlHandler(`select * from users where email = ?`, [email])) !== false) {
+    if ((await mysqlHandler(`select * from users where email = ?`, [email])).length !== 0) {
       return {
         code: 409,
         data: {

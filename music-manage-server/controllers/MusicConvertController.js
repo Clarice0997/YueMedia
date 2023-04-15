@@ -1,20 +1,29 @@
 // import modules
 const router = require('express').Router()
 const multer = require('multer')
-const { fileAnalysis } = require('../services/MusicConvertService')
+const { analyseFileService } = require('../services/MusicConvertService')
+const { auth } = require('../middlewares/Auth')
 
 // 文件上传配置
 const fileUpload = multer({
   limits: { fileSize: 100000000, files: 1 }
 })
 
-// 文件解析
-router.post('/analyse', fileUpload.single('file'), async (req, res) => {
+/**
+ * @api {POST} /apis/convert/analyse 解析文件接口
+ * @apiName analyseFile
+ * @apiGroup MusicConvert
+ * @apiName MusicConvert/analyseFile
+ * @apiPermission User
+ * @apiHeader {String} Authorization JWT鉴权
+ * @apiBody {Buffer} file 待解析文件
+ */
+router.post('/analyse', auth, fileUpload.single('file'), async (req, res) => {
   try {
     // 获取上传文件
     const file = req.file
     // Service
-    const { code, data } = await fileAnalysis(file)
+    const { code, data } = await analyseFileService(file)
     // response
     res.status(code).send({ ...data, code })
   } catch (error) {

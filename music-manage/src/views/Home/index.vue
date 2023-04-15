@@ -29,9 +29,7 @@
         <el-main>
           <div class="page-bg"></div>
           <div class="main-container">
-            <keep-alive>
-              <router-view></router-view>
-            </keep-alive>
+            <router-view></router-view>
           </div>
           <p class="footer">版权所有@悦音 2023</p>
         </el-main>

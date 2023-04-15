@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "持续更新中~",
   "title": "悦音 - 媒体管理一站式平台接口文档",
-  "url": "<http://localhost:3000/apidoc>",
+  "url": "http://localhost:3001",
   "header": {
     "title": "悦音 - 媒体管理一站式平台接口文档",
     "content": "<h1>API文档</h1>"
