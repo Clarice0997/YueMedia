@@ -37,6 +37,7 @@
         </el-main>
       </el-container>
     </el-container>
+    <!--  TODO: 删除音乐列表，需要修改原组件，尝试使用 patch-package  -->
     <a-player :music="audio[0]" :list="audio" :volume="0.4" listFolded repeat="repeat-all" />
   </div>
 </template>

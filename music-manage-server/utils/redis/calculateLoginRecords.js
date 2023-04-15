@@ -40,7 +40,7 @@ const calculateLoginRecords = async () => {
     .sort((a, b) => a.date.localeCompare(b.date))
 
   // Redis storage
-  await setRedis('calculate_login_record', JSON.stringify(handledLoginRecords))
+  await setRedis('calculate_login_record', JSON.stringify(handledLoginRecords), 'EX', 2400)
 }
 
 module.exports = { calculateLoginRecords }
