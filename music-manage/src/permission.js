@@ -74,7 +74,7 @@ router.beforeEach(async (to, from, next) => {
       return next('/home')
     }
   } else if (to.path === '/') {
-    return next('/login/login')
+    return next()
   } else {
     return next()
   }

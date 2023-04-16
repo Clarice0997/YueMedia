@@ -74,11 +74,12 @@ const uploadMusicService = async (musicFile, mimetype) => {
       } else {
         // 编码格式不为 MPEG 转码文件
         // 异步进程转码同步
+        console.time('ffmpeg')
         const result = spawnSync('ffmpeg', ['-i', originFilePath, '-c:a', 'libmp3lame', tempPlayFilePath])
         // 等待转码结束判断是否成功 标准输出流和错误输出流
         if (result.status === 0) {
-          console.log(result.stdout.toString())
           console.log('格式转换完成')
+          console.timeEnd('ffmpeg')
         } else {
           throw new ffmpegError(result.stderr.toString('utf8'))
         }
@@ -138,11 +139,12 @@ const uploadMusicService = async (musicFile, mimetype) => {
       } else {
         // 编码格式不为 MPEG 转码文件
         // 异步进程转码同步
+        console.time('ffmpeg')
         const result = spawnSync('ffmpeg', ['-i', musicPath, '-c:a', 'libmp3lame', tempPlayFilePath])
         // 等待转码结束判断是否成功 标准输出流和错误输出流
         if (result.status === 0) {
-          console.log(result.stdout.toString())
           console.log('格式转换完成')
+          console.time('ffmpeg')
         } else {
           throw new ffmpegError(result.stderr.toString('utf8'))
         }

@@ -191,4 +191,51 @@ export default {
     padding-left: 5px;
   }
 }
+
+.el-form {
+  transition: 0.3s;
+  width: 350px;
+  font-family: 'poppins', sans-serif;
+  box-sizing: content-box;
+  background: rgba(255, 255, 255, 0.578);
+  padding: 20px;
+  border-radius: 1rem;
+
+  h1 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+  }
+
+  a {
+    display: block;
+    margin-top: 10px;
+    text-align: center;
+    text-decoration: none;
+    color: #999;
+    font-size: 0.9rem;
+    transition: 0.3s;
+  }
+
+  a:hover {
+    color: #38d39f;
+  }
+
+  .login-button {
+    width: 100%;
+    border-radius: 10px;
+    transition: 0.3s;
+    margin-top: 22px;
+
+    span {
+      font-size: 1rem;
+    }
+  }
+}
+
+.el-form:hover {
+  background: rgba(255, 255, 255, 0.868);
+  font-family: 'poppins', sans-serif;
+  box-sizing: content-box;
+  border-radius: 1rem;
+}
 </style>

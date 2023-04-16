@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 
 // 路由
+import introduction from '@/views/Introduction/index.vue'
 import login from '@/views/Login'
 
 Vue.use(VueRouter)
@@ -9,7 +10,8 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/',
-    redirect: '/login'
+    name: 'introduction',
+    component: introduction
   },
   {
     path: '/login',
