@@ -17,6 +17,7 @@ const PLAY_MUSIC_FOLDER = process.env.PLAY_MUSIC_FOLDER
 const MUSIC_FOLDER = process.env.MUSIC_FOLDER
 const COVER_FOLDER = process.env.COVER_FOLDER
 const DEFAULT_STATIC_PATH = process.env.DEFAULT_STATIC_PATH
+const TEMP_PLAY_MUSIC_FOLDER = process.env.TEMP_PLAY_MUSIC_FOLDER
 
 /**
  * 上传音乐文件
@@ -32,8 +33,9 @@ const uploadMusicService = async (musicFile, mimetype) => {
     const musicName = musicMD5 + Date.now()
     // NCM 格式处理
     if (mimetype === 'application/octet-stream') {
-      // 解码 NCM 转换为 MP3
+      // 解码 NCM
       const ncmData = await ncmCracker(musicFile, musicName)
+      // 解码错误返回
       if (ncmData.code) {
         return {
           code: ncmData.code,
@@ -42,7 +44,7 @@ const uploadMusicService = async (musicFile, mimetype) => {
           }
         }
       }
-      const { musicFileName, mp3Buffer, tempFilePath } = ncmData
+      const { musicFileName, mp3Buffer, originFilePath } = ncmData
       // 获取音乐文件元数据
       const metadata = await mm.parseBuffer(mp3Buffer)
       // 判断音乐封面是否存在
@@ -64,8 +66,23 @@ const uploadMusicService = async (musicFile, mimetype) => {
         // 临时存储音乐封面
         fs.copyFileSync(path.join(__dirname, '..', 'public', 'cover.jpg'), coverPath)
       }
-      // 删除临时 MP3 文件
-      fs.unlinkSync(tempFilePath)
+      // 存储临时播放文件
+      const tempPlayFilePath = path.join(DEFAULT_STATIC_PATH, TEMP_PLAY_MUSIC_FOLDER, `${musicName}.mp3`)
+      if (metadata.format.container === 'MPEG') {
+        // 编码格式为 MPEG 直接复制文件
+        fs.copyFileSync(originFilePath, tempPlayFilePath)
+      } else {
+        // 编码格式不为 MPEG 转码文件
+        // 异步进程转码同步
+        const result = spawnSync('ffmpeg', ['-i', originFilePath, '-c:a', 'libmp3lame', tempPlayFilePath])
+        // 等待转码结束判断是否成功 标准输出流和错误输出流
+        if (result.status === 0) {
+          console.log(result.stdout.toString())
+          console.log('格式转换完成')
+        } else {
+          throw new ffmpegError(result.stderr.toString('utf8'))
+        }
+      }
       // 返回成功消息对象
       return {
         code: 200,
@@ -113,6 +130,23 @@ const uploadMusicService = async (musicFile, mimetype) => {
       const musicPath = path.join(DEFAULT_STATIC_PATH, TEMP_MUSIC_FOLDER, musicFileName)
       // 临时存储音乐文件
       fs.writeFileSync(musicPath, musicFile.buffer)
+      // 存储临时播放文件
+      const tempPlayFilePath = path.join(DEFAULT_STATIC_PATH, TEMP_PLAY_MUSIC_FOLDER, `${musicName}.mp3`)
+      if (metadata.format.container === 'MPEG') {
+        // 编码格式为 MPEG 直接复制文件
+        fs.copyFileSync(musicPath, tempPlayFilePath)
+      } else {
+        // 编码格式不为 MPEG 转码文件
+        // 异步进程转码同步
+        const result = spawnSync('ffmpeg', ['-i', musicPath, '-c:a', 'libmp3lame', tempPlayFilePath])
+        // 等待转码结束判断是否成功 标准输出流和错误输出流
+        if (result.status === 0) {
+          console.log(result.stdout.toString())
+          console.log('格式转换完成')
+        } else {
+          throw new ffmpegError(result.stderr.toString('utf8'))
+        }
+      }
       // 返回成功消息对象
       return {
         code: 200,
@@ -217,24 +251,10 @@ const uploadMusicDataService = async (data, userData) => {
     }
     // 判断音乐文件是否需要转码 供播放使用
     let playFileName = `${songId}.mp3`
-    if (musicCodec !== 'MPEG') {
-      const inputPath = path.join(DEFAULT_STATIC_PATH, TEMP_MUSIC_FOLDER, musicFileName)
-      const outputPath = path.join(DEFAULT_STATIC_PATH, PLAY_MUSIC_FOLDER, playFileName)
-      // 异步进程转码同步
-      const result = spawnSync('ffmpeg', ['-i', inputPath, '-c:a', 'libmp3lame', outputPath])
-      // 等待转码结束判断是否成功 标准输出流和错误输出流
-      if (result.status === 0) {
-        console.log(result.stdout.toString())
-        console.log('格式转换完成')
-      } else {
-        throw new ffmpegError(result.stderr.toString('utf8'))
-      }
-    } else {
-      const inputPath = path.join(DEFAULT_STATIC_PATH, TEMP_MUSIC_FOLDER, musicFileName)
-      const outputPath = path.join(DEFAULT_STATIC_PATH, PLAY_MUSIC_FOLDER, musicFileName)
-      // 复制文件到播放文件夹
-      fs.copyFileSync(inputPath, outputPath)
-    }
+    const inputPath = path.join(DEFAULT_STATIC_PATH, TEMP_PLAY_MUSIC_FOLDER, playFileName)
+    const outputPath = path.join(DEFAULT_STATIC_PATH, PLAY_MUSIC_FOLDER, playFileName)
+    // 复制文件到播放文件夹
+    fs.copyFileSync(inputPath, outputPath)
 
     // 持久化临时文件夹中的临时音乐文件和音乐封面
     // 剪切临时音乐文件夹中的音乐文件到持久化音乐文件夹
