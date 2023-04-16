@@ -1,8 +1,8 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import { dynamicRoutes } from './router'
-import { userProfile } from './userProfile'
-import { dataCharts } from '@/store/dataCharts'
+import { dynamicRoutes } from './modules/router'
+import { userProfile } from './modules/userProfile'
+import { dataCharts } from '@/store/modules/dataCharts'
 
 Vue.use(Vuex)
 

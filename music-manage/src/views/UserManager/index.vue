@@ -62,7 +62,7 @@
         </el-table-column>
         <template slot="empty">
           <div class="empty">
-            <img src="@/assets/image/empty.png" alt="empty" />
+            <img src="../../assets/image/icons/empty.png" alt="empty" />
             <span>暂无用户数据</span>
           </div>
         </template>

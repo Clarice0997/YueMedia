@@ -45,6 +45,7 @@
 import store from '@/store'
 import { deleteCookie } from '@/utils/cookie'
 import APlayer from 'vue-aplayer'
+import { resetRouter } from '@/utils/routeHandle'
 
 export default {
   name: 'MusicManageSystemHomeView',
@@ -86,11 +87,14 @@ export default {
   },
 
   methods: {
-    clickLogoutHandler() {
+    async clickLogoutHandler() {
       // 清除登录索引 和 用户信息
-      this.$store.dispatch('userProfile/clearUserData')
+      await this.$store.dispatch('userProfile/clearUserData')
       deleteCookie('Access-Token')
       localStorage.removeItem('Access-Token')
+      // 重置路由
+      await resetRouter()
+      await this.$store.dispatch('dynamicRoutes/asyncClearRoutes')
       // 退出登录弹窗
       this.$message({
         message: '退出登录成功',
@@ -98,7 +102,7 @@ export default {
         duration: 2000
       })
       // 跳转登录页
-      this.$router.replace('/login/login')
+      await this.$router.replace('/login/login')
     },
     // 收缩导航栏按钮点击事件
     toggleClick() {

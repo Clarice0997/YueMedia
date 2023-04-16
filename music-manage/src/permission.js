@@ -7,7 +7,7 @@ import 'nprogress/nprogress.css'
 import { verify, getProfile } from '@/apis/loginAPI'
 import { getRoutesAPI } from '@/apis/routesAPI'
 import store from './store'
-import { routeParser } from '@/utils/routeParser'
+import { routeHandle } from '@/utils/routeHandle'
 
 // 配置Nprogress项 关闭右上角螺旋加载提示
 NProgress.configure({ showSpinner: false })
@@ -36,6 +36,7 @@ router.beforeEach(async (to, from, next) => {
         hasToken = undefined
         await deleteCookie('Access-Token')
         await localStorage.removeItem('Access-Token')
+        await store.dispatch('dynamicRoutes/asyncClearRoutes')
         return next('/login/login')
       }
     })
@@ -53,6 +54,7 @@ router.beforeEach(async (to, from, next) => {
         type: 'error',
         duration: 1500
       })
+      await store.dispatch('dynamicRoutes/asyncClearRoutes')
       NProgress.done()
       return next('/login/login')
     }
@@ -110,7 +112,7 @@ router.beforeEach(async (to, from, next) => {
       return originRoute
     })
     // 保存返回路由树
-    await store.dispatch('dynamicRoutes/asyncAddRoutes', await routeParser(Routes))
+    await store.dispatch('dynamicRoutes/asyncAddRoutes', await routeHandle(Routes))
     // 插入路由树
     store.getters['dynamicRoutes/getDynamicRoutes'].forEach(route => {
       router.addRoute(route)

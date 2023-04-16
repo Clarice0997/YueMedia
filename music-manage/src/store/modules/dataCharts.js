@@ -16,7 +16,7 @@ export const dataCharts = {
     },
     // 重绘 Echart
     REDRAW_ECHARTS(state) {
-      if (router.currentRoute.fullPath === '/home/homepage' && state.charts) {
+      if (router.currentRoute.fullPath === '/home/analyse' && state.charts) {
         for (const chart in state.charts) {
           state.charts[chart].resize()
         }
