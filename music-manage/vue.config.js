@@ -10,6 +10,11 @@ module.exports = defineConfig({
   },
   productionSourceMap: false,
   configureWebpack: {
-    plugins: [new BundleAnalyzerPlugin()]
+    plugins: [
+      new BundleAnalyzerPlugin({
+        openAnalyzer: false,
+        analyzerPort: '3003'
+      })
+    ]
   }
 })
