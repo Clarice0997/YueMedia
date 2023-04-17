@@ -71,7 +71,7 @@ router.post(
 
 // 上传音乐图片文件配置
 const musicCoverUpload = multer({
-  limits: { fileSize: 50000000, files: 1 },
+  limits: { fileSize: 10000000, files: 1 },
   fileFilter: function (req, file, cb) {
     const filetypes = /jpeg|jpg|png/
     const mimetype = filetypes.test(file.mimetype)

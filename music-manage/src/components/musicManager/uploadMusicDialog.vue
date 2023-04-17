@@ -23,6 +23,7 @@
         <el-upload
           class="uploadMusicCover"
           :show-file-list="false"
+          :before-upload="uploadMusicCoverBeforeHook"
           :on-success="uploadMusicCoverSuccessHook"
           :disabled="!isMusicUploaded"
           name="musicCoverFile"
@@ -203,7 +204,6 @@ export default {
     },
     // 音乐文件上传前回调
     uploadMusicFileBeforeHook(file) {
-      console.log(file)
       const allowedMimetypes = ['audio/mpeg', 'audio/wav', 'audio/flac', 'audio/aac', 'audio/ogg', 'audio/aiff', 'audio/alac']
       let isAllowedMusic = allowedMimetypes.indexOf(file.type) !== -1
       const isLt100M = file.size / 1024 / 1024 < 100
@@ -216,13 +216,33 @@ export default {
 
       if (!isAllowedMusic) {
         this.$message.error('只能上传音乐文件（MP3/WAV/FLAC/NCM/AAC/OGG/AIFF/ALAC）')
+        return false
       }
 
       if (!isLt100M) {
         this.$message.error('上传文件大小不能超过 100MB')
+        return false
       }
 
       return isAllowedMusic && isLt100M
+    },
+    // 音乐封面文件上传前回调
+    uploadMusicCoverBeforeHook(file) {
+      const allowedMimetypes = ['image/jpeg', 'image/png', 'image/jpg']
+      const isAllowedImage = allowedMimetypes.indexOf(file.type) !== -1
+      const isLt10M = file.size / 1024 / 1024 < 10
+
+      if (!isAllowedImage) {
+        this.$message.error('只能上传图片文件（JPG/JPEG/PNG）')
+        return false
+      }
+
+      if (!isLt10M) {
+        this.$message.error('上传封面文件大小不能超过 10MB')
+        return false
+      }
+
+      return isAllowedImage && isLt10M
     },
     // 音乐文件上传成功回调
     uploadMusicFileSuccessHook({ coverName, musicName, meta, songId }) {
