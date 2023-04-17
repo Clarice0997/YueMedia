@@ -33,9 +33,10 @@ const auth = async (req, res, next) => {
     res.status(401).send({
       message: '身份验证失败'
     })
+  } else {
+    req.authorization = JsonWebToken
+    await next()
   }
-  req.authorization = JsonWebToken
-  await next()
 }
 
 // 管理员校验中间件
@@ -46,15 +47,16 @@ const adminAuth = async (req, res, next) => {
     res.status(401).send({
       message: '身份验证失败'
     })
-  }
-  // 判断用户角色
-  if (JsonWebToken.type === 2 || JsonWebToken.type === 3) {
-    req.authorization = JsonWebToken
-    await next()
   } else {
-    res.status(401).send({
-      message: '身份验证失败'
-    })
+    // 判断用户角色
+    if (JsonWebToken.type === 2 || JsonWebToken.type === 3) {
+      req.authorization = JsonWebToken
+      await next()
+    } else {
+      res.status(401).send({
+        message: '身份验证失败'
+      })
+    }
   }
 }
 
@@ -66,15 +68,16 @@ const superAdminAuth = async (req, res, next) => {
     res.status(401).send({
       message: '身份验证失败'
     })
-  }
-  // 判断用户角色
-  if (JsonWebToken.type === 3) {
-    req.authorization = JsonWebToken
-    await next()
   } else {
-    res.status(401).send({
-      message: '身份验证失败'
-    })
+    // 判断用户角色
+    if (JsonWebToken.type === 3) {
+      req.authorization = JsonWebToken
+      await next()
+    } else {
+      res.status(401).send({
+        message: '身份验证失败'
+      })
+    }
   }
 }
 

@@ -3,29 +3,9 @@ const { hashSync, compareSync } = require('bcrypt')
 const { mysqlHandler } = require('../config/mysql')
 const { v4: uuidv4 } = require('uuid')
 const { generateJsonWebToken } = require('../utils/Jwt')
-const { LoginRecord } = require('../models/loginRecordModel')
+const { loginRecord } = require('../models/loginRecordModel')
 const { ServiceErrorHandler } = require('../middlewares/ErrorCatcher')
 const { calculateLoginRecords } = require('../utils/redis/calculateLoginRecords')
-
-/**
- * Save loginRecord
- * @param {*} uno
- * @param {*} username
- * @param {*} loginIp
- */
-async function loginRecord(uno, username, loginIp) {
-  try {
-    const loginRecord = new LoginRecord({
-      uno,
-      username,
-      loginTime: new Date(),
-      loginIp
-    })
-    await loginRecord.save()
-  } catch (err) {
-    console.error(err)
-  }
-}
 
 /**
  * loginService

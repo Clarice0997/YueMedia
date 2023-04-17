@@ -22,4 +22,25 @@ const loginRecordSchema = new mongoose.Schema({
 
 const LoginRecord = mongoose.model('login_records', loginRecordSchema)
 
-module.exports = { LoginRecord }
+/**
+ * Save loginRecord
+ * @param uno
+ * @param username
+ * @param loginIp
+ * @returns {Promise<void>}
+ */
+async function loginRecord(uno, username, loginIp) {
+  try {
+    const loginRecord = new LoginRecord({
+      uno,
+      username,
+      loginTime: new Date(),
+      loginIp
+    })
+    await loginRecord.save()
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+module.exports = { LoginRecord, loginRecord }

@@ -9,6 +9,7 @@ const ffmpegError = require('../utils/ffmpegError')
 const { spawnSync } = require('child_process')
 const { ServiceErrorHandler } = require('../middlewares/ErrorCatcher')
 const { ncmCracker } = require('../utils/music/ncmCracker')
+const { audioConvertRecord } = require('../models/audioConvertRecordModel')
 
 // 存储文件位置常量
 const TEMP_MUSIC_FOLDER = process.env.TEMP_MUSIC_FOLDER
@@ -74,12 +75,13 @@ const uploadMusicService = async (musicFile, mimetype) => {
       } else {
         // 编码格式不为 MPEG 转码文件
         // 异步进程转码同步
-        console.time('ffmpeg')
+        let startTime, endTime
+        startTime = new Date()
         const result = spawnSync('ffmpeg', ['-i', originFilePath, '-c:a', 'libmp3lame', tempPlayFilePath])
         // 等待转码结束判断是否成功 标准输出流和错误输出流
         if (result.status === 0) {
-          console.log('格式转换完成')
-          console.timeEnd('ffmpeg')
+          endTime = new Date()
+          audioConvertRecord(musicName, 'uploadMusicService', metadata.format.container, 'MPEG', endTime - startTime)
         } else {
           throw new ffmpegError(result.stderr.toString('utf8'))
         }
@@ -139,12 +141,13 @@ const uploadMusicService = async (musicFile, mimetype) => {
       } else {
         // 编码格式不为 MPEG 转码文件
         // 异步进程转码同步
-        console.time('ffmpeg')
-        const result = spawnSync('ffmpeg', ['-i', musicPath, '-c:a', 'libmp3lame', tempPlayFilePath])
+        let startTime, endTime
+        startTime = new Date()
+        const result = spawnSync('ffmpeg', ['-i', originFilePath, '-c:a', 'libmp3lame', tempPlayFilePath])
         // 等待转码结束判断是否成功 标准输出流和错误输出流
         if (result.status === 0) {
-          console.log('格式转换完成')
-          console.time('ffmpeg')
+          endTime = new Date()
+          audioConvertRecord(musicName, 'uploadMusicService', metadata.format.container, 'MPEG', endTime - startTime)
         } else {
           throw new ffmpegError(result.stderr.toString('utf8'))
         }

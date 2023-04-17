@@ -2,18 +2,36 @@
 const mongoose = require('mongoose')
 
 const LogSchema = new mongoose.Schema({
-  method: String,
-  url: String,
-  status: Number,
-  ip: String,
-  responseTime: Number,
-  contentLength: Number,
+  method: {
+    type: String,
+    require: true
+  },
+  url: {
+    type: String,
+    require: true
+  },
+  status: {
+    type: Number,
+    require: true
+  },
+  ip: {
+    type: String,
+    require: true
+  },
+  responseTime: {
+    type: Number,
+    require: true
+  },
+  contentLength: {
+    type: String,
+    require: true
+  },
   createdAt: {
     type: Date,
     default: Date.now
   }
 })
 
-const Log = mongoose.model('Log', LogSchema)
+const Log = mongoose.model('api_logs', LogSchema)
 
 module.exports = Log

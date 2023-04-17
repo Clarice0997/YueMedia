@@ -1,56 +1,39 @@
 // import modules
-const ErrorModel = require('../models/errorRecordModel')
+const { errorRecord } = require('../models/errorRecordModel')
 
 // 错误日志
-const errorHandler = (err, req, res) => {
+const errorHandler = async (err, req, res) => {
   console.log('Normal Error')
   console.log(err)
   console.log(err.name)
   console.log(err.message)
   // Log the error to MongoDB
-  const error = new ErrorModel({
-    name: err.name,
-    message: err.message,
-    stack: err.stack,
-    ip: req.ip
-  })
-  error.save()
+  await errorRecord(err.name, err.message, err.stack, req.ip)
 
   // Send error response to client
   res.status(500).json({ code: 500, message: '服务器内部错误' })
 }
 
 // Multer 错误日志
-const multerErrorHandler = (err, req, res) => {
+const multerErrorHandler = async (err, req, res) => {
   console.log('Multer Error')
   console.log(err)
   console.log(err.name)
   console.log(err.message)
   // Log the Multer error to MongoDB
-  const error = new ErrorModel({
-    name: err.name,
-    message: err.message,
-    stack: err.stack,
-    ip: req.ip
-  })
-  error.save()
+  await errorRecord(err.name, err.message, err.stack, req.ip)
 
   // Send Multer error response to client
   res.status(400).json({ code: 400, message: err.message })
 }
 
 // Service 错误日志
-const ServiceErrorHandler = err => {
+const ServiceErrorHandler = async err => {
   console.log('Service Error')
   console.log(err)
   console.log(err.name)
   console.log(err.message)
-  const error = new ErrorModel({
-    name: err.name,
-    message: err.message,
-    stack: err.stack
-  })
-  error.save()
+  await errorRecord(err.name, err.message, err.stack)
 }
 
 module.exports = { errorHandler, multerErrorHandler, ServiceErrorHandler }
