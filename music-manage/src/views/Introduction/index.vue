@@ -174,6 +174,7 @@ export default {
     h1 {
       font-family: '阿里妈妈东方大楷 Regular', sans-serif;
       font-size: 3rem;
+      font-weight: 300;
       margin-bottom: 28px;
       background: linear-gradient(120deg, #89f7fe 0%, #66a6ff 100%);
       -webkit-background-clip: text;
@@ -183,6 +184,7 @@ export default {
     h2 {
       font-family: '阿里妈妈东方大楷 Regular', sans-serif;
       font-size: 1.5rem;
+      font-weight: 200;
     }
   }
 

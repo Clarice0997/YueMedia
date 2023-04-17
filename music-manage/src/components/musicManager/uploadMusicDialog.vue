@@ -11,7 +11,6 @@
         </el-upload>
       </el-form-item>
       <!-- 上传封面文件 -->
-      <!-- TODO: 上传文件类型限定 -->
       <el-form-item label="上传封面文件" prop="coverFile">
         <div style="width: 148px; height: 148px; display: inline-block; border: 1px dashed #c0ccda; border-radius: 6px">
           <el-image :src="coverImage" style="width: 148px; height: 148px">

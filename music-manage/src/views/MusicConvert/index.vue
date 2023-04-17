@@ -1,10 +1,15 @@
 <template>
-  <el-card shadow="hover" class="body-card"></el-card>
+  <el-card shadow="hover" class="body-card">
+    <musicConverter></musicConverter>
+  </el-card>
 </template>
 
 <script>
 export default {
-  name: 'MusicManageSystemMusicConvertView'
+  name: 'MusicManageSystemMusicConvertView',
+  components: {
+    musicConverter: () => import('@/components/musicConvert/musicConverter.vue')
+  }
 }
 </script>
 

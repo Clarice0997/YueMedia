@@ -3,7 +3,9 @@
     <el-container>
       <el-header>
         <div class="logo-container">
-          <h3>悦音 - 媒体管理一站式平台</h3>
+          <div class="logo">
+            <h3>悦音 - 媒体管理一站式平台</h3>
+          </div>
           <div class="toggle-container" @click="toggleClick">
             <i :class="toggleClass"></i>
           </div>
@@ -148,12 +150,17 @@ export default {
     width: 350px;
     display: flex;
 
-    h3 {
+    .logo {
       width: 300px;
-      font-size: 20px;
-      font-weight: bold;
-      text-align: center;
       line-height: 60px;
+
+      h3 {
+        color: #fafafa;
+        font-size: 20px;
+        font-weight: 300;
+        text-align: center;
+        font-family: '阿里妈妈东方大楷 Regular', sans-serif;
+      }
     }
 
     .toggle-container {
