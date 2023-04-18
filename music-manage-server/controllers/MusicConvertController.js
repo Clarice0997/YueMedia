@@ -1,7 +1,7 @@
 // import modules
 const router = require('express').Router()
 const multer = require('multer')
-const { analyseFileService, uploadConvertMusicService } = require('../services/MusicConvertService')
+const { analyseFileService, uploadConvertMusicService, deleteConvertMusicService, getSupportMusicCodecService } = require('../services/MusicConvertService')
 const { auth } = require('../middlewares/Auth')
 const { errorHandler } = require('../middlewares/ErrorCatcher')
 
@@ -39,7 +39,7 @@ const convertFileUpload = multer({
 })
 
 /**
- * @api {POST} /apis/convert/upload 上传转码音乐文件接口
+ * @api {POST} /apis/convert/upload 上传待转码音乐文件接口
  * @apiName uploadConvertMusic
  * @apiGroup MusicConvert
  * @apiName MusicConvert/uploadConvertMusic
@@ -54,6 +54,47 @@ router.post('/upload', auth, convertFileUpload.array('file[]'), async (req, res)
     const files = req.files
     // Service
     const { code, data } = await uploadConvertMusicService(files, req.body.fileNames)
+    // response
+    res.status(code).send({ ...data, code })
+  } catch (error) {
+    errorHandler(error, req, res)
+  }
+})
+
+/**
+ * @api {DELETE} /apis/convert/upload 删除待转码音乐文件接口
+ * @apiName deleteConvertMusic
+ * @apiGroup MusicConvert
+ * @apiName MusicConvert/deleteConvertMusic
+ * @apiPermission User
+ * @apiHeader {String} Authorization JWT鉴权
+ * @apiParam {String} filename 删除文件名
+ */
+router.delete('/upload', auth, async (req, res) => {
+  try {
+    // 获取删除文件名
+    const targetFile = req.query.filename
+    // Service
+    const { code, data } = await deleteConvertMusicService(targetFile)
+    // response
+    res.status(code).send({ ...data, code })
+  } catch (error) {
+    errorHandler(error, req, res)
+  }
+})
+
+/**
+ * @api {GET} /apis/convert/support 获取支持音乐格式接口
+ * @apiName getSupportMusicCodec
+ * @apiGroup MusicConvert
+ * @apiName MusicConvert/getSupportMusicCodec
+ * @apiPermission User
+ * @apiHeader {String} Authorization JWT鉴权
+ */
+router.get('/support', auth, async (req, res) => {
+  try {
+    // Service
+    const { code, data } = await getSupportMusicCodecService()
     // response
     res.status(code).send({ ...data, code })
   } catch (error) {

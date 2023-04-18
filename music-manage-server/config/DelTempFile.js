@@ -2,7 +2,12 @@ const fs = require('fs')
 const path = require('path')
 
 // 扫描文件夹路径
-const folders = [path.join(__dirname, '..', '..', 'static', process.env.TEMP_COVER_FOLDER), path.join(__dirname, '..', '..', 'static', process.env.TEMP_MUSIC_FOLDER), path.join(__dirname, '..', '..', 'static', process.env.TEMP_PLAY_MUSIC_FOLDER)]
+const folders = [
+  path.join(process.env.DEFAULT_STATIC_PATH, process.env.TEMP_COVER_FOLDER),
+  path.join(process.env.DEFAULT_STATIC_PATH, process.env.TEMP_MUSIC_FOLDER),
+  path.join(process.env.DEFAULT_STATIC_PATH, process.env.TEMP_PLAY_MUSIC_FOLDER),
+  path.join(process.env.DEFAULT_STATIC_PATH, process.env.TEMP_PARSE_MUSIC_FOLDER)
+]
 const maxAge = 1800000 // 30 minutes in milliseconds
 
 // 删除过期文件方法

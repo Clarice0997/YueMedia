@@ -8,13 +8,13 @@ module.exports = defineConfig({
     host: 'localhost',
     open: true
   },
-  productionSourceMap: false,
-  configureWebpack: {
-    plugins: [
-      new BundleAnalyzerPlugin({
-        openAnalyzer: false,
-        analyzerPort: '3003'
-      })
-    ]
-  }
+  productionSourceMap: false
+  // configureWebpack: {
+  //   plugins: [
+  //     new BundleAnalyzerPlugin({
+  //       openAnalyzer: false,
+  //       analyzerPort: '3003'
+  //     })
+  //   ]
+  // }
 })

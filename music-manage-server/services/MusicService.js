@@ -98,7 +98,7 @@ const uploadMusicService = async (musicFile, mimetype) => {
             disk: undefined,
             movementIndex: undefined,
             encodersettings: undefined,
-            codec: metadata.format.container,
+            codec: metadata.format.codec,
             size: musicFile.buffer.length
           },
           songId: musicName,
@@ -164,7 +164,7 @@ const uploadMusicService = async (musicFile, mimetype) => {
             disk: undefined,
             movementIndex: undefined,
             encodersettings: undefined,
-            codec: metadata.format.container,
+            codec: metadata.format.codec,
             size: musicFile.buffer.length
           },
           songId: musicName,
@@ -268,6 +268,7 @@ const uploadMusicDataService = async (data, userData) => {
     fs.renameSync(path.join(DEFAULT_STATIC_PATH, TEMP_COVER_FOLDER, musicCoverFileName), path.join(DEFAULT_STATIC_PATH, COVER_FOLDER, musicCoverFileName))
 
     // 准备数据 插入数据库
+    // TODO: 数据库改变 待修改
     const query = 'insert into music(song_id,upload_by,song_name,song_size,music_codec,play_file_name,music_cover_file_name,origin_file_name,singer_name,album_name,year) values(?,?,?,?,?,?,?,?,?,?,?)'
     const params = [songId, userData.uno, songName, songSize, musicCodec, playFileName, musicCoverFileName, musicFileName, singerName ? singerName : null, albumName ? albumName : null, year ? year : null]
     await mysqlHandler(query, params)

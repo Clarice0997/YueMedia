@@ -19,12 +19,10 @@ const LogSchema = new mongoose.Schema({
     require: true
   },
   responseTime: {
-    type: Number,
-    require: true
+    type: Number
   },
   contentLength: {
-    type: String,
-    require: true
+    type: String
   },
   createdAt: {
     type: Date,

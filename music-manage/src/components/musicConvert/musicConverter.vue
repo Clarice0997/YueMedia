@@ -1,8 +1,7 @@
 <template>
   <div class="music-converter-container">
-    <el-progress v-if="isShowProgress" type="circle" :percentage="uploadProgress" class="fixed-progress"></el-progress>
-    <input type="file" ref="fileInput" id="file-upload" @change="noSelectUploadFile" multiple />
-    <div class="no-select-container">
+    <input type="file" ref="fileInput" id="file-upload" @change="selectUploadFile" multiple :disabled="!isAllowUpload" />
+    <div class="no-select-container" v-if="!isUploaded">
       <div class="content-area">
         <div class="index-counter">
           <div class="counter-box">我们已转换 <span>100</span> 个文件，总大小为 <span>100</span> TB</div>
@@ -30,6 +29,76 @@
         </div>
       </div>
     </div>
+    <div v-else class="with-select-container">
+      <div class="files-container-box">
+        <div class="data-table-wrapper">
+          <el-table :data="uploadFiles" style="width: 100%" :show-header="false">
+            <!--  源文件名  -->
+            <el-table-column prop="originalName" width="350" align="center">
+              <template slot-scope="scope">
+                <div style="display: flex; align-items: center">
+                  <i class="far fa-file-audio" style="margin: 0 20px"></i>
+                  <span class="file-name-title">{{ scope.row.originalName | truncateFilename(20) }}</span>
+                </div>
+              </template>
+            </el-table-column>
+            <!--  源文件格式  -->
+            <el-table-column width="250" align="center">
+              <template slot-scope="scope">
+                <span style="margin-right: 10px">源文件格式：</span>
+                <span style="font-weight: 400">{{ scope.row.codec }}</span>
+              </template>
+            </el-table-column>
+            <!--  目标转换格式  -->
+            <el-table-column align="center">
+              <template slot-scope="scope">
+                <span style="margin-right: 10px">转换格式</span>
+                <el-select v-model="scope.row.targetCodec" filterable placeholder="请选择" clearable>
+                  <el-option v-for="(item, index) in supportMusicCodec" :key="index" :label="item.codec" :value="item.codec" :disabled="item.codec === scope.row.codec"></el-option>
+                </el-select>
+              </template>
+            </el-table-column>
+            <!--  文件状态  -->
+            <el-table-column width="100" align="center">
+              <template slot-scope="scope">
+                <el-tag type="success" v-if="scope.row.status === 1">就绪</el-tag>
+                <el-tag type="danger" v-else>错误</el-tag>
+              </template>
+            </el-table-column>
+            <!--  文件大小  -->
+            <el-table-column width="100" align="center">
+              <template slot-scope="scope">
+                <span>{{ scope.row.size | calculateFileSize }} MB</span>
+              </template>
+            </el-table-column>
+            <!--  删除按钮  -->
+            <el-table-column width="100" align="center">
+              <template slot-scope="scope">
+                <i class="fas fa-times del-icon" @click="handleDeleteTempCovertMusic(scope.$index, scope.row)"></i>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+        <div class="file-tools">
+          <div class="file-tools-sticky-wrapper">
+            <div class="file-tools-sticky">
+              <div class="btn-holder1">
+                <el-select :disabled="!isAllowUpload" placeholder="添加更多文件" v-model="selectedOption" size="medium" @change="handleOptionChange">
+                  <el-option v-for="item in options" :label="item" :value="item"></el-option>
+                </el-select>
+                <div class="add-btn-caption">使用 Ctrl 或 Shift 一次添加多个文件</div>
+                <el-progress v-if="isShowProgress" :text-inside="true" :stroke-width="24" :percentage="uploadProgress" class="file-progress">上传进度 </el-progress>
+              </div>
+              <div class="btn-holder2">
+                <div class="convert-button">
+                  <button type="button" :disabled="isUploading" @click="submitCoverMusicQuest">转换音频<i class="fas fa-arrow-right"></i></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -37,14 +106,20 @@
 // import modules
 import axios from 'axios'
 import { getCookie } from '@/utils/cookie'
+import { deleteConvertMusicAPI, getSupportMusicCodecAPI } from '@/apis/musicConvertAPI'
 
 export default {
   name: 'musicConverter',
   data() {
     return {
-      isShowProgress: false,
+      isUploaded: false,
+      isShowProgress: true,
       uploadProgress: 0,
-      uploadFiles: []
+      selectedOption: '',
+      supportMusicCodec: [],
+      uploadFiles: [],
+      isUploading: false,
+      options: ['选择文件', '我的音乐']
     }
   },
   props: {
@@ -57,13 +132,41 @@ export default {
       default: 100
     }
   },
+  computed: {
+    isAllowUpload() {
+      return this.uploadFiles.length < this.maxFileNum && !this.isUploading
+    }
+  },
+  mounted() {
+    getSupportMusicCodecAPI().then(({ data: { supportMusicCodec } }) => {
+      this.supportMusicCodec = supportMusicCodec
+    })
+  },
+  filters: {
+    calculateFileSize(value) {
+      return (value / 1024 / 1024).toFixed(2)
+    },
+    truncateFilename(value, maxLength) {
+      if (!value) return ''
+      if (value.length <= maxLength) return value
+      const extensionIndex = value.lastIndexOf('.')
+      const name = value.substring(0, extensionIndex)
+      const extension = value.substring(extensionIndex)
+      const truncatedName = name.substring(0, maxLength - extension.length - 1)
+      return truncatedName + '...' + extension
+    }
+  },
   methods: {
-    async noSelectUploadFile() {
-      let fileNames = []
+    async selectUploadFile() {
+      // 判断是否上传文件
+      if (!this.$refs.fileInput.files) {
+        return this.$message.warning(`请上传待转换文件`)
+      }
       // 判断文件数量是否超出数量
-      if (this.$refs.fileInput.files.length > this.maxFileNum) {
+      if (this.uploadFiles.length + this.$refs.fileInput.files.length > this.maxFileNum) {
         return this.$message.error(`一次只能转换 ${this.maxFileNum} 个文件`)
       }
+      let fileNames = []
       // 实例化 FormData
       const formData = new FormData()
       // 循环上传文件 构建 FormData
@@ -72,6 +175,9 @@ export default {
         fileNames.push(this.$refs.fileInput.files[i].name)
       }
       formData.append('fileNames', JSON.stringify(fileNames))
+      // 上传文件中状态改变
+      this.isUploaded = true
+      this.isUploading = true
       // 发起网络请求 发送文件
       axios({
         baseURL: process.env.VUE_APP_REQUEST_URL,
@@ -96,7 +202,12 @@ export default {
         }
       })
         .then(({ data }) => {
-          console.log(data)
+          // 插入已上传文件
+          if (data.filesDetail) {
+            data.filesDetail.forEach(file => {
+              this.uploadFiles.push(file)
+            })
+          }
         })
         .catch(error => {
           console.log(error)
@@ -106,7 +217,42 @@ export default {
           this.isShowProgress = false
           // 重置上传进度
           this.uploadProgress = 0
+          // 改变文件上传状态
+          this.isUploading = false
+          // 重置上传文件输入框
+          this.$refs.fileInput.value = ''
         })
+    },
+    handleOptionChange() {
+      if (this.selectedOption === '选择文件') {
+        document.getElementById('file-upload').click()
+        this.selectedOption = ''
+      }
+    },
+    async handleDeleteTempCovertMusic(index, row) {
+      // 删除对应索引数据
+      this.uploadFiles.splice(index, 1)
+      // 删除服务器临时代转换音乐文件
+      await deleteConvertMusicAPI(row.musicFileName)
+    },
+    // 提交转换音频文件请求
+    async submitCoverMusicQuest() {
+      // 判断是否存在数据
+      if (this.uploadFiles.length === 0) {
+        return this.$message.error('数据不存在')
+      }
+
+      // 判断文件是否都选择了转换格式
+      if (!this.uploadFiles.every(file => file.targetCodec)) {
+        return this.$message.error('未选择目标编码格式')
+      }
+
+      this.reset()
+      this.$message.success('任务提交成功，请前往处理文件查看处理结果')
+    },
+    // 重置组件
+    reset() {
+      Object.assign(this.$data, this.$options.data())
     }
   }
 }
@@ -257,5 +403,121 @@ input[type='file'] {
       }
     }
   }
+
+  .with-select-container {
+    box-sizing: border-box;
+
+    .files-container-box {
+      border-radius: 0 0 4px 4px;
+      background-color: #f8f8f8;
+      box-shadow: 0 18px 100px 4px rgba(0, 0, 0, 0.15);
+      -webkit-background-clip: padding-box;
+      -webkit-backface-visibility: hidden;
+
+      .data-table-wrapper {
+        background-color: #fff;
+        box-shadow: 0 7px 0 0 rgba(70, 70, 70, 0.01), 0 6px 0 0 rgba(65, 65, 65, 0.01), 0 5px 0 0 rgba(60, 60, 60, 0.01), 0 4px 0 0 rgba(55, 55, 55, 0.01), 0 3px 0 0 rgba(50, 50, 50, 0.01), 0 2px 0 0 rgba(50, 50, 50, 0.01), 0 1px 0 0 rgba(45, 45, 45, 0.01);
+      }
+
+      .file-tools {
+        margin-top: -40px;
+
+        .file-tools-sticky-wrapper {
+          min-height: 70.4688px;
+
+          .file-tools-sticky {
+            margin-top: 40px;
+            flex-wrap: nowrap;
+            border-radius: 0 0 4px 4px;
+            display: flex;
+            color: #999;
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.15) 0%, rgba(0, 0, 0, 0.15) 100%), radial-gradient(at top center, rgba(255, 255, 255, 0.4) 0%, rgba(0, 0, 0, 0.4) 120%) #989898;
+            background-blend-mode: multiply, multiply;
+
+            .btn-holder1 {
+              padding: 17px 26px;
+              display: flex;
+              text-align: left;
+              flex: 1;
+              width: auto;
+              align-items: center;
+
+              .add-btn-caption {
+                color: whitesmoke;
+                display: block;
+                align-self: center;
+                margin: -5px 0 -5px 32px;
+                max-height: 40px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                font-size: 16px;
+                line-height: 20px;
+              }
+            }
+
+            .btn-holder2 {
+              flex: 0 1 auto;
+              width: auto;
+              flex-wrap: nowrap;
+              display: flex;
+
+              .convert-button {
+                min-width: 268px;
+                flex: 0 1 auto;
+                text-align: center;
+
+                button {
+                  border-radius: 0 0 4px 0;
+                  position: relative;
+                  min-width: 100%;
+                  width: 100%;
+                  height: 100%;
+                  padding: 20px 66px 20px 60px;
+                  font-size: 19px;
+                  line-height: 28px;
+                  letter-spacing: -0.6px;
+                  font-weight: 700;
+                  text-align: left;
+                  cursor: pointer;
+                  background-color: #ff4335;
+                  color: #fff;
+                  text-decoration: none;
+                  border: 1px solid transparent;
+                  transition: 0.3s;
+
+                  i {
+                    margin-left: 40px;
+                    transition: 0.3s;
+                  }
+                }
+
+                button:hover {
+                  opacity: 0.8;
+
+                  i {
+                    transform: translateX(30px);
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.del-icon {
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.del-icon:hover {
+  color: red;
+}
+
+.file-progress {
+  width: 200px;
+  margin-left: 20px;
 }
 </style>
