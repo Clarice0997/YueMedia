@@ -3,7 +3,7 @@
     <div class="bg"></div>
     <div class="container">
       <div class="img">
-        <img src="@/assets/image/compose_music.svg" />
+        <img src="@/assets/image/compose_music.svg" alt="compose_music" />
       </div>
       <div class="login-container">
         <router-view></router-view>
@@ -14,16 +14,17 @@
 
 <script>
 export default {
-  name: 'MusicManageSystemLoginView',
+  name: "MusicManageSystemLoginView",
 
   data() {
-    return {}
+    return {};
   },
 
-  mounted() {},
+  mounted() {
+  },
 
   methods: {}
-}
+};
 </script>
 
 <style lang="less" scoped>
