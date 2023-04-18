@@ -47,6 +47,9 @@ async function convertAudio(taskId, musicFileName, originalName, originCodec, ta
         // 返回转码结果文件名
         resolve(originalName.split('.').shift() + targetExtname)
       } else {
+        // 删除待转码文件
+        fs.unlinkSync(originFilePath)
+        // 返回错误信息
         reject(new Error(result.stderr.toString('utf8')))
       }
     } catch (error) {

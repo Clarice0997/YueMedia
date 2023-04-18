@@ -14,17 +14,16 @@
 
 <script>
 export default {
-  name: "MusicManageSystemLoginView",
+  name: 'MusicManageSystemLoginView',
 
   data() {
-    return {};
+    return {}
   },
 
-  mounted() {
-  },
+  mounted() {},
 
   methods: {}
-};
+}
 </script>
 
 <style lang="less" scoped>
