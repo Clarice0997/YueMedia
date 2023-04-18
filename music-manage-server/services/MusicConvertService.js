@@ -5,6 +5,7 @@ const path = require('path')
 const fs = require('fs')
 const mm = require('music-metadata')
 const { mysqlHandler } = require('../config/mysql')
+const { rpushRedis } = require('../utils/RedisHandler')
 
 const DEFAULT_STATIC_PATH = process.env.DEFAULT_STATIC_PATH
 const TEMP_PARSE_MUSIC_FOLDER = process.env.TEMP_PARSE_MUSIC_FOLDER
@@ -60,7 +61,6 @@ const uploadConvertMusicService = async (files, fileNames) => {
     if (fileNames) fileNames = JSON.parse(fileNames)
     // 循环待转码文件 存入待转码文件夹
     for (let i = 0; i < files.length; i++) {
-      console.log(files[i])
       // 根据音乐文件生成 MD5
       const musicMD5 = await generateMD5(files[i].buffer)
       // 获取音乐文件元数据
@@ -144,7 +144,7 @@ const deleteConvertMusicService = async targetFile => {
 }
 
 // 获取支持音乐格式 Service
-const getSupportMusicCodecService = async targetFile => {
+const getSupportMusicCodecService = async () => {
   try {
     // 查询数据
     const supportMusicCodec = await mysqlHandler('select * from music_codec')
@@ -165,9 +165,50 @@ const getSupportMusicCodecService = async targetFile => {
   }
 }
 
+// 提交音频转码任务 Service
+const submitMusicConvertTaskService = async (tasks, user) => {
+  try {
+    // 判断参数是否合法
+    if (!tasks) {
+      return {
+        code: 400,
+        data: {
+          message: '参数不合法'
+        }
+      }
+    }
+    // 判断文件是否存在
+    if (!tasks.every(task => fs.existsSync(path.join(DEFAULT_STATIC_PATH, TEMP_PARSE_MUSIC_FOLDER, task.musicFileName)))) {
+      return {
+        code: 400,
+        data: {
+          message: '文件不存在'
+        }
+      }
+    }
+    // 生成唯一的任务 id
+    const taskId = `${user.uno}-${Date.now()}`
+    // 插入 Redis 任务队列
+    await rpushRedis('music_convert_tasks', JSON.stringify({ task: { taskId, createTime: Date.now(), tasks } }))
+    return {
+      code: 200,
+      data: { task: { taskId, tasks } }
+    }
+  } catch (error) {
+    ServiceErrorHandler(error)
+    return {
+      code: 500,
+      data: {
+        message: error.message
+      }
+    }
+  }
+}
+
 module.exports = {
   analyseFileService,
   uploadConvertMusicService,
   deleteConvertMusicService,
-  getSupportMusicCodecService
+  getSupportMusicCodecService,
+  submitMusicConvertTaskService
 }

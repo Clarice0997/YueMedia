@@ -10,6 +10,9 @@ require('dotenv').config()
 const path = require('path')
 process.env.DEFAULT_STATIC_PATH = path.join(__dirname, '..', 'static')
 
+// 默认项目根目录
+process.env.DIRPATH = path.join(__dirname)
+
 // 连接 MySQL 数据库
 require('./config/mysql')
 

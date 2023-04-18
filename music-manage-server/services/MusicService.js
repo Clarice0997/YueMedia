@@ -4,7 +4,6 @@ const fs = require('fs')
 const { generateMD5 } = require('../utils/MD5.js')
 const mm = require('music-metadata')
 const { mysqlHandler } = require('../config/mysql')
-const ffmpeg = require('fluent-ffmpeg')
 const ffmpegError = require('../utils/ffmpegError')
 const { spawnSync } = require('child_process')
 const { ServiceErrorHandler } = require('../middlewares/ErrorCatcher')
@@ -24,7 +23,7 @@ const TEMP_PLAY_MUSIC_FOLDER = process.env.TEMP_PLAY_MUSIC_FOLDER
  * 上传音乐文件
  * @param musicFile
  * @param mimetype
- * @returns {Promise<{code: number, data: {message}}|{code: number, data: {meta: {encodedby?: string, copyright?: string, year?: number, tvShow?: string, releasetype?: string[], albumartistsort?: string, originalalbum?: string, musicbrainz_discid?: string, peakLevel?: number, releasestatus?: string, movementIndex: undefined, work?: string, grouping?: string, script?: string, movementTotal?: number, size, podcasturl?: string, titlesort?: string, subtitle?: string[], mixer?: string[], originalartist?: string, djmixer?: string[], musicbrainz_albumid?: string, artist?: string, composersort?: string, catalognumber?: string[], artists?: string[], replaygain_track_gain?: IRatio, genre?: string[], musicip_fingerprint?: string, key?: string, replaygain_album_gain?: IRatio, albumsort?: string, website?: string, musicbrainz_artistid?: string[], discogs_release_id?: number, composer?: string[], conductor?: string[], picture: undefined, tvEpisodeId?: string, stik?: number, discsubtitle?: string[], musicbrainz_albumartistid?: string[], musicip_puid?: string, movement?: string, date?: string, tvSeason?: number, notes?: string[], lyricist?: string[], replaygain_album_peak?: IRatio, keywords?: string[], musicbrainz_recordingid?: string, rating?: IRating[], originaldate?: string, language?: string, totaldiscs?: string, releasecountry?: string, acoustid_id?: string, discogs_label_id?: number, totaltracks?: string, barcode?: string, musicbrainz_releasegroupid?: string, discogs_votes?: number, replaygain_track_peak_ratio?: number, remixer?: string[], tvShowSort?: string, tvNetwork?: string, arranger?: string[], license?: string, codec: string, disk: undefined, discogs_master_release_id?: number, producer?: string[], discogs_rating?: number, musicbrainz_trackid?: string, averageLevel?: number, albumartist?: string, replaygain_track_minmax?: number[], longDescription?: string, podcastId?: string, mood?: string, showMovement?: boolean, hdVideo?: number, description?: string[], "performer:instrument"?: string[], media?: string, title?: string, replaygain_undo?: {leftChannel: number, rightChannel: number}, podcast?: boolean, track: undefined, musicbrainz_workid?: string, lyrics?: string[], bpm?: number, encodersettings: undefined, album?: string, technician?: string[], isrc?: string[], musicbrainz_trmid?: string, label?: string[], gapless?: boolean, engineer?: string[], tvEpisode?: number, originalyear?: number, acoustid_fingerprint?: string, discogs_artist_id?: number[], replaygain_track_peak?: IRatio, compilation?: boolean, replaygain_track_gain_ratio?: number, comment: undefined, asin?: string, writer?: string[], artistsort?: string, category?: string[]}, songId: string, musicName, coverName: string}}|{code, data: {message}}|{code: number, data: {meta: {encodedby?: string, copyright?: string, year?: number, tvShow?: string, releasetype?: string[], albumartistsort?: string, originalalbum?: string, musicbrainz_discid?: string, peakLevel?: number, releasestatus?: string, movementIndex: undefined, work?: string, grouping?: string, script?: string, movementTotal?: number, size, podcasturl?: string, titlesort?: string, subtitle?: string[], mixer?: string[], originalartist?: string, djmixer?: string[], musicbrainz_albumid?: string, artist?: string, composersort?: string, catalognumber?: string[], artists?: string[], replaygain_track_gain?: IRatio, genre?: string[], musicip_fingerprint?: string, key?: string, replaygain_album_gain?: IRatio, albumsort?: string, website?: string, musicbrainz_artistid?: string[], discogs_release_id?: number, composer?: string[], conductor?: string[], picture: undefined, tvEpisodeId?: string, stik?: number, discsubtitle?: string[], musicbrainz_albumartistid?: string[], musicip_puid?: string, movement?: string, date?: string, tvSeason?: number, notes?: string[], lyricist?: string[], replaygain_album_peak?: IRatio, keywords?: string[], musicbrainz_recordingid?: string, rating?: IRating[], originaldate?: string, language?: string, totaldiscs?: string, releasecountry?: string, acoustid_id?: string, discogs_label_id?: number, totaltracks?: string, barcode?: string, musicbrainz_releasegroupid?: string, discogs_votes?: number, replaygain_track_peak_ratio?: number, remixer?: string[], tvShowSort?: string, tvNetwork?: string, arranger?: string[], license?: string, codec: string, disk: undefined, discogs_master_release_id?: number, producer?: string[], discogs_rating?: number, musicbrainz_trackid?: string, averageLevel?: number, albumartist?: string, replaygain_track_minmax?: number[], longDescription?: string, podcastId?: string, mood?: string, showMovement?: boolean, hdVideo?: number, description?: string[], "performer:instrument"?: string[], media?: string, title?: string, replaygain_undo?: {leftChannel: number, rightChannel: number}, podcast?: boolean, track: undefined, musicbrainz_workid?: string, lyrics?: string[], bpm?: number, encodersettings: undefined, album?: string, technician?: string[], isrc?: string[], musicbrainz_trmid?: string, label?: string[], gapless?: boolean, engineer?: string[], tvEpisode?: number, originalyear?: number, acoustid_fingerprint?: string, discogs_artist_id?: number[], replaygain_track_peak?: IRatio, compilation?: boolean, replaygain_track_gain_ratio?: number, comment: undefined, asin?: string, writer?: string[], artistsort?: string, category?: string[]}, songId: string, musicName: string, coverName: string}}>}
+ * @returns
  */
 const uploadMusicService = async (musicFile, mimetype) => {
   try {
@@ -143,7 +142,7 @@ const uploadMusicService = async (musicFile, mimetype) => {
         // 异步进程转码同步
         let startTime, endTime
         startTime = new Date()
-        const result = spawnSync('ffmpeg', ['-i', originFilePath, '-c:a', 'libmp3lame', tempPlayFilePath])
+        const result = spawnSync('ffmpeg', ['-i', musicPath, '-c:a', 'libmp3lame', tempPlayFilePath])
         // 等待转码结束判断是否成功 标准输出流和错误输出流
         if (result.status === 0) {
           endTime = new Date()
@@ -230,7 +229,8 @@ const uploadMusicCoverService = async (musicCoverFile, musicName, originCoverNam
 /**
  * 上传音乐数据
  * @param data
- * @returns {Promise<{code: number, data: {message}}|{code: number, data: {message: string}}>}
+ * @param userData
+ * @returns
  */
 const uploadMusicDataService = async (data, userData) => {
   try {

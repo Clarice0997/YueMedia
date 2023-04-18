@@ -1,7 +1,7 @@
 // import modules
 const router = require('express').Router()
 const multer = require('multer')
-const { analyseFileService, uploadConvertMusicService, deleteConvertMusicService, getSupportMusicCodecService } = require('../services/MusicConvertService')
+const { analyseFileService, uploadConvertMusicService, deleteConvertMusicService, getSupportMusicCodecService, submitMusicConvertTaskService } = require('../services/MusicConvertService')
 const { auth } = require('../middlewares/Auth')
 const { errorHandler } = require('../middlewares/ErrorCatcher')
 
@@ -95,6 +95,28 @@ router.get('/support', auth, async (req, res) => {
   try {
     // Service
     const { code, data } = await getSupportMusicCodecService()
+    // response
+    res.status(code).send({ ...data, code })
+  } catch (error) {
+    errorHandler(error, req, res)
+  }
+})
+
+/**
+ * @api {POST} /apis/convert/submit 提交音频转码任务接口
+ * @apiName submitMusicConvertTask
+ * @apiGroup MusicConvert
+ * @apiName MusicConvert/submitMusicConvertTask
+ * @apiPermission User
+ * @apiHeader {String} Authorization JWT鉴权
+ * @apiBody {String} tasks 转码任务数组
+ */
+router.post('/submit', auth, async (req, res) => {
+  try {
+    // 获取待处理音频文件数组
+    const { tasks } = req.body
+    // Service
+    const { code, data } = await submitMusicConvertTaskService(tasks, req.authorization)
     // response
     res.status(code).send({ ...data, code })
   } catch (error) {

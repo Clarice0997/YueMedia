@@ -45,4 +45,91 @@ async function delRedis(key) {
   }
 }
 
-module.exports = { getRedis, setRedis, delRedis }
+/**
+ * Redis Lpush
+ * @param {*} key
+ * @param {*} value
+ * @returns
+ */
+async function lpushRedis(key, ...value) {
+  try {
+    return redisHandler('lpush', key, value)
+  } catch (err) {
+    console.log(`Redis Lpush Error => ${err}`)
+    throw err
+  }
+}
+
+/**
+ * Redis Rpush
+ * @param {*} key
+ * @param {*} value
+ * @returns
+ */
+async function rpushRedis(key, ...value) {
+  try {
+    return redisHandler('rpush', key, value)
+  } catch (err) {
+    console.log(`Redis Rpush Error => ${err}`)
+    throw err
+  }
+}
+
+/**
+ * Redis Lpop
+ * @param {*} key
+ * @returns
+ */
+async function lpopRedis(key) {
+  try {
+    return redisHandler('lpop', key)
+  } catch (err) {
+    console.log(`Redis Lpop Error => ${err}`)
+    throw err
+  }
+}
+
+/**
+ * Redis Rpop
+ * @param {*} key
+ * @returns
+ */
+async function rpopRedis(key) {
+  try {
+    return redisHandler('rpop', key)
+  } catch (err) {
+    console.log(`Redis Rpop Error => ${err}`)
+    throw err
+  }
+}
+
+/**
+ * Redis Lindex
+ * @param {*} key
+ * @param {*} value
+ * @returns
+ */
+async function lindexRedis(key, value) {
+  try {
+    return redisHandler('lindex', key, value)
+  } catch (err) {
+    console.log(`Redis Lindex Error => ${err}`)
+    throw err
+  }
+}
+
+/**
+ * Redis Llen
+ * @param {*} key
+ * @returns
+ */
+async function llenRedis(key) {
+  try {
+    return redisHandler('llen', key)
+  } catch (err) {
+    console.log(`Redis Llen Error => ${err}`)
+    throw err
+  }
+}
+
+module.exports = { getRedis, setRedis, delRedis, lpushRedis, rpushRedis, lpopRedis, rpopRedis, lindexRedis, llenRedis }

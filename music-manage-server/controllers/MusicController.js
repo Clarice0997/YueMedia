@@ -210,6 +210,6 @@ router.get('/download', auth, async (req, res) => {})
 // TODO: 批量下载音乐接口
 router.get('/download/batch', auth, async (req, res) => {})
 
-// TODO: 普通音乐上传音乐文件（需要审核）
+// TODO: 获取初始音乐接口
 
 module.exports = router
