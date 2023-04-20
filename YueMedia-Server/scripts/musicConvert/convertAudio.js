@@ -37,15 +37,29 @@ async function convertAudio(taskId, musicFileName, originalName, originCodec, ta
       if (!fs.existsSync(originFilePath)) reject('文件不存在')
       // 获取对应编码器
       const { encoder, targetExtname } = await findEncoder(originCodec, targetCodec)
+      // TODO: 结果需要存在对应任务的文件夹中
+      // TODO: 文件名和源文件保持一致 后缀和目标编码保持一致
+      // TODO: 出现同名文件措施 文件后加_时间戳
       const targetFilePath = path.join(DEFAULT_STATIC_PATH, CONVERT_MUSIC_FOLDER, musicFileName.split('.').shift() + targetExtname)
       // 多线程转码
-      // TODO: 转码记录
+      let startTime, endTime
+      startTime = new Date()
       const result = spawnSync('ffmpeg', ['-i', originFilePath, '-c:a', encoder, targetFilePath])
       if (result.status === 0) {
+        endTime = new Date()
         // 删除待转码文件
         fs.unlinkSync(originFilePath)
         // 返回转码结果文件名
-        resolve(originalName.split('.').shift() + targetExtname)
+        resolve({
+          outputFileName: originalName.split('.').shift() + targetExtname,
+          taskDetail: {
+            songId: musicFileName.split('.').shift(),
+            type: 'musicConvertQueues',
+            originCodec,
+            targetCodec,
+            convertTimeMS: endTime - startTime
+          }
+        })
       } else {
         // 删除待转码文件
         fs.unlinkSync(originFilePath)

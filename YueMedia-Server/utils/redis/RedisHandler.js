@@ -1,5 +1,5 @@
 // import module
-const { redisHandler } = require('../config/redis')
+const { redisHandler } = require('../../config/redis')
 
 /**
  * Redis Get
@@ -132,4 +132,114 @@ async function llenRedis(key) {
   }
 }
 
-module.exports = { getRedis, setRedis, delRedis, lpushRedis, rpushRedis, lpopRedis, rpopRedis, lindexRedis, llenRedis }
+/**
+ * Redis hset
+ * @param key
+ * @param field
+ * @param value
+ * @returns
+ */
+async function hsetRedis(key, field, value) {
+  try {
+    return redisHandler('hset', key, [field, value])
+  } catch (err) {
+    console.log(`Redis Hset Error => ${err}`)
+    throw err
+  }
+}
+
+/**
+ * Redis hget
+ * @param key
+ * @param field
+ * @returns
+ */
+async function hgetRedis(key, field) {
+  try {
+    return redisHandler('hget', key, field)
+  } catch (err) {
+    console.log(`Redis Hget Error => ${err}`)
+    throw err
+  }
+}
+
+/**
+ * Redis hmset
+ * @param key
+ * @param obj
+ * @returns
+ */
+async function hmsetRedis(key, obj) {
+  try {
+    let arr = []
+    Object.keys(obj).forEach(function (k) {
+      arr.push(k, obj[k])
+    })
+    return redisHandler('hmset', key, arr)
+  } catch (err) {
+    console.log(`Redis Hmset Error => ${err}`)
+    throw err
+  }
+}
+
+/**
+ * Redis hmget
+ * @param key
+ * @param fields
+ * @returns
+ */
+async function hmgetRedis(key, ...fields) {
+  try {
+    return redisHandler('hmget', key, fields)
+  } catch (err) {
+    console.log(`Redis Hmget Error => ${err}`)
+    throw err
+  }
+}
+
+/**
+ * Redis hgetall
+ * @param key
+ * @returns
+ */
+async function hgetallRedis(key) {
+  try {
+    return redisHandler('hgetall', key)
+  } catch (err) {
+    console.log(`Redis Hgetall Error => ${err}`)
+    throw err
+  }
+}
+
+/**
+ * Redis hdel
+ * @param key
+ * @param fields
+ * @returns
+ */
+async function hdelRedis(key, ...fields) {
+  try {
+    return redisHandler('hdel', key, fields)
+  } catch (err) {
+    console.log(`Redis Hdel Error => ${err}`)
+    throw err
+  }
+}
+
+module.exports = {
+  getRedis,
+  setRedis,
+  delRedis,
+  lpushRedis,
+  rpushRedis,
+  lpopRedis,
+  rpopRedis,
+  lindexRedis,
+  llenRedis,
+  hsetRedis,
+  hgetRedis,
+  hmsetRedis,
+  hmgetRedis,
+  hgetallRedis,
+  hdelRedis
+}

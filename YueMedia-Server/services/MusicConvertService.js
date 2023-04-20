@@ -5,7 +5,8 @@ const path = require('path')
 const fs = require('fs')
 const mm = require('music-metadata')
 const { mysqlHandler } = require('../config/mysql')
-const { rpushRedis } = require('../utils/RedisHandler')
+const { rpushRedis } = require('../utils/redis/RedisHandler')
+const { insertAudioConvertQueues } = require('../models/audioConvertQueueModel')
 
 const DEFAULT_STATIC_PATH = process.env.DEFAULT_STATIC_PATH
 const TEMP_PARSE_MUSIC_FOLDER = process.env.TEMP_PARSE_MUSIC_FOLDER
@@ -190,6 +191,7 @@ const submitMusicConvertTaskService = async (tasks, user) => {
     const taskId = `${user.uno}-${Date.now()}`
     // 插入 Redis 任务队列
     await rpushRedis('music_convert_tasks', JSON.stringify({ task: { taskId, createTime: Date.now(), tasks } }))
+    await insertAudioConvertQueues(taskId, tasks)
     return {
       code: 200,
       data: { task: { taskId, tasks } }

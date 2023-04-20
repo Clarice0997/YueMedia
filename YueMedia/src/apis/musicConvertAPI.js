@@ -19,3 +19,11 @@ export const deleteConvertMusicAPI = async filename => {
 export const getSupportMusicCodecAPI = async () => {
   return request.get('apis/convert/support')
 }
+
+/**
+ * 提交音频转码任务 API
+ * @returns
+ */
+export const submitMusicConvertTaskAPI = async tasks => {
+  return request.post('/apis/convert/submit', { tasks })
+}

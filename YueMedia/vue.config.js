@@ -1,11 +1,11 @@
-const { defineConfig } = require("@vue/cli-service");
-const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
+const { defineConfig } = require('@vue/cli-service')
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
 
 module.exports = defineConfig({
   transpileDependencies: true,
   devServer: {
     port: process.env.VUE_APP_PORT,
-    host: "localhost",
+    host: 'localhost',
     open: true
   },
   productionSourceMap: false,
@@ -13,8 +13,8 @@ module.exports = defineConfig({
     plugins: [
       new BundleAnalyzerPlugin({
         openAnalyzer: false,
-        analyzerPort: "3003"
+        analyzerPort: '3003'
       })
     ]
   }
-});
+})

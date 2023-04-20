@@ -4,6 +4,7 @@
     <div class="no-select-container" v-if="!isUploaded">
       <div class="content-area">
         <div class="index-counter">
+          <!--  TODO: 动态获取转换数据统计  -->
           <div class="counter-box">我们已转换 <span>100</span> 个文件，总大小为 <span>100</span> TB</div>
         </div>
         <div class="converter-container">
@@ -106,7 +107,7 @@
 // import modules
 import axios from 'axios'
 import { getCookie } from '@/utils/cookie'
-import { deleteConvertMusicAPI, getSupportMusicCodecAPI } from '@/apis/musicConvertAPI'
+import { deleteConvertMusicAPI, getSupportMusicCodecAPI, submitMusicConvertTaskAPI } from '@/apis/musicConvertAPI'
 
 export default {
   name: 'musicConverter',
@@ -166,6 +167,7 @@ export default {
       if (this.uploadFiles.length + this.$refs.fileInput.files.length > this.maxFileNum) {
         return this.$message.error(`一次只能转换 ${this.maxFileNum} 个文件`)
       }
+      // TODO: 判断上传文件是否符合规范
       let fileNames = []
       // 实例化 FormData
       const formData = new FormData()
@@ -247,8 +249,22 @@ export default {
         return this.$message.error('未选择目标编码格式')
       }
 
-      this.reset()
-      this.$message.success('任务提交成功，请前往处理文件查看处理结果')
+      // 提交音频转码任务
+      submitMusicConvertTaskAPI(this.uploadFiles)
+        .then(() => {
+          this.reset()
+          this.$message.success('任务提交成功，请前往处理文件查看处理结果')
+        })
+        .catch(error => {
+          this.reset()
+          if (error.response) {
+            this.$message({
+              message: error.response.data.message,
+              type: 'error',
+              duration: 2000
+            })
+          }
+        })
     },
     // 重置组件
     reset() {

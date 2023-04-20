@@ -9,6 +9,10 @@ const errorSchema = new mongoose.Schema({
   message: {
     type: String
   },
+  from: {
+    type: String,
+    required: true
+  },
   ip: {
     type: String
   },
@@ -28,15 +32,17 @@ const ErrorModel = mongoose.model('error_records', errorSchema)
  * Save Error
  * @param name
  * @param message
+ * @param from
  * @param stack
  * @param ip
  * @returns {Promise<void>}
  */
-async function errorRecord(name, message, stack, ip) {
+async function errorRecord(name, message, from, stack, ip) {
   try {
     const errorRecord = new ErrorModel({
       name,
       message,
+      from,
       stack,
       ip
     })

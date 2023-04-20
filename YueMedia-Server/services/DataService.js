@@ -1,6 +1,6 @@
 // import modules
 const { ServiceErrorHandler } = require('../middlewares/ErrorCatcher')
-const { getRedis } = require('../utils/RedisHandler')
+const { getRedis } = require('../utils/redis/RedisHandler')
 
 /**
  * getLoginRecord Service

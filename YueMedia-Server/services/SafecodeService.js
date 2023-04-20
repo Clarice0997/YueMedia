@@ -1,7 +1,7 @@
 // import module
 const svgCaptcha = require('svg-captcha')
 const { v4: uuidv4 } = require('uuid')
-const { getRedis, setRedis, delRedis } = require('../utils/RedisHandler')
+const { getRedis, setRedis, delRedis } = require('../utils/redis/RedisHandler')
 const { ServiceErrorHandler } = require('../middlewares/ErrorCatcher')
 
 // Math 验证码生成相关参数
@@ -53,6 +53,7 @@ async function generateSafeCode(type) {
         captcha = svgCaptcha.create(StringCaptchaConfig)
     }
     // Redis storage
+    // TODO: 存入redis hash
     await setRedis(uuid, captcha.text)
     // 返回验证码数据
     return {
@@ -94,6 +95,7 @@ async function validateSafeCode(type, answer, uuid) {
     }
     // 根据 uuid 从 Redis 中取出答案
     let result
+    // TODO: 从redis hash取出验证码
     result = await getRedis(uuid)
     // 判断验证码类型
     let flag
@@ -105,6 +107,7 @@ async function validateSafeCode(type, answer, uuid) {
     // 判断验证码是否正确
     if (flag) {
       // 删除 Redis 中的键值
+      // TODO: 从redis hash删除验证码
       await delRedis(uuid)
       // 返回成功对象
       return {

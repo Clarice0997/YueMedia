@@ -170,6 +170,7 @@ export default {
     clickCloseInsertMusicDialogHandler() {
       this.resetUploadMusicForm()
     },
+    // 点击确认插入音乐处理函数
     clickConfirmInsertMusicHandler() {
       this.$refs.insertMusicForm.validate(async valid => {
         if (valid) {
@@ -180,7 +181,7 @@ export default {
             .then(({ data }) => {
               // 成功弹窗
               this.$notify({
-                message: data.message,
+                title: data.message,
                 type: 'success',
                 duration: 2000
               })
@@ -188,7 +189,7 @@ export default {
             .catch(({ response }) => {
               // 提示错误弹窗
               this.$notify({
-                message: response.data.message,
+                title: response.data.message,
                 type: 'error',
                 duration: 2000
               })

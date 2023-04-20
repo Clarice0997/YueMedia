@@ -31,6 +31,8 @@ const uploadMusicService = async (musicFile, mimetype) => {
     const musicMD5 = await generateMD5(musicFile.buffer)
     // 定义音乐保存名
     const musicName = musicMD5 + Date.now()
+    // TODO: 文件存储位置改变 每个用户单独一个文件夹
+    // TODO: 需要判断文件夹是否存在，没有则创建新的文件夹
     // NCM 格式处理
     if (mimetype === 'application/octet-stream') {
       // 解码 NCM
@@ -146,7 +148,7 @@ const uploadMusicService = async (musicFile, mimetype) => {
         // 等待转码结束判断是否成功 标准输出流和错误输出流
         if (result.status === 0) {
           endTime = new Date()
-          audioConvertRecord(musicName, 'uploadMusicService', metadata.format.container, 'MPEG', endTime - startTime)
+          audioConvertRecord(musicName, 'uploadMusicService', metadata.format.container, 'MPEG 1 Layer 3', endTime - startTime)
         } else {
           throw new ffmpegError(result.stderr.toString('utf8'))
         }
@@ -254,6 +256,8 @@ const uploadMusicDataService = async (data, userData) => {
         }
       }
     }
+    // TODO: 文件存储位置改变 每个用户单独一个文件夹
+    // TODO: 需要判断文件夹是否存在，没有则创建新的文件夹
     // 判断音乐文件是否需要转码 供播放使用
     let playFileName = `${songId}.mp3`
     const inputPath = path.join(DEFAULT_STATIC_PATH, TEMP_PLAY_MUSIC_FOLDER, playFileName)
@@ -268,9 +272,13 @@ const uploadMusicDataService = async (data, userData) => {
     fs.renameSync(path.join(DEFAULT_STATIC_PATH, TEMP_COVER_FOLDER, musicCoverFileName), path.join(DEFAULT_STATIC_PATH, COVER_FOLDER, musicCoverFileName))
 
     // 准备数据 插入数据库
-    // TODO: 数据库改变 待修改
+    // 查询数据库编码类型
+    const codecData = await mysqlHandler(`select id from music_codec where codec = ?`, [musicCodec])
+    const codecId = codecData[0].id
+
+    // 插入音乐表
     const query = 'insert into music(song_id,upload_by,song_name,song_size,music_codec,play_file_name,music_cover_file_name,origin_file_name,singer_name,album_name,year) values(?,?,?,?,?,?,?,?,?,?,?)'
-    const params = [songId, userData.uno, songName, songSize, musicCodec, playFileName, musicCoverFileName, musicFileName, singerName ? singerName : null, albumName ? albumName : null, year ? year : null]
+    const params = [songId, userData.uno, songName, songSize, codecId, playFileName, musicCoverFileName, musicFileName, singerName ? singerName : null, albumName ? albumName : null, year ? year : null]
     await mysqlHandler(query, params)
 
     return {

@@ -45,7 +45,13 @@ const redisHandler = (type = 'get', key, value, mode = 'EX', timeout = 600) => {
       lpop: promisify(client.lpop).bind(client),
       rpop: promisify(client.rpop).bind(client),
       lindex: promisify(client.lindex).bind(client),
-      llen: promisify(client.llen).bind(client)
+      llen: promisify(client.llen).bind(client),
+      hset: promisify(client.hset).bind(client),
+      hget: promisify(client.hget).bind(client),
+      hmset: promisify(client.hmset).bind(client),
+      hmget: promisify(client.hmget).bind(client),
+      hgetall: promisify(client.hgetall).bind(client),
+      hdel: promisify(client.hdel).bind(client)
     }
 
     let result
@@ -150,12 +156,78 @@ const redisHandler = (type = 'get', key, value, mode = 'EX', timeout = 600) => {
           })
         break
       }
+      case 'hset': {
+        await redisAsync
+          .hset(key, ...value)
+          .then(reply => {
+            result = reply
+          })
+          .catch(err => {
+            console.log(`Redis Hset Error => ${err}`)
+          })
+        break
+      }
+      case 'hget': {
+        await redisAsync
+          .hget(key, value)
+          .then(reply => {
+            result = reply
+          })
+          .catch(err => {
+            console.log(`Redis Hget Error => ${err}`)
+          })
+        break
+      }
+      case 'hmset': {
+        await redisAsync
+          .hmset(key, ...value)
+          .then(reply => {
+            result = reply
+          })
+          .catch(err => {
+            console.log(`Redis Hmset Error => ${err}`)
+          })
+        break
+      }
+      case 'hmget': {
+        await redisAsync
+          .hmget(key, ...value)
+          .then(reply => {
+            result = reply
+          })
+          .catch(err => {
+            console.log(`Redis Hmget Error => ${err}`)
+          })
+        break
+      }
+      case 'hgetall': {
+        await redisAsync
+          .hgetall(key)
+          .then(reply => {
+            result = reply
+          })
+          .catch(err => {
+            console.log(`Redis Hgetall Error => ${err}`)
+          })
+        break
+      }
+      case 'hdel': {
+        await redisAsync
+          .hdel(key, ...value)
+          .then(reply => {
+            result = reply
+          })
+          .catch(err => {
+            console.log(`Redis Hdel Error => ${err}`)
+          })
+        break
+      }
       default: {
         return new Error('Redis Type Error')
       }
     }
     // 将 Redis 客户端返回到连接池中
-    redisPool.release(client)
+    await redisPool.release(client)
     // 返回结果
     return result
   })

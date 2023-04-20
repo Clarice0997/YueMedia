@@ -1,7 +1,9 @@
 // import modules
 const { Worker } = require('worker_threads')
-const { llenRedis, lpopRedis } = require('../RedisHandler')
+const { llenRedis, lpopRedis } = require('./RedisHandler')
 const path = require('path')
+const { updateAudioConvertQueues } = require('../../models/audioConvertQueueModel')
+const { audioConvertRecord } = require('../../models/audioConvertRecordModel')
 
 // 全局标志变量
 let timerId = null
@@ -33,6 +35,7 @@ async function processAudioQueue() {
       // 取出队列值
       let task = await lpopRedis(queueKey)
       task = JSON.parse(task)
+      // TODO: 创建任务输出文件夹
       // 取出任务清单
       const taskDetail = task.task
       // 初始化线程池
@@ -67,7 +70,7 @@ async function processAudioQueue() {
           worker.on('message', message => {
             const { status, message: msg } = message
             if (status) {
-              resolve(msg)
+              resolve(message)
             } else {
               reject(msg)
             }
@@ -80,11 +83,22 @@ async function processAudioQueue() {
           })
         })
       })
-      Promise.all(promises).then(data => {
-        // TODO: 判断完成情况，记录数据
-        console.log(data)
-      })
-      console.log('All tasks processed successfully')
+      Promise.all(promises)
+        .then(datas => {
+          if (datas.every(data => data.status)) {
+            updateAudioConvertQueues(taskDetail.taskId, 2, new Date())
+            datas.forEach(async data => {
+              const { songId, type, originCodec, targetCodec, convertTimeMS } = data.taskDetail
+              await audioConvertRecord(songId, type, originCodec, targetCodec, convertTimeMS)
+            })
+            // TODO: 压缩包
+          } else {
+            updateAudioConvertQueues(taskDetail.taskId, 4, new Date())
+          }
+        })
+        .catch(() => {
+          updateAudioConvertQueues(taskDetail.taskId, 4, new Date())
+        })
       isProcessing = false
       // 重启计时器
       timerId = setInterval(() => {
