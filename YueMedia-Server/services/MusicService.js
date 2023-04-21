@@ -82,7 +82,7 @@ const uploadMusicService = async (musicFile, mimetype) => {
         // 等待转码结束判断是否成功 标准输出流和错误输出流
         if (result.status === 0) {
           endTime = new Date()
-          audioConvertRecord(musicName, 'uploadMusicService', metadata.format.container, 'MPEG', endTime - startTime)
+          audioConvertRecord(musicName, 'uploadMusicService', musicFile.buffer.length, metadata.format.container, 'MPEG', endTime - startTime)
         } else {
           throw new ffmpegError(result.stderr.toString('utf8'))
         }
@@ -148,7 +148,7 @@ const uploadMusicService = async (musicFile, mimetype) => {
         // 等待转码结束判断是否成功 标准输出流和错误输出流
         if (result.status === 0) {
           endTime = new Date()
-          audioConvertRecord(musicName, 'uploadMusicService', metadata.format.container, 'MPEG 1 Layer 3', endTime - startTime)
+          audioConvertRecord(musicName, 'uploadMusicService', musicFile.buffer.length, metadata.format.container, 'MPEG 1 Layer 3', endTime - startTime)
         } else {
           throw new ffmpegError(result.stderr.toString('utf8'))
         }

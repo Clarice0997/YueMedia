@@ -47,19 +47,19 @@ async function convertAudio(taskId, musicFileName, originalName, originCodec, ta
       const result = spawnSync('ffmpeg', ['-i', originFilePath, '-c:a', encoder, targetFilePath])
       if (result.status === 0) {
         endTime = new Date()
-        // 删除待转码文件
-        fs.unlinkSync(originFilePath)
         // 返回转码结果文件名
         resolve({
           outputFileName: originalName.split('.').shift() + targetExtname,
           taskDetail: {
             songId: musicFileName.split('.').shift(),
             type: 'musicConvertQueues',
-            originCodec,
+            size: fs.statSync(originFilePath).size,
             targetCodec,
             convertTimeMS: endTime - startTime
           }
         })
+        // 删除待转码文件
+        fs.unlinkSync(originFilePath)
       } else {
         // 删除待转码文件
         fs.unlinkSync(originFilePath)

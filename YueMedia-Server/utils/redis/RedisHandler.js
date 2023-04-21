@@ -226,6 +226,21 @@ async function hdelRedis(key, ...fields) {
   }
 }
 
+/**
+ * Redis persist
+ * @param key
+ * @param fields
+ * @returns
+ */
+async function persistRedis(key, value) {
+  try {
+    return redisHandler('persist', key, value)
+  } catch (err) {
+    console.log(`Redis Persist Error => ${err}`)
+    throw err
+  }
+}
+
 module.exports = {
   getRedis,
   setRedis,
@@ -241,5 +256,6 @@ module.exports = {
   hmsetRedis,
   hmgetRedis,
   hgetallRedis,
-  hdelRedis
+  hdelRedis,
+  persistRedis
 }

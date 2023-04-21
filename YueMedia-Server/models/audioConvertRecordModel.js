@@ -10,6 +10,10 @@ const audioConvertSchema = new mongoose.Schema({
     type: String,
     require: true
   },
+  size: {
+    type: Number,
+    require: true
+  },
   originCodec: {
     type: String,
     require: true
@@ -34,16 +38,18 @@ const AudioConvertRecord = mongoose.model('audio_convert_records', audioConvertS
  * audioConvertRecord
  * @param songId
  * @param type
+ * @param size
  * @param originCodec
  * @param targetCodec
  * @param convertTimeMS
  * @returns {Promise<void>}
  */
-async function audioConvertRecord(songId, type, originCodec, targetCodec, convertTimeMS) {
+async function audioConvertRecord(songId, type, size, originCodec, targetCodec, convertTimeMS) {
   try {
     const audioConvertRecord = new AudioConvertRecord({
       songId,
       type,
+      size,
       originCodec,
       targetCodec,
       convertTimeMS

@@ -33,6 +33,7 @@ const redisPool = createPool(
  * @param {*} mode 标志 (EX)
  * @param {*} timeout 过期时间 (seconds)
  */
+// TODO: 过期时间
 const redisHandler = (type = 'get', key, value, mode = 'EX', timeout = 600) => {
   return redisPool.acquire().then(async client => {
     // 将 Redis 客户端封装为可重用的对象
@@ -51,7 +52,8 @@ const redisHandler = (type = 'get', key, value, mode = 'EX', timeout = 600) => {
       hmset: promisify(client.hmset).bind(client),
       hmget: promisify(client.hmget).bind(client),
       hgetall: promisify(client.hgetall).bind(client),
-      hdel: promisify(client.hdel).bind(client)
+      hdel: promisify(client.hdel).bind(client),
+      persist: promisify(client.persist).bind(client)
     }
 
     let result
@@ -222,8 +224,19 @@ const redisHandler = (type = 'get', key, value, mode = 'EX', timeout = 600) => {
           })
         break
       }
+      case 'persist': {
+        await redisAsync
+          .persist(key, value)
+          .then(reply => {
+            result = reply
+          })
+          .catch(err => {
+            console.log(`Redis persist Error => ${err}`)
+          })
+      }
       default: {
         return new Error('Redis Type Error')
+        break
       }
     }
     // 将 Redis 客户端返回到连接池中

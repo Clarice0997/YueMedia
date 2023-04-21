@@ -1,5 +1,6 @@
 // import modules
 const mongoose = require('mongoose')
+const moment = require('moment')
 
 const audioConvertQueueSchema = new mongoose.Schema({
   taskId: {
@@ -22,6 +23,16 @@ const audioConvertQueueSchema = new mongoose.Schema({
   },
   finishedAt: {
     type: Date
+  }
+})
+
+// 处理时间 虚拟属性
+audioConvertQueueSchema.virtual('processTime').get(function () {
+  if (this.finishedAt) {
+    const duration = moment.duration(moment(this.finishedAt).diff(moment(this.createdAt)))
+    return duration.asMilliseconds()
+  } else {
+    return undefined
   }
 })
 

@@ -88,8 +88,8 @@ async function processAudioQueue() {
           if (datas.every(data => data.status)) {
             updateAudioConvertQueues(taskDetail.taskId, 2, new Date())
             datas.forEach(async data => {
-              const { songId, type, originCodec, targetCodec, convertTimeMS } = data.taskDetail
-              await audioConvertRecord(songId, type, originCodec, targetCodec, convertTimeMS)
+              const { songId, type, size, originCodec, targetCodec, convertTimeMS } = data.taskDetail
+              await audioConvertRecord(songId, type, size, originCodec, targetCodec, convertTimeMS)
             })
             // TODO: 压缩包
           } else {
