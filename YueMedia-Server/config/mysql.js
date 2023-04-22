@@ -14,7 +14,6 @@ const MySQLConnectionPool = mysql.createPool({
 })
 
 MySQLConnectionPool.on('connection', connection => {
-  console.log('数据库连接成功')
   connection.query('SET SESSION wait_timeout = 28800')
   connection.query('SET NAMES utf8mb4')
 })
@@ -23,9 +22,7 @@ MySQLConnectionPool.on('enqueue', () => {
   console.log('数据库连接池已满')
 })
 
-MySQLConnectionPool.on('release', () => {
-  console.log('数据库连接释放')
-})
+MySQLConnectionPool.on('release', () => {})
 
 MySQLConnectionPool.on('error', err => {
   console.error('MySQL error: ', err)

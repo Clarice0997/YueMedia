@@ -1,8 +1,8 @@
 // import modules
 const { LoginRecord } = require('../../models/loginRecordModel')
-const { setRedis } = require('./RedisHandler')
+const { setRedis, hsetRedis } = require('./RedisHandler')
 
-// 计算登录记录 Redis持久化
+// 计算登录记录 Redis 持久化
 const calculateLoginRecords = async () => {
   // 获取所有登录记录数据
   const loginRecords = await LoginRecord.find({})
@@ -40,7 +40,7 @@ const calculateLoginRecords = async () => {
     .sort((a, b) => a.date.localeCompare(b.date))
 
   // Redis storage
-  await setRedis('calculate_login_record', JSON.stringify(handledLoginRecords), 'EX', 2400)
+  await hsetRedis('calculator', 'total_login_record', JSON.stringify(handledLoginRecords), 2400)
 }
 
 module.exports = { calculateLoginRecords }

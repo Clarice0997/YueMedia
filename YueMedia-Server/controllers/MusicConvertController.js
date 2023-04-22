@@ -1,7 +1,7 @@
 // import modules
 const router = require('express').Router()
 const multer = require('multer')
-const { analyseFileService, uploadConvertMusicService, deleteConvertMusicService, getSupportMusicCodecService, submitMusicConvertTaskService } = require('../services/MusicConvertService')
+const { analyseFileService, uploadConvertMusicService, deleteConvertMusicService, getSupportMusicCodecService, submitMusicConvertTaskService, getMusicConvertAnalyseService } = require('../services/MusicConvertService')
 const { auth } = require('../middlewares/Auth')
 const { errorHandler } = require('../middlewares/ErrorCatcher')
 
@@ -124,6 +124,23 @@ router.post('/submit', auth, async (req, res) => {
   }
 })
 
-// TODO: 获取总转换数量/总转换大小/平均每个文件转码时间
+/**
+ * @api {POST} /apis/convert/data/analyse 获取音频转码统计数据接口
+ * @apiName getMusicConvertAnalyse
+ * @apiGroup MusicConvert
+ * @apiName MusicConvert/getMusicConvertAnalyse
+ * @apiPermission User
+ * @apiHeader {String} Authorization JWT鉴权
+ */
+router.get('/data/analyse', auth, async (req, res) => {
+  try {
+    // Service
+    const { code, data } = await getMusicConvertAnalyseService()
+    // response
+    res.status(code).send({ ...data, code })
+  } catch (error) {
+    errorHandler(error, req, res)
+  }
+})
 
 module.exports = router

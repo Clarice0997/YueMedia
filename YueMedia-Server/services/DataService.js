@@ -1,6 +1,6 @@
 // import modules
 const { ServiceErrorHandler } = require('../middlewares/ErrorCatcher')
-const { getRedis } = require('../utils/redis/RedisHandler')
+const { hgetRedis } = require('../utils/redis/RedisHandler')
 
 /**
  * getLoginRecord Service
@@ -8,7 +8,7 @@ const { getRedis } = require('../utils/redis/RedisHandler')
  */
 const getLoginRecordService = async () => {
   try {
-    const handledLoginRecords = JSON.parse(await getRedis('calculate_login_record'))
+    const handledLoginRecords = JSON.parse(await hgetRedis('calculator', 'total_login_record'))
 
     // 更新返回数据
     return {

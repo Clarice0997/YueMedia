@@ -4,8 +4,11 @@
     <div class="no-select-container" v-if="!isUploaded">
       <div class="content-area">
         <div class="index-counter">
-          <!--  TODO: 动态获取转换数据统计  -->
-          <div class="counter-box">我们已转换 <span>100</span> 个文件，总大小为 <span>100</span> TB</div>
+          <div class="counter-box">
+            我们已转换 <span>{{ musicConvertAnalyse.totalTasks }}</span> 个文件，总大小为 <span>{{ (musicConvertAnalyse.totalSize / 1024 / 1024) | numToFixed }}</span> MB，平均转码速度
+            <span>{{ musicConvertAnalyse.averageSpeed | numToFixed }}</span>
+            MS
+          </div>
         </div>
         <div class="converter-container">
           <div class="converter-wrapper">
@@ -69,7 +72,7 @@
             <!--  文件大小  -->
             <el-table-column width="100" align="center">
               <template slot-scope="scope">
-                <span>{{ scope.row.size | calculateFileSize }} MB</span>
+                <span>{{ (scope.row.size / 1024 / 1024) | numToFixed }} MB</span>
               </template>
             </el-table-column>
             <!--  删除按钮  -->
@@ -88,6 +91,7 @@
                   <el-option v-for="item in options" :label="item" :value="item"></el-option>
                 </el-select>
                 <div class="add-btn-caption">使用 Ctrl 或 Shift 一次添加多个文件</div>
+                <div class="warning-max-tip" v-if="uploadFiles.length >= 5">一次最多处理5个文件</div>
                 <el-progress v-if="isShowProgress" :text-inside="true" :stroke-width="24" :percentage="uploadProgress" class="file-progress">上传进度 </el-progress>
               </div>
               <div class="btn-holder2">
@@ -100,6 +104,11 @@
         </div>
       </div>
     </div>
+    <el-steps :active="stepActive" align-center style="margin-top: 40px">
+      <el-step title="上传音频文件"></el-step>
+      <el-step title="选择目标转码格式"></el-step>
+      <el-step title="提交转码任务"></el-step>
+    </el-steps>
   </div>
 </template>
 
@@ -107,7 +116,7 @@
 // import modules
 import axios from 'axios'
 import { getCookie } from '@/utils/cookie'
-import { deleteConvertMusicAPI, getSupportMusicCodecAPI, submitMusicConvertTaskAPI } from '@/apis/musicConvertAPI'
+import { deleteConvertMusicAPI, getSupportMusicCodecAPI, submitMusicConvertTaskAPI, getMusicConvertAnalyseAPI } from '@/apis/musicConvertAPI'
 
 export default {
   name: 'musicConverter',
@@ -120,7 +129,13 @@ export default {
       supportMusicCodec: [],
       uploadFiles: [],
       isUploading: false,
-      options: ['选择文件', '我的音乐']
+      options: ['选择文件', '我的音乐'],
+      stepActive: 0,
+      musicConvertAnalyse: {
+        totalTasks: 0,
+        totalSize: 0,
+        averageSpeed: 0
+      }
     }
   },
   props: {
@@ -138,14 +153,27 @@ export default {
       return this.uploadFiles.length < this.maxFileNum && !this.isUploading
     }
   },
+  watch: {
+    // 监听全选目标转码格式
+    uploadFiles: {
+      handler: function (files) {
+        if (files.every(file => file.targetCodec)) this.stepActive = 2
+        if (files.length === 0) this.stepActive = 0
+      },
+      // 对象深度监听
+      deep: true
+    }
+  },
   mounted() {
-    getSupportMusicCodecAPI().then(({ data: { supportMusicCodec } }) => {
-      this.supportMusicCodec = supportMusicCodec
-    })
+    this.executeMountedCode()
   },
   filters: {
-    calculateFileSize(value) {
-      return (value / 1024 / 1024).toFixed(2)
+    numToFixed(value, fixed = 2) {
+      if (value !== undefined && value !== null) {
+        return value.toFixed(fixed)
+      } else {
+        return 'N/A'
+      }
     },
     truncateFilename(value, maxLength) {
       if (!value) return ''
@@ -158,6 +186,22 @@ export default {
     }
   },
   methods: {
+    executeMountedCode() {
+      // 获取音频转码统计数据
+      this.getMusicConvertAnalyse()
+      // 获取支持的音频文件数据
+      getSupportMusicCodecAPI().then(({ data: { supportMusicCodec } }) => {
+        this.supportMusicCodec = supportMusicCodec
+      })
+    },
+    // 获取音频转码统计数据
+    async getMusicConvertAnalyse() {
+      const {
+        data: { totalMusicConvertRecord }
+      } = await getMusicConvertAnalyseAPI()
+      this.musicConvertAnalyse = totalMusicConvertRecord
+    },
+    // 上传文件事件
     async selectUploadFile() {
       // 判断是否上传文件
       if (!this.$refs.fileInput.files) {
@@ -167,7 +211,18 @@ export default {
       if (this.uploadFiles.length + this.$refs.fileInput.files.length > this.maxFileNum) {
         return this.$message.error(`一次只能转换 ${this.maxFileNum} 个文件`)
       }
-      // TODO: 判断上传文件是否符合规范
+      // 判断上传文件是否符合规范
+      let allowedFormats = this.supportMusicCodec.map(format => format.extname)
+      let allowedMimetypes = this.supportMusicCodec.map(format => format.mimetype)
+      for (let i = 0; i < this.$refs.fileInput.files.length; i++) {
+        let fileExt = this.$refs.fileInput.files[i].name.split('.').pop()
+        let fileMimetype = this.$refs.fileInput.files[i].type
+        if (!allowedFormats.includes(`.${fileExt}`) || !allowedMimetypes.includes(fileMimetype)) {
+          return this.$message.error(`文件 ${this.$refs.fileInput.files[i].name} 不符合支持的格式`)
+        }
+      }
+
+      // 上传操作
       let fileNames = []
       // 实例化 FormData
       const formData = new FormData()
@@ -210,6 +265,8 @@ export default {
               this.uploadFiles.push(file)
             })
           }
+          // 改变进行步骤状态
+          if (this.stepActive === 0) this.stepActive = 1
         })
         .catch(error => {
           console.log(error)
@@ -228,6 +285,8 @@ export default {
     handleOptionChange() {
       if (this.selectedOption === '选择文件') {
         document.getElementById('file-upload').click()
+        this.selectedOption = ''
+      } else {
         this.selectedOption = ''
       }
     },
@@ -269,6 +328,8 @@ export default {
     // 重置组件
     reset() {
       Object.assign(this.$data, this.$options.data())
+      // 重新获取数据
+      this.executeMountedCode()
     }
   }
 }
@@ -422,6 +483,7 @@ input[type='file'] {
 
   .with-select-container {
     box-sizing: border-box;
+    min-width: 1000px;
 
     .files-container-box {
       border-radius: 0 0 4px 4px;
@@ -460,6 +522,18 @@ input[type='file'] {
 
               .add-btn-caption {
                 color: whitesmoke;
+                display: block;
+                align-self: center;
+                margin: -5px 0 -5px 32px;
+                max-height: 40px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                font-size: 16px;
+                line-height: 20px;
+              }
+
+              .warning-max-tip {
+                color: #f44336;
                 display: block;
                 align-self: center;
                 margin: -5px 0 -5px 32px;

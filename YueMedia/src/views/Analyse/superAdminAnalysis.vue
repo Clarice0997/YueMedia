@@ -58,8 +58,29 @@ export default {
             padding: 10
           },
           tooltip: {
-            trigger: 'axis'
+            trigger: 'axis',
+            axisPointer: {
+              type: 'cross',
+              crossStyle: {
+                color: '#999'
+              }
+            }
           },
+          toolbox: {
+            feature: {
+              dataView: { show: true, readOnly: false },
+              magicType: { show: true, type: ['line', 'bar'] },
+              restore: { show: true },
+              saveAsImage: { show: true }
+            }
+          },
+          dataZoom: [
+            {
+              type: 'slider',
+              start: 50,
+              end: 100
+            }
+          ],
           color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
             { offset: 0, color: '#a1c4fd' },
             { offset: 1, color: '#c2e9fb' }

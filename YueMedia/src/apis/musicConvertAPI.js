@@ -27,3 +27,11 @@ export const getSupportMusicCodecAPI = async () => {
 export const submitMusicConvertTaskAPI = async tasks => {
   return request.post('/apis/convert/submit', { tasks })
 }
+
+/**
+ * 获取音频转码统计数据 API
+ * @returns
+ */
+export const getMusicConvertAnalyseAPI = async () => {
+  return request.get('apis/convert/data/analyse')
+}

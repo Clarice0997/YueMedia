@@ -5,7 +5,7 @@ const path = require('path')
 const fs = require('fs')
 const mm = require('music-metadata')
 const { mysqlHandler } = require('../config/mysql')
-const { rpushRedis } = require('../utils/redis/RedisHandler')
+const { rpushRedis, hgetRedis } = require('../utils/redis/RedisHandler')
 const { insertAudioConvertQueues } = require('../models/audioConvertQueueModel')
 
 const DEFAULT_STATIC_PATH = process.env.DEFAULT_STATIC_PATH
@@ -207,10 +207,33 @@ const submitMusicConvertTaskService = async (tasks, user) => {
   }
 }
 
+// 获取音频转码统计数据 Service
+const getMusicConvertAnalyseService = async () => {
+  try {
+    // 从 Redis 中取出音频转码统计数据缓存
+    const totalMusicConvertRecord = JSON.parse(await hgetRedis('calculator', 'total_music_convert_record'))
+    return {
+      code: 200,
+      data: {
+        totalMusicConvertRecord
+      }
+    }
+  } catch (error) {
+    ServiceErrorHandler(error)
+    return {
+      code: 500,
+      data: {
+        message: error.message
+      }
+    }
+  }
+}
+
 module.exports = {
   analyseFileService,
   uploadConvertMusicService,
   deleteConvertMusicService,
   getSupportMusicCodecService,
-  submitMusicConvertTaskService
+  submitMusicConvertTaskService,
+  getMusicConvertAnalyseService
 }

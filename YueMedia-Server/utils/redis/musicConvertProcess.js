@@ -4,6 +4,7 @@ const { llenRedis, lpopRedis } = require('./RedisHandler')
 const path = require('path')
 const { updateAudioConvertQueues } = require('../../models/audioConvertQueueModel')
 const { audioConvertRecord } = require('../../models/audioConvertRecordModel')
+const { calculateMusicConvertRecord } = require('./calculateMusicConvertRecord')
 
 // 全局标志变量
 let timerId = null
@@ -86,11 +87,15 @@ async function processAudioQueue() {
       Promise.all(promises)
         .then(datas => {
           if (datas.every(data => data.status)) {
+            // 更新状态
             updateAudioConvertQueues(taskDetail.taskId, 2, new Date())
             datas.forEach(async data => {
               const { songId, type, size, originCodec, targetCodec, convertTimeMS } = data.taskDetail
+              // 保存音频转换记录
               await audioConvertRecord(songId, type, size, originCodec, targetCodec, convertTimeMS)
             })
+            // 更新 Redis 总音乐转换数据缓存
+            calculateMusicConvertRecord()
             // TODO: 压缩包
           } else {
             updateAudioConvertQueues(taskDetail.taskId, 4, new Date())

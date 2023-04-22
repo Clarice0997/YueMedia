@@ -51,7 +51,6 @@ const redisHandler = () => {
           expire: await promisify(client.expire).bind(client),
           release: async () => {
             await redisPool.release(client)
-            console.log('redis 连接释放')
           }
         })
       })
