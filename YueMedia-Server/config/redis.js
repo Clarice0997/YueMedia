@@ -30,25 +30,30 @@ const redisPool = createPool(
 const redisHandler = () => {
   return new Promise(async (resolve, reject) => {
     try {
-      const client = await redisPool.acquire()
-      resolve({
-        get: promisify(client.get).bind(client),
-        set: promisify(client.set).bind(client),
-        del: promisify(client.del).bind(client),
-        lpush: promisify(client.lpush).bind(client),
-        rpush: promisify(client.rpush).bind(client),
-        lpop: promisify(client.lpop).bind(client),
-        rpop: promisify(client.rpop).bind(client),
-        lindex: promisify(client.lindex).bind(client),
-        llen: promisify(client.llen).bind(client),
-        hset: promisify(client.hset).bind(client),
-        hget: promisify(client.hget).bind(client),
-        hmset: promisify(client.hmset).bind(client),
-        hmget: promisify(client.hmget).bind(client),
-        hgetall: promisify(client.hgetall).bind(client),
-        hdel: promisify(client.hdel).bind(client),
-        expire: promisify(client.expire).bind(client),
-        release: promisify(redisPool.release).bind(client)
+      await redisPool.acquire().then(async client => {
+        resolve({
+          exists: await promisify(client.exists).bind(client),
+          get: await promisify(client.get).bind(client),
+          set: await promisify(client.set).bind(client),
+          del: await promisify(client.del).bind(client),
+          lpush: await promisify(client.lpush).bind(client),
+          rpush: await promisify(client.rpush).bind(client),
+          lpop: await promisify(client.lpop).bind(client),
+          rpop: await promisify(client.rpop).bind(client),
+          lindex: await promisify(client.lindex).bind(client),
+          llen: await promisify(client.llen).bind(client),
+          hset: await promisify(client.hset).bind(client),
+          hget: await promisify(client.hget).bind(client),
+          hmset: await promisify(client.hmset).bind(client),
+          hmget: await promisify(client.hmget).bind(client),
+          hgetall: await promisify(client.hgetall).bind(client),
+          hdel: await promisify(client.hdel).bind(client),
+          expire: await promisify(client.expire).bind(client),
+          release: async () => {
+            await redisPool.release(client)
+            console.log('redis 连接释放')
+          }
+        })
       })
     } catch (error) {
       reject(error)

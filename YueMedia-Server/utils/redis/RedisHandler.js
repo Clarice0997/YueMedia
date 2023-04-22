@@ -64,7 +64,8 @@ async function delRedis(key) {
 async function lpushRedis(key, ...value) {
   try {
     const redis = await redisHandler()
-    await redis.lpush(key, ...value, 'EX', 600)
+    await redis.lpush(key, ...value)
+    await redis.expire(key, 600)
     await redis.release()
     return true
   } catch (err) {
@@ -82,7 +83,8 @@ async function lpushRedis(key, ...value) {
 async function rpushRedis(key, ...value) {
   try {
     const redis = await redisHandler()
-    await redis.rpush(key, ...value, 'EX', 600)
+    await redis.rpush(key, ...value)
+    await redis.expire(key, 600)
     await redis.release()
     return true
   } catch (err) {
