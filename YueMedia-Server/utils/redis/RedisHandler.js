@@ -3,11 +3,15 @@ const { redisHandler } = require('../../config/redis')
 
 /**
  * Redis Get
- * @param {*} key
+ * @param key
+ * @returns {Promise<*>}
  */
 async function getRedis(key) {
   try {
-    return redisHandler('get', key)
+    const redis = await redisHandler()
+    const data = await redis.get(key)
+    redis.release()
+    return data
   } catch (err) {
     console.log(`Redis Get Error => ${err}`)
     throw err
@@ -20,11 +24,14 @@ async function getRedis(key) {
  * @param value
  * @param flag
  * @param timeout
- * @returns {Promise<void>}
+ * @returns {Promise<boolean>}
  */
 async function setRedis(key, value, flag = 'EX', timeout = 600) {
   try {
-    await redisHandler('set', key, value, flag, timeout)
+    const redis = await redisHandler()
+    await redis.set(key, value, flag, timeout)
+    await redis.release()
+    return true
   } catch (err) {
     console.log(`Redis Set Error => ${err}`)
     throw err
@@ -33,12 +40,15 @@ async function setRedis(key, value, flag = 'EX', timeout = 600) {
 
 /**
  * Redis Del
- * @param {*} key
- * @returns
+ * @param key
+ * @returns {Promise<boolean>}
  */
 async function delRedis(key) {
   try {
-    return redisHandler('del', key)
+    const redis = await redisHandler()
+    await redis.del(key)
+    await redis.release()
+    return true
   } catch (err) {
     console.log(`Redis Del Error => ${err}`)
     throw err
@@ -53,7 +63,10 @@ async function delRedis(key) {
  */
 async function lpushRedis(key, ...value) {
   try {
-    return redisHandler('lpush', key, value)
+    const redis = await redisHandler()
+    await redis.lpush(key, ...value, 'EX', 600)
+    await redis.release()
+    return true
   } catch (err) {
     console.log(`Redis Lpush Error => ${err}`)
     throw err
@@ -68,7 +81,10 @@ async function lpushRedis(key, ...value) {
  */
 async function rpushRedis(key, ...value) {
   try {
-    return redisHandler('rpush', key, value)
+    const redis = await redisHandler()
+    await redis.rpush(key, ...value, 'EX', 600)
+    await redis.release()
+    return true
   } catch (err) {
     console.log(`Redis Rpush Error => ${err}`)
     throw err
@@ -77,12 +93,15 @@ async function rpushRedis(key, ...value) {
 
 /**
  * Redis Lpop
- * @param {*} key
- * @returns
+ * @param key
+ * @returns {Promise<*>}
  */
 async function lpopRedis(key) {
   try {
-    return redisHandler('lpop', key)
+    const redis = await redisHandler()
+    const data = await redis.lpop(key)
+    await redis.release()
+    return data
   } catch (err) {
     console.log(`Redis Lpop Error => ${err}`)
     throw err
@@ -96,7 +115,10 @@ async function lpopRedis(key) {
  */
 async function rpopRedis(key) {
   try {
-    return redisHandler('rpop', key)
+    const redis = await redisHandler()
+    const data = await redis.rpop(key)
+    await redis.release()
+    return data
   } catch (err) {
     console.log(`Redis Rpop Error => ${err}`)
     throw err
@@ -106,12 +128,15 @@ async function rpopRedis(key) {
 /**
  * Redis Lindex
  * @param {*} key
- * @param {*} value
+ * @param {*} index
  * @returns
  */
-async function lindexRedis(key, value) {
+async function lindexRedis(key, index) {
   try {
-    return redisHandler('lindex', key, value)
+    const redis = await redisHandler()
+    const data = await redis.lindex(key, index)
+    await redis.release()
+    return data
   } catch (err) {
     console.log(`Redis Lindex Error => ${err}`)
     throw err
@@ -125,7 +150,10 @@ async function lindexRedis(key, value) {
  */
 async function llenRedis(key) {
   try {
-    return redisHandler('llen', key)
+    const redis = await redisHandler()
+    const data = await redis.llen(key)
+    await redis.release()
+    return data
   } catch (err) {
     console.log(`Redis Llen Error => ${err}`)
     throw err
@@ -137,11 +165,16 @@ async function llenRedis(key) {
  * @param key
  * @param field
  * @param value
- * @returns
+ * @param timeout
+ * @returns {Promise<boolean>}
  */
-async function hsetRedis(key, field, value) {
+async function hsetRedis(key, field, value, timeout = 600) {
   try {
-    return redisHandler('hset', key, [field, value])
+    const redis = await redisHandler()
+    await redis.hset(key, field, value)
+    await redis.expire(key, timeout)
+    await redis.release()
+    return true
   } catch (err) {
     console.log(`Redis Hset Error => ${err}`)
     throw err
@@ -152,11 +185,14 @@ async function hsetRedis(key, field, value) {
  * Redis hget
  * @param key
  * @param field
- * @returns
+ * @returns {Promise<*>}
  */
 async function hgetRedis(key, field) {
   try {
-    return redisHandler('hget', key, field)
+    const redis = await redisHandler()
+    const data = await redis.hget(key, field)
+    await redis.release()
+    return data
   } catch (err) {
     console.log(`Redis Hget Error => ${err}`)
     throw err
@@ -167,15 +203,16 @@ async function hgetRedis(key, field) {
  * Redis hmset
  * @param key
  * @param obj
- * @returns
+ * @param timeout
+ * @returns {Promise<boolean>}
  */
-async function hmsetRedis(key, obj) {
+async function hmsetRedis(key, obj, timeout = 600) {
   try {
-    let arr = []
-    Object.keys(obj).forEach(function (k) {
-      arr.push(k, obj[k])
-    })
-    return redisHandler('hmset', key, arr)
+    const redis = await redisHandler()
+    await redis.hmset(key, obj)
+    await redis.expire(key, timeout)
+    await redis.release()
+    return true
   } catch (err) {
     console.log(`Redis Hmset Error => ${err}`)
     throw err
@@ -186,11 +223,16 @@ async function hmsetRedis(key, obj) {
  * Redis hmget
  * @param key
  * @param fields
- * @returns
+ * @returns {Promise<{}>}
  */
-async function hmgetRedis(key, ...fields) {
+async function hmgetRedis(key, fields) {
   try {
-    return redisHandler('hmget', key, fields)
+    const redis = await redisHandler()
+    const values = await redis.hmget(key, fields)
+    const obj = {}
+    fields.forEach((field, i) => (obj[field] = values[i]))
+    await redis.release()
+    return obj
   } catch (err) {
     console.log(`Redis Hmget Error => ${err}`)
     throw err
@@ -200,11 +242,14 @@ async function hmgetRedis(key, ...fields) {
 /**
  * Redis hgetall
  * @param key
- * @returns
+ * @returns {Promise<*>}
  */
 async function hgetallRedis(key) {
   try {
-    return redisHandler('hgetall', key)
+    const redis = await redisHandler()
+    const obj = await redis.hgetall(key)
+    await redis.release()
+    return obj
   } catch (err) {
     console.log(`Redis Hgetall Error => ${err}`)
     throw err
@@ -215,28 +260,16 @@ async function hgetallRedis(key) {
  * Redis hdel
  * @param key
  * @param fields
- * @returns
+ * @returns {Promise<boolean>}
  */
 async function hdelRedis(key, ...fields) {
   try {
-    return redisHandler('hdel', key, fields)
+    const redis = await redisHandler()
+    const result = await redis.hdel(key, ...fields)
+    await redis.release()
+    return result === fields.length
   } catch (err) {
     console.log(`Redis Hdel Error => ${err}`)
-    throw err
-  }
-}
-
-/**
- * Redis persist
- * @param key
- * @param fields
- * @returns
- */
-async function persistRedis(key, value) {
-  try {
-    return redisHandler('persist', key, value)
-  } catch (err) {
-    console.log(`Redis Persist Error => ${err}`)
     throw err
   }
 }
@@ -256,6 +289,5 @@ module.exports = {
   hmsetRedis,
   hmgetRedis,
   hgetallRedis,
-  hdelRedis,
-  persistRedis
+  hdelRedis
 }
