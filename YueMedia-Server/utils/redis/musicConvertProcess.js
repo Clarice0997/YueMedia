@@ -5,10 +5,18 @@ const path = require('path')
 const { updateAudioConvertQueues } = require('../../models/audioConvertQueueModel')
 const { audioConvertRecord } = require('../../models/audioConvertRecordModel')
 const { calculateMusicConvertRecord } = require('./calculateMusicConvertRecord')
+const fs = require('fs')
+const fsPlus = require('fs-extra')
+const { dirCompressing } = require('../dirCompressing')
+const { musicConvertErrorHandler } = require('../../middlewares/ErrorCatcher')
 
 // 全局标志变量
 let timerId = null
 let isProcessing = false
+
+// Path
+const DEFAULT_STATIC_PATH = process.env.DEFAULT_STATIC_PATH
+const CONVERT_MUSIC_FOLDER = process.env.CONVERT_MUSIC_FOLDER
 
 /**
  * 从 Redis 队列中取出并处理音频任务
@@ -36,7 +44,6 @@ async function processAudioQueue() {
       // 取出队列值
       let task = await lpopRedis(queueKey)
       task = JSON.parse(task)
-      // TODO: 创建任务输出文件夹
       // 取出任务清单
       const taskDetail = task.task
       // 初始化线程池
@@ -45,6 +52,8 @@ async function processAudioQueue() {
       const maxThreads = 5
       // 当前线程数
       let currentThreads = 0
+      const outputDir = path.join(DEFAULT_STATIC_PATH, CONVERT_MUSIC_FOLDER, taskDetail.taskId)
+      fs.mkdirSync(outputDir)
       // 分配线程
       for (let i = 0; i < taskDetail.tasks.length; i++) {
         // 判断是否有空闲线程
@@ -58,7 +67,8 @@ async function processAudioQueue() {
         const worker = new Worker(scriptPath, {
           workerData: {
             taskId: taskDetail.taskId,
-            audioTask: taskDetail.tasks[i]
+            audioTask: taskDetail.tasks[i],
+            outputDir
           }
         })
         workerPool.push(worker)
@@ -85,24 +95,28 @@ async function processAudioQueue() {
         })
       })
       Promise.all(promises)
-        .then(datas => {
+        .then(async datas => {
           if (datas.every(data => data.status)) {
             // 更新状态
-            updateAudioConvertQueues(taskDetail.taskId, 2, new Date())
-            datas.forEach(async data => {
+            await updateAudioConvertQueues(taskDetail.taskId, 2, new Date())
+            await datas.forEach(data => {
               const { songId, type, size, originCodec, targetCodec, convertTimeMS } = data.taskDetail
               // 保存音频转换记录
-              await audioConvertRecord(songId, type, size, originCodec, targetCodec, convertTimeMS)
+              audioConvertRecord(songId, type, size, originCodec, targetCodec, convertTimeMS)
             })
             // 更新 Redis 总音乐转换数据缓存
-            calculateMusicConvertRecord()
-            // TODO: 压缩包
+            await calculateMusicConvertRecord()
+            // 任务输出压缩包
+            await dirCompressing(outputDir, path.join(DEFAULT_STATIC_PATH, CONVERT_MUSIC_FOLDER, `${taskDetail.taskId}.zip`), 'zip')
+            // 删除原文件夹
+            fsPlus.removeSync(outputDir)
           } else {
-            updateAudioConvertQueues(taskDetail.taskId, 4, new Date())
+            await updateAudioConvertQueues(taskDetail.taskId, 4, new Date())
           }
         })
-        .catch(() => {
-          updateAudioConvertQueues(taskDetail.taskId, 4, new Date())
+        .catch(async error => {
+          await musicConvertErrorHandler(error)
+          await updateAudioConvertQueues(taskDetail.taskId, 4, new Date())
         })
       isProcessing = false
       // 重启计时器

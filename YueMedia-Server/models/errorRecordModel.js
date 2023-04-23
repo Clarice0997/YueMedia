@@ -1,6 +1,8 @@
 // import modules
 const mongoose = require('mongoose')
 
+// TODO: 错误日志处理情况
+
 const errorSchema = new mongoose.Schema({
   name: {
     type: String,

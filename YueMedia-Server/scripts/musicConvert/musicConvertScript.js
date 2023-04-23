@@ -2,8 +2,8 @@ const { parentPort, workerData } = require('worker_threads')
 const { convertAudio } = require('./convertAudio')
 const { musicConvertErrorHandler } = require('../../middlewares/ErrorCatcher')
 
-async function processAudioTask(taskId, audioTask) {
-  convertAudio(taskId, audioTask.musicFileName, audioTask.originalName, audioTask.codec, audioTask.targetCodec)
+async function processAudioTask(taskId, audioTask, outputDir) {
+  convertAudio(taskId, audioTask.musicFileName, audioTask.originalName, audioTask.codec, audioTask.targetCodec, outputDir)
     .then(({ outputFileName, taskDetail }) => {
       parentPort.postMessage({ status: true, message: 'Audio task processed successfully', outputFileName, taskDetail })
     })
@@ -13,4 +13,4 @@ async function processAudioTask(taskId, audioTask) {
     })
 }
 
-processAudioTask(workerData.taskId, workerData.audioTask)
+processAudioTask(workerData.taskId, workerData.audioTask, workerData.outputDir)

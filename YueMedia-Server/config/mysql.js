@@ -38,6 +38,8 @@ function transformResult(result) {
   return result
 }
 
+// TODO: SQL语句响应状态记录
+
 // MySQL Handler
 const mysqlHandler = async (sql, value) => {
   // 从连接池中获取连接
