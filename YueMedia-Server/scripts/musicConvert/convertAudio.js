@@ -51,6 +51,7 @@ async function convertAudio(taskId, musicFileName, originalName, originCodec, ta
             songId: musicFileName.split('.').shift(),
             type: 'musicConvertQueues',
             size: fs.statSync(originFilePath).size,
+            originCodec,
             targetCodec,
             convertTimeMS: endTime - startTime
           }

@@ -1,6 +1,7 @@
 // import modules
 const path = require('path')
 const fs = require('fs')
+const fse = require('fs-extra')
 const { generateMD5 } = require('../utils/MD5.js')
 const mm = require('music-metadata')
 const { mysqlHandler } = require('../config/mysql')
@@ -31,10 +32,9 @@ const uploadMusicService = async (musicFile, mimetype) => {
     const musicMD5 = await generateMD5(musicFile.buffer)
     // 定义音乐保存名
     const musicName = musicMD5 + Date.now()
-    // TODO: 文件存储位置改变 每个用户单独一个文件夹
-    // TODO: 需要判断文件夹是否存在，没有则创建新的文件夹
-    // NCM 格式处理
+    // 判断用户音乐文件夹是否存在 没有则创建新的文件夹
     if (mimetype === 'application/octet-stream') {
+      // NCM 格式处理
       // 解码 NCM
       const ncmData = await ncmCracker(musicFile, musicName)
       // 解码错误返回
@@ -256,20 +256,20 @@ const uploadMusicDataService = async (data, userData) => {
         }
       }
     }
-    // TODO: 文件存储位置改变 每个用户单独一个文件夹
-    // TODO: 需要判断文件夹是否存在，没有则创建新的文件夹
-    // 判断音乐文件是否需要转码 供播放使用
-    let playFileName = `${songId}.mp3`
-    const inputPath = path.join(DEFAULT_STATIC_PATH, TEMP_PLAY_MUSIC_FOLDER, playFileName)
-    const outputPath = path.join(DEFAULT_STATIC_PATH, PLAY_MUSIC_FOLDER, playFileName)
-    // 复制文件到播放文件夹
-    fs.copyFileSync(inputPath, outputPath)
+    // 判断用户文件夹是否存在，没有则创建文件夹
+    const userMusicFileDir = path.join(DEFAULT_STATIC_PATH, MUSIC_FOLDER, userData.uno)
+    const userPlayMusicFileDir = path.join(DEFAULT_STATIC_PATH, PLAY_MUSIC_FOLDER, userData.uno)
+    const userMusicCoverFileDir = path.join(DEFAULT_STATIC_PATH, COVER_FOLDER, userData.uno)
+    fse.ensureDirSync(userMusicFileDir, {}) && fse.ensureDirSync(userPlayMusicFileDir, {}) && fse.ensureDirSync(userMusicCoverFileDir, {})
 
-    // 持久化临时文件夹中的临时音乐文件和音乐封面
-    // 剪切临时音乐文件夹中的音乐文件到持久化音乐文件夹
-    fs.renameSync(path.join(DEFAULT_STATIC_PATH, TEMP_MUSIC_FOLDER, musicFileName), path.join(DEFAULT_STATIC_PATH, MUSIC_FOLDER, musicFileName))
-    // 剪切临时音乐封面文件夹中的音乐封面到持久化音乐封面文件夹
-    fs.renameSync(path.join(DEFAULT_STATIC_PATH, TEMP_COVER_FOLDER, musicCoverFileName), path.join(DEFAULT_STATIC_PATH, COVER_FOLDER, musicCoverFileName))
+    // 持久化临时文件夹中的临时音乐文件、音乐封面和临时播放音乐文件
+    // 移动临时播放音乐文件夹中的播放音乐文件到持久化播放音乐文件夹中
+    let playFileName = `${songId}.mp3`
+    fse.moveSync(path.join(DEFAULT_STATIC_PATH, TEMP_PLAY_MUSIC_FOLDER, playFileName), path.join(userPlayMusicFileDir, playFileName))
+    // 移动临时音乐文件夹中的音乐文件到持久化音乐文件夹
+    fse.moveSync(path.join(DEFAULT_STATIC_PATH, TEMP_MUSIC_FOLDER, musicFileName), path.join(userMusicFileDir, musicFileName))
+    // 移动临时音乐封面文件夹中的音乐封面到持久化音乐封面文件夹
+    fse.moveSync(path.join(DEFAULT_STATIC_PATH, TEMP_COVER_FOLDER, musicCoverFileName), path.join(userMusicCoverFileDir, musicCoverFileName))
 
     // 准备数据 插入数据库
     // 查询数据库编码类型

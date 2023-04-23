@@ -62,8 +62,8 @@ export default {
         {
           title: 'Little Snowflake',
           artist: '花近 feat. ryuryu',
-          src: `${process.env.VUE_APP_REQUEST_URL}/playMusic/eaa0b64708126a14e1598c1456a50a421680533414029.mp3`,
-          pic: `${process.env.VUE_APP_REQUEST_URL}/cover/eaa0b64708126a14e1598c1456a50a421680533414029.jpg`
+          src: `${process.env.VUE_APP_REQUEST_URL}/df64172568e6614d23046b50618636ce1681897545891.mp3`,
+          pic: `${process.env.VUE_APP_REQUEST_URL}/df64172568e6614d23046b50618636ce1681897545891.jpg`
         }
       ]
     }
