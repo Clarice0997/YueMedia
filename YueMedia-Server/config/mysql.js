@@ -1,5 +1,6 @@
 // import module
 const mysql = require('mysql')
+const { SqlRecord } = require('../models/sqlRecordModel')
 
 // mysql pool
 const MySQLConnectionPool = mysql.createPool({
@@ -38,8 +39,6 @@ function transformResult(result) {
   return result
 }
 
-// TODO: SQL语句响应状态记录
-
 // MySQL Handler
 const mysqlHandler = async (sql, value) => {
   // 从连接池中获取连接
@@ -47,12 +46,35 @@ const mysqlHandler = async (sql, value) => {
     try {
       await MySQLConnectionPool.getConnection(async (err, connection) => {
         if (err) throw new Error(err)
+        // 记录开始时间
+        const startTime = Date.now()
         await connection.query(sql, value, async (err, result) => {
-          console.log(sql)
-          if (err) throw new Error(err)
+          // 记录结束时间
+          const endTime = Date.now()
+          if (err) {
+            // SQL 响应时间
+            const responseTime = endTime - startTime
+            // 保存 SQL 记录
+            const newSqlRecord = new SqlRecord({
+              sql,
+              status: 'failure',
+              responseTime
+            })
+            await newSqlRecord.save()
+            throw new Error(err)
+          }
           let data = await transformResult(result)
           connection.release()
           resolve(data)
+          // SQL 响应时间
+          const responseTime = endTime - startTime
+          // 保存 SQL 记录
+          const newSqlRecord = new SqlRecord({
+            sql,
+            status: 'success',
+            responseTime
+          })
+          await newSqlRecord.save()
         })
       })
     } catch (err) {

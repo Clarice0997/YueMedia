@@ -13,7 +13,7 @@ const authHandler = async req => {
   try {
     const JsonWebToken = await decryptJsonWebToken(authorization.split(' ').pop())
     if (JsonWebToken) {
-      console.log('校验通过=>' + req.originalUrl)
+      console.log(JsonWebToken.username + ' 校验通过=> ' + req.originalUrl)
       return JsonWebToken
     } else {
       console.log('校验失败=>' + req.originalUrl)
