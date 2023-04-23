@@ -100,7 +100,11 @@ const uploadConvertMusicService = async (files, fileNames) => {
   }
 }
 
-// 删除待转码音乐文件 Service
+/**
+ * 删除待转码音乐文件 Service
+ * @param targetFile
+ * @returns
+ */
 const deleteConvertMusicService = async targetFile => {
   try {
     // 数据校验
@@ -144,7 +148,10 @@ const deleteConvertMusicService = async targetFile => {
   }
 }
 
-// 获取支持音乐格式 Service
+/**
+ * 获取支持音乐格式 Service
+ * @returns
+ */
 const getSupportMusicCodecService = async () => {
   try {
     // 查询数据
@@ -166,7 +173,12 @@ const getSupportMusicCodecService = async () => {
   }
 }
 
-// 提交音频转码任务 Service
+/**
+ * 提交音频转码任务 Service
+ * @param tasks
+ * @param user
+ * @returns
+ */
 const submitMusicConvertTaskService = async (tasks, user) => {
   try {
     // 判断参数是否合法
@@ -207,7 +219,10 @@ const submitMusicConvertTaskService = async (tasks, user) => {
   }
 }
 
-// 获取音频转码统计数据 Service
+/**
+ * 获取音频转码统计数据 Service
+ * @returns
+ */
 const getMusicConvertAnalyseService = async () => {
   try {
     // 从 Redis 中取出音频转码统计数据缓存

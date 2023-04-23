@@ -63,6 +63,8 @@ app.use('/apis/music', require('./controllers/MusicController'))
 app.use('/apis/data', require('./controllers/DataController'))
 // 音乐转换路由
 app.use('/apis/convert', require('./controllers/MusicConvertController'))
+// 错误记录路由
+app.use('/apis/error', require('./controllers/ErrorHandlerController'))
 
 // 连接测试接口
 app.get('/', (req, res) => {

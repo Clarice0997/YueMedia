@@ -26,7 +26,7 @@ const StringCaptchaConfig = {
 }
 
 /**
- * generate captcha
+ * 验证码生成 Service
  * @param {*} type
  * @returns
  */
@@ -75,7 +75,7 @@ async function generateSafeCode(type) {
 }
 
 /**
- * validate SafeCode
+ * 验证验证码 Service
  * @param {*} type
  * @param {*} answer
  * @param {*} uuid

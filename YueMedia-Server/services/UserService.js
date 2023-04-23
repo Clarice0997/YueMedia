@@ -8,7 +8,7 @@ const { ServiceErrorHandler } = require('../middlewares/ErrorCatcher')
 const { calculateLoginRecords } = require('../utils/redis/calculateLoginRecords')
 
 /**
- * loginService
+ * 登录 Service
  * @param {*} username
  * @param {*} password
  * @param {*} ip
@@ -75,7 +75,7 @@ async function loginService(username, password, ip) {
 }
 
 /**
- * registerService
+ * 注册 Service
  * @param {*} param0
  * @returns
  */

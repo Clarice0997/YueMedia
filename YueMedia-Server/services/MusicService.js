@@ -20,7 +20,7 @@ const DEFAULT_STATIC_PATH = process.env.DEFAULT_STATIC_PATH
 const TEMP_PLAY_MUSIC_FOLDER = process.env.TEMP_PLAY_MUSIC_FOLDER
 
 /**
- * 上传音乐文件
+ * 上传音乐文件 Service
  * @param musicFile
  * @param mimetype
  * @returns
@@ -186,7 +186,7 @@ const uploadMusicService = async (musicFile, mimetype) => {
 }
 
 /**
- * 上传音乐封面
+ * 上传音乐封面 Service
  * @param musicCoverFile
  * @param musicName
  * @param originCoverName
@@ -229,7 +229,7 @@ const uploadMusicCoverService = async (musicCoverFile, musicName, originCoverNam
 }
 
 /**
- * 上传音乐数据
+ * 上传音乐数据 Service
  * @param data
  * @param userData
  * @returns
@@ -299,7 +299,7 @@ const uploadMusicDataService = async (data, userData) => {
 }
 
 /**
- * 删除临时音乐文件数据
+ * 删除临时音乐文件数据 Service
  * @param musicName
  * @param coverName
  * @returns {Promise<{code: number, data: {message}}|{code: number, data: {message: string}}>}
