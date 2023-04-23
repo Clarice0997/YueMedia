@@ -6,7 +6,7 @@ const { updateAudioConvertQueues } = require('../../models/audioConvertQueueMode
 const { audioConvertRecord } = require('../../models/audioConvertRecordModel')
 const { calculateMusicConvertRecord } = require('./calculateMusicConvertRecord')
 const fs = require('fs')
-const fse = require('fs-extra')
+const fsPlus = require('fs-extra')
 const { dirCompressing } = require('../dirCompressing')
 const { musicConvertErrorHandler } = require('../../middlewares/ErrorCatcher')
 
@@ -109,7 +109,7 @@ async function processAudioQueue() {
             // 任务输出压缩包
             await dirCompressing(outputDir, path.join(DEFAULT_STATIC_PATH, CONVERT_MUSIC_FOLDER, `${taskDetail.taskId}.zip`), 'zip')
             // 删除原文件夹
-            fse.removeSync(outputDir)
+            fsPlus.removeSync(outputDir)
           } else {
             await updateAudioConvertQueues(taskDetail.taskId, 4, new Date())
           }
