@@ -36,6 +36,22 @@ audioConvertQueueSchema.virtual('processTime').get(function () {
   }
 })
 
+// 过期状态改变 静态方法
+audioConvertQueueSchema.statics.updateStatus = function () {
+  const oneHour = 60 * 60 * 1000
+  const now = new Date()
+  this.find({
+    status: 2,
+    finishedAt: {
+      $lt: new Date(now - oneHour)
+    }
+  })
+    .updateMany({
+      status: 3
+    })
+    .exec()
+}
+
 const AudioConvertQueues = mongoose.model('audio_convert_queues', audioConvertQueueSchema)
 
 // 插入音频转码任务

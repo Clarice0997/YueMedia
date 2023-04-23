@@ -44,6 +44,9 @@ require('./config/DelTempFile')
 // 初始化 Redis 装载数据
 require('./utils/redis/initRedis')
 
+// 初始化定时任务
+require('./utils/interval/initInterval')
+
 // 使用 morgan 中间件记录日志
 app.use(require('./config/morganLog'))
 
