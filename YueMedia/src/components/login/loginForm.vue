@@ -103,6 +103,7 @@ export default {
       // 校验登录表单是否合法
       this.$refs.form.validate(async valid => {
         if (valid) {
+          // TODO: 手机端或宽高比过低的设备禁止登录 移动端适配未实现
           // Loading遮罩
           this.fullscreenLoading = true
           // 加载按钮

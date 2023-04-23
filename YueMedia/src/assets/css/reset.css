@@ -132,3 +132,9 @@ a {
     list-style: none;
     text-decoration: none;
 }
+
+html,
+body {
+    margin: 0;
+    height: 100%;
+}

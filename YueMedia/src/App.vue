@@ -12,6 +12,11 @@
   font-family: '阿里巴巴普惠体 2.0 65 Medium', sans-serif;
 }
 
+#app {
+  margin: 0;
+  height: 100%;
+}
+
 @font-face {
   font-family: '阿里巴巴普惠体 2.0 65 Medium';
   src: url('@/assets/font/Alibaba_PuHuiTi_2.0_65_Medium_65_Medium.ttf') format('truetype');

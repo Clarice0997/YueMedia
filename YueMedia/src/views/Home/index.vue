@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="height: 100%">
     <el-container>
       <el-header>
         <div class="logo-container">
@@ -29,7 +29,6 @@
           </el-menu>
         </el-aside>
         <el-main>
-          <div class="page-bg"></div>
           <div class="main-container">
             <router-view></router-view>
           </div>
@@ -37,6 +36,7 @@
         </el-main>
       </el-container>
     </el-container>
+    <div class="page-bg"></div>
     <!--  TODO: 删除音乐列表，需要修改原组件，尝试使用 patch-package  -->
     <a-player :music="audio[0]" :list="audio" :volume="0.4" listFolded repeat="repeat-all" />
   </div>
@@ -117,27 +117,16 @@ export default {
         this.asideWidth = '0px'
         this.toggleClass = 'el-icon-s-unfold'
       }
-      // 判断当前是否处于首页 重绘 Echarts (解决方案)
-      // if (this.$router.currentRoute.fullPath === '/home/homepage') {
-      //   let isTransitioning = true
-      //   // 监听过渡效果结束事件
-      //   this.$nextTick(() => {
-      //     const elAside = this.$refs.elAside.$el
-      //     // 添加过渡效果的监听器
-      //     elAside.addEventListener('transitionend', () => {
-      //       if (isTransitioning) {
-      //         store.dispatch('dataCharts/redrawEcharts')
-      //         isTransitioning = false
-      //       }
-      //     })
-      //   })
-      // }
     }
   }
 }
 </script>
 
 <style lang="less" scoped>
+.el-container {
+  height: 100%;
+}
+
 .el-header {
   background-image: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%);
   color: #fff;
@@ -216,7 +205,7 @@ export default {
 
 .el-aside {
   transition: 0.5s;
-  height: calc(100vh - 60px);
+  //height: calc(100vh - 60px);
   background-color: #545c64;
 
   .el-menu {
@@ -243,17 +232,18 @@ export default {
 .page-bg {
   display: block;
   position: fixed;
+  left: 0;
+  top: 0;
   width: 100%;
   height: 100%;
-  z-index: 1;
+  z-index: -1;
   background-size: cover !important;
   background-attachment: fixed !important;
   background: url('@/assets/image/bg.jpg'), no-repeat;
 }
 
 .el-main {
-  height: calc(100vh - 60px);
-  background-color: #e9eef3;
+  //height: calc(100vh - 60px);
   color: #333;
   text-align: center;
   padding: 0;

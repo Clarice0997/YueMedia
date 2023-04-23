@@ -7,13 +7,14 @@
       <el-button type="warning" icon="el-icon-takeaway-box">批量导出</el-button>
       <el-button type="danger" icon="el-icon-delete">批量删除</el-button>
     </el-card>
+    <el-card shadow="hover" class="body-card">
+      <musicManagerTable></musicManagerTable>
+    </el-card>
     <uploadMusicDialog :dialog-insert-music-form-visible="dialogInsertMusicFormVisible" @hideInsertMusicDialogHandler="hideInsertMusicDialogHandler"></uploadMusicDialog>
   </div>
 </template>
 
 <script>
-import { selectMusicListAPI } from '@/apis/musicAPI'
-
 export default {
   name: 'MusicManageSystemMusicManagerView',
 
@@ -34,13 +35,10 @@ export default {
     }
   },
 
-  async mounted() {
-    await selectMusicListAPI()
-  },
-
   components: {
     // 懒加载组件
-    uploadMusicDialog: () => import('@/components/musicManager/uploadMusicDialog.vue')
+    uploadMusicDialog: () => import('@/components/musicManager/uploadMusicDialog.vue'),
+    musicManagerTable: () => import('@/components/musicManager/musicManagerTable.vue')
   },
 
   methods: {
@@ -68,5 +66,9 @@ export default {
 .top-card,
 .body-card {
   margin: 10px;
+}
+
+.body-card {
+  margin-bottom: 30px;
 }
 </style>

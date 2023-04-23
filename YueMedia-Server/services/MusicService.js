@@ -399,13 +399,21 @@ const selectMusicListService = async (pageNumber, pageSize, uno) => {
       }
     }
 
-    // 查询数据
+    // 查询音频数据
     const musicData = await mysqlHandler('select * from music where upload_by = ? limit ?,?', [uno, (pageNumber - 1) * pageSize, Number(pageSize)])
+    // 查询编码格式
+    const codecData = await mysqlHandler('select * from music_codec')
+    // 处理返回数据
+    const filterMusicData = musicData.map(music => {
+      let filterMusic = music
+      filterMusic['music_codec'] = codecData.find(codec => codec.id === filterMusic['music_codec']).codec
+      return filterMusic
+    })
 
     // Return
     return {
       code: 200,
-      data: { musicData, count }
+      data: { musicData: filterMusicData, count }
     }
   } catch (error) {
     ServiceErrorHandler(error)

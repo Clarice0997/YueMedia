@@ -6,6 +6,7 @@ const { generateJsonWebToken } = require('../utils/Jwt')
 const { loginRecord } = require('../models/loginRecordModel')
 const { ServiceErrorHandler } = require('../middlewares/ErrorCatcher')
 const { calculateLoginRecords } = require('../utils/redis/calculateLoginRecords')
+const { hsetRedis, hgetRedis } = require('../utils/redis/RedisHandler')
 
 /**
  * 登录 Service
@@ -36,6 +37,24 @@ async function loginService(username, password, ip) {
         }
       }
     }
+    // IP 锁定
+    if (+(await hgetRedis('login_ip_limit_lock', ip)) >= +process.env.LoginIpLimitTime) {
+      return {
+        code: 400,
+        data: {
+          message: 'IP已锁定！'
+        }
+      }
+    }
+    // 账号锁定
+    if (+(await hgetRedis('login_limit_lock', username)) >= +process.env.LoginLimitTime) {
+      return {
+        code: 400,
+        data: {
+          message: '登录已锁定！'
+        }
+      }
+    }
     // 用户存在则比对密码是否相同
     let flag = compareSync(password, user[0].password)
     if (flag) {
@@ -56,6 +75,20 @@ async function loginService(username, password, ip) {
         }
       }
     } else {
+      // IP 锁定
+      const loginIpTimes = await hgetRedis('login_ip_limit_lock', ip)
+      if (loginIpTimes) {
+        await hsetRedis('login_ip_limit_lock', ip, +loginIpTimes + 1, process.env.LoginIpLimit)
+      } else {
+        await hsetRedis('login_ip_limit_lock', ip, 1, process.env.LoginIpLimit)
+      }
+      // 登录账号锁定
+      const loginTimes = await hgetRedis('login_limit_lock', username)
+      if (loginTimes) {
+        await hsetRedis('login_limit_lock', username, +loginTimes + 1, process.env.LoginLimit)
+      } else {
+        await hsetRedis('login_limit_lock', username, 1, process.env.LoginLimit)
+      }
       return {
         code: 400,
         data: {
