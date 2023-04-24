@@ -1,29 +1,39 @@
 <template>
   <div>
-    <el-table ref="musicManagerTable" :data="musicData" tooltip-effect="dark" class="musicManagerTable" :row-class-name="tableRowClassName" max-height="900" :default-sort="{ prop: 'create_time', order: 'descending' }">
+    <el-table ref="musicManagerTable" :data="musicData" @selection-change="handleSelectionChange" tooltip-effect="dark" class="musicManagerTable" :row-class-name="tableRowClassName" max-height="900" :default-sort="{ prop: 'create_time', order: 'ascending' }">
       <!--  选择列  -->
       <el-table-column type="selection" width="55" align="center"></el-table-column>
       <!--  音频 ID  -->
-      <el-table-column label="ID" align="center" prop="song_id" sortable></el-table-column>
-      <!--  音频名列  -->
-      <el-table-column label="音频名" prop="song_name" align="center"></el-table-column>
-      <!--  专辑名   -->
-      <el-table-column label="专辑名" prop="album_name" sortable align="center"></el-table-column>
-      <!--  歌手   -->
-      <el-table-column label="歌手" prop="singer_name" sortable align="center"></el-table-column>
+      <el-table-column label="ID" align="center" width="150" prop="song_id" sortable></el-table-column>
+      <!--  封面  -->
+      <el-table-column label="封面" align="center" width="150">
+        <template slot-scope="scope">
+          <el-avatar shape="square" :size="100" fit="cover" :src="scope.row.music_cover_file_name | concatCoverUrl"></el-avatar>
+        </template>
+      </el-table-column>
+      <!--  音频名  -->
+      <el-table-column label="音频名" prop="song_name" width="150" align="center"></el-table-column>
       <!--  音频状态   -->
-      <el-table-column label="音频状态" prop="status" sortable align="center">
+      <el-table-column label="音频状态" prop="status" width="150" sortable align="center">
         <template slot-scope="scope">
           <el-tag size="medium" type="warning" v-if="scope.row.status === 1">私有</el-tag>
           <el-tag size="medium" type="success" v-else>公开</el-tag>
         </template>
       </el-table-column>
+      <!--  开放API地址  -->
+      <el-table-column label="开放API地址" prop="music_api" width="200" align="center">
+        <template slot-scope="scope"></template>
+      </el-table-column>
       <!--  音频编码格式  -->
-      <el-table-column label="编码格式" prop="music_codec" sortable align="center">
+      <el-table-column label="编码格式" prop="music_codec" width="150" sortable align="center">
         <template slot-scope="scope">
           <el-tag size="medium" type="success">{{ scope.row.music_codec }}</el-tag>
         </template>
       </el-table-column>
+      <!--  专辑名   -->
+      <el-table-column label="专辑名" prop="album_name" width="200" sortable align="center"></el-table-column>
+      <!--  歌手   -->
+      <el-table-column label="歌手" prop="singer_name" width="150" sortable align="center"></el-table-column>
       <!--  创建时间  -->
       <el-table-column label="创建时间" width="180" prop="create_time" sortable align="center">
         <template slot-scope="scope">
@@ -32,14 +42,32 @@
         </template>
       </el-table-column>
       <!--  文件大小  -->
-      <el-table-column label="文件大小" prop="song_size" sortable align="center">
+      <el-table-column label="文件大小" width="150" prop="song_size" sortable align="center">
         <template slot-scope="scope">
           <span>{{ (scope.row.song_size / 1024 / 1024) | numToFixed }} MB</span>
         </template>
       </el-table-column>
       <!--  年份  -->
       <el-table-column label="年份" prop="year" sortable align="center"></el-table-column>
-      <!--   TODO: 操作栏   -->
+      <!-- 操作列  -->
+      <el-table-column label="操作" fixed="right" width="200" align="center">
+        <template slot-scope="scope">
+          <div class="handler-list">
+            <p class="icon">
+              <img src="@/assets/image/icons/play.svg" />
+            </p>
+            <p class="icon">
+              <img src="@/assets/image/icons/download_from_the_cload.svg" />
+            </p>
+            <p class="icon">
+              <img src="@/assets/image/icons/settings.svg" />
+            </p>
+            <p class="icon">
+              <img src="@/assets/image/icons/delete_document.svg" />
+            </p>
+          </div>
+        </template>
+      </el-table-column>
       <!--  数据为空插槽  -->
       <template slot="empty">
         <div class="empty">
@@ -58,12 +86,14 @@
 <script>
 import { selectMusicListAPI } from '@/apis/musicAPI'
 import { formatDate } from '@/utils/formatDate'
+import store from '@/store'
 
 export default {
   name: 'musicManagerTable',
   data() {
     return {
       musicData: [],
+      selectedMusicData: [],
       pageNumber: 1,
       pageSize: 5,
       totalData: 0
@@ -83,6 +113,9 @@ export default {
     dateFormat(value, fmt = 'yyyy年MM月dd日') {
       const myDate = new Date(value)
       return formatDate(myDate, fmt)
+    },
+    concatCoverUrl(value) {
+      return `${process.env['VUE_APP_REQUEST_URL']}/cover/${store.state['userProfile'].userData.uno}/${value}`
     }
   },
   methods: {
@@ -100,6 +133,10 @@ export default {
         return 'warning-row'
       }
       return ''
+    },
+    // 选择列改变事件
+    handleSelectionChange(val) {
+      this.selectedMusicData = val
     },
     // 页面显示条数改变事件
     handleSizeChange(val) {
@@ -139,7 +176,29 @@ export default {
   }
 }
 
+.musicManagerTable::-webkit-scrollbar {
+  display: block;
+}
+
 .block {
   margin-top: 10px;
+}
+
+.handler-list {
+  display: flex;
+  justify-content: space-evenly;
+  padding: 10px;
+
+  .icon {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    transition: 0.3s;
+
+    img {
+      width: 24px;
+      height: 24px;
+    }
+  }
 }
 </style>

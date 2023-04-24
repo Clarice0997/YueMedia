@@ -10,6 +10,7 @@ const { spawnSync } = require('child_process')
 const { ServiceErrorHandler } = require('../middlewares/ErrorCatcher')
 const { ncmCracker } = require('../utils/music/ncmCracker')
 const { audioConvertRecord } = require('../models/audioConvertRecordModel')
+const { uploadMusicPromise } = require('../utils/uploadMusicPromise')
 
 // 存储文件位置常量
 const TEMP_MUSIC_FOLDER = process.env.TEMP_MUSIC_FOLDER
@@ -21,18 +22,18 @@ const DEFAULT_STATIC_PATH = process.env.DEFAULT_STATIC_PATH
 const TEMP_PLAY_MUSIC_FOLDER = process.env.TEMP_PLAY_MUSIC_FOLDER
 
 /**
- * 上传音乐文件 Service
+ * 上传音频文件 Service
  * @param musicFile
  * @param mimetype
  * @returns
  */
 const uploadMusicService = async (musicFile, mimetype) => {
   try {
-    // 根据音乐文件生成 MD5
+    // 根据音频文件生成 MD5
     const musicMD5 = await generateMD5(musicFile.buffer)
-    // 定义音乐保存名
+    // 定义音频保存名
     const musicName = musicMD5 + Date.now()
-    // 判断用户音乐文件夹是否存在 没有则创建新的文件夹
+    // 判断用户音频文件夹是否存在 没有则创建新的文件夹
     if (mimetype === 'application/octet-stream') {
       // NCM 格式处理
       // 解码 NCM
@@ -47,25 +48,25 @@ const uploadMusicService = async (musicFile, mimetype) => {
         }
       }
       const { musicFileName, mp3Buffer, originFilePath } = ncmData
-      // 获取音乐文件元数据
+      // 获取音频文件元数据
       const metadata = await mm.parseBuffer(mp3Buffer)
-      // 判断音乐封面是否存在
+      // 判断音频封面是否存在
       let coverData
       let musicCoverName = `${musicName}.jpg`
-      // 音乐封面存在存储音乐封面 如果不存在则采用默认音乐封面
+      // 音频封面存在存储音频封面 如果不存在则采用默认音频封面
       if (metadata.common.picture) {
         if (metadata.common.picture.length > 0) {
-          // 获取音乐封面图
+          // 获取音频封面图
           coverData = metadata.common.picture[0].data
-          // 生成音乐封面存储地址
+          // 生成音频封面存储地址
           const coverPath = path.join(DEFAULT_STATIC_PATH, TEMP_COVER_FOLDER, musicCoverName)
-          // 临时存储音乐封面
+          // 临时存储音频封面
           fs.writeFileSync(coverPath, coverData)
         }
       } else {
-        // 生成音乐封面存储地址
+        // 生成音频封面存储地址
         const coverPath = path.join(DEFAULT_STATIC_PATH, TEMP_COVER_FOLDER, musicCoverName)
-        // 临时存储音乐封面
+        // 临时存储音频封面
         fs.copyFileSync(path.join(__dirname, '..', 'public', 'cover.jpg'), coverPath)
       }
       // 存储临时播放文件
@@ -82,7 +83,7 @@ const uploadMusicService = async (musicFile, mimetype) => {
         // 等待转码结束判断是否成功 标准输出流和错误输出流
         if (result.status === 0) {
           endTime = new Date()
-          audioConvertRecord(musicName, 'uploadMusicService', musicFile.buffer.length, metadata.format.container, 'MPEG', endTime - startTime)
+          audioConvertRecord(musicName, 'uploadMusicService', musicFile.buffer.length, metadata.format.codec, 'MPEG', endTime - startTime)
         } else {
           throw new ffmpegError(result.stderr.toString('utf8'))
         }
@@ -108,31 +109,31 @@ const uploadMusicService = async (musicFile, mimetype) => {
         }
       }
     } else {
-      // 获取音乐文件元数据
+      // 获取音频文件元数据
       const metadata = await mm.parseBuffer(musicFile.buffer)
-      // 判断音乐封面是否存在
+      // 判断音频封面是否存在
       let coverData
       let musicCoverName = `${musicName}.jpg`
-      // 音乐封面存在存储音乐封面 如果不存在则采用默认音乐封面
+      // 音频封面存在存储音频封面 如果不存在则采用默认音频封面
       if (metadata.common.picture) {
         if (metadata.common.picture.length > 0) {
-          // 获取音乐封面图
+          // 获取音频封面图
           coverData = metadata.common.picture[0].data
-          // 生成音乐封面存储地址
+          // 生成音频封面存储地址
           const coverPath = path.join(DEFAULT_STATIC_PATH, TEMP_COVER_FOLDER, musicCoverName)
-          // 临时存储音乐封面
+          // 临时存储音频封面
           fs.writeFileSync(coverPath, coverData)
         }
       } else {
-        // 生成音乐封面存储地址
+        // 生成音频封面存储地址
         const coverPath = path.join(DEFAULT_STATIC_PATH, TEMP_COVER_FOLDER, musicCoverName)
-        // 临时存储音乐封面
+        // 临时存储音频封面
         fs.copyFileSync(path.join(__dirname, '..', 'public', 'cover.jpg'), coverPath)
       }
-      // 生成音乐文件存储地址
+      // 生成音频文件存储地址
       const musicFileName = musicName + path.extname(musicFile.originalname)
       const musicPath = path.join(DEFAULT_STATIC_PATH, TEMP_MUSIC_FOLDER, musicFileName)
-      // 临时存储音乐文件
+      // 临时存储音频文件
       fs.writeFileSync(musicPath, musicFile.buffer)
       // 存储临时播放文件
       const tempPlayFilePath = path.join(DEFAULT_STATIC_PATH, TEMP_PLAY_MUSIC_FOLDER, `${musicName}.mp3`)
@@ -148,7 +149,7 @@ const uploadMusicService = async (musicFile, mimetype) => {
         // 等待转码结束判断是否成功 标准输出流和错误输出流
         if (result.status === 0) {
           endTime = new Date()
-          audioConvertRecord(musicName, 'uploadMusicService', musicFile.buffer.length, metadata.format.container, 'MPEG 1 Layer 3', endTime - startTime)
+          audioConvertRecord(musicName, 'uploadMusicService', musicFile.buffer.length, metadata.format.codec, 'MPEG 1 Layer 3', endTime - startTime)
         } else {
           throw new ffmpegError(result.stderr.toString('utf8'))
         }
@@ -186,7 +187,7 @@ const uploadMusicService = async (musicFile, mimetype) => {
 }
 
 /**
- * 上传音乐封面 Service
+ * 上传音频封面 Service
  * @param musicCoverFile
  * @param musicName
  * @param originCoverName
@@ -206,7 +207,7 @@ const uploadMusicCoverService = async (musicCoverFile, musicName, originCoverNam
     // 删除原封面文件
     const originCoverPath = path.join(DEFAULT_STATIC_PATH, TEMP_COVER_FOLDER, originCoverName)
     fs.unlinkSync(originCoverPath)
-    // 将新音乐封面文件写入临时文件夹
+    // 将新音频封面文件写入临时文件夹
     const coverPath = path.join(DEFAULT_STATIC_PATH, TEMP_COVER_FOLDER, `${musicName}${path.extname(musicCoverFile.originalname)}`)
     fs.writeFileSync(coverPath, musicCoverFile.buffer)
     // 返回成功消息对象
@@ -229,21 +230,21 @@ const uploadMusicCoverService = async (musicCoverFile, musicName, originCoverNam
 }
 
 /**
- * 上传音乐数据 Service
+ * 上传音频数据 Service
  * @param data
  * @param userData
  * @returns
  */
 const uploadMusicDataService = async (data, userData) => {
   try {
-    // 获取音乐数据上传所需参数
+    // 获取音频数据上传所需参数
     let { songId, songName, songSize, musicCodec, musicCoverFileName, musicFileName, singerName, albumName, year } = data
     // 判断参数是否齐全
     if (!(songId && songName && songSize && musicCodec && musicCoverFileName && musicFileName)) {
       return {
         code: 400,
         data: {
-          message: '音乐数据上传参数不合法'
+          message: '音频数据上传参数不合法'
         }
       }
     }
@@ -252,7 +253,7 @@ const uploadMusicDataService = async (data, userData) => {
       return {
         code: 400,
         data: {
-          message: '音乐文件不存在'
+          message: '音频文件不存在'
         }
       }
     }
@@ -262,13 +263,13 @@ const uploadMusicDataService = async (data, userData) => {
     const userMusicCoverFileDir = path.join(DEFAULT_STATIC_PATH, COVER_FOLDER, userData.uno)
     fse.ensureDirSync(userMusicFileDir, {}) && fse.ensureDirSync(userPlayMusicFileDir, {}) && fse.ensureDirSync(userMusicCoverFileDir, {})
 
-    // 持久化临时文件夹中的临时音乐文件、音乐封面和临时播放音乐文件
-    // 移动临时播放音乐文件夹中的播放音乐文件到持久化播放音乐文件夹中
+    // 持久化临时文件夹中的临时音频文件、音频封面和临时播放音频文件
+    // 移动临时播放音频文件夹中的播放音频文件到持久化播放音频文件夹中
     let playFileName = `${songId}.mp3`
     fse.moveSync(path.join(DEFAULT_STATIC_PATH, TEMP_PLAY_MUSIC_FOLDER, playFileName), path.join(userPlayMusicFileDir, playFileName))
-    // 移动临时音乐文件夹中的音乐文件到持久化音乐文件夹
+    // 移动临时音频文件夹中的音频文件到持久化音频文件夹
     fse.moveSync(path.join(DEFAULT_STATIC_PATH, TEMP_MUSIC_FOLDER, musicFileName), path.join(userMusicFileDir, musicFileName))
-    // 移动临时音乐封面文件夹中的音乐封面到持久化音乐封面文件夹
+    // 移动临时音频封面文件夹中的音频封面到持久化音频封面文件夹
     fse.moveSync(path.join(DEFAULT_STATIC_PATH, TEMP_COVER_FOLDER, musicCoverFileName), path.join(userMusicCoverFileDir, musicCoverFileName))
 
     // 准备数据 插入数据库
@@ -276,7 +277,7 @@ const uploadMusicDataService = async (data, userData) => {
     const codecData = await mysqlHandler(`select id from music_codec where codec = ?`, [musicCodec])
     const codecId = codecData[0].id
 
-    // 插入音乐表
+    // 插入音频表
     const query = 'insert into music(song_id,upload_by,song_name,song_size,music_codec,play_file_name,music_cover_file_name,origin_file_name,singer_name,album_name,year) values(?,?,?,?,?,?,?,?,?,?,?)'
     const params = [songId, userData.uno, songName, songSize, codecId, playFileName, musicCoverFileName, musicFileName, singerName ? singerName : null, albumName ? albumName : null, year ? year : null]
     await mysqlHandler(query, params)
@@ -284,7 +285,7 @@ const uploadMusicDataService = async (data, userData) => {
     return {
       code: 200,
       data: {
-        message: '插入音乐数据成功'
+        message: '插入音频数据成功'
       }
     }
   } catch (error) {
@@ -299,7 +300,7 @@ const uploadMusicDataService = async (data, userData) => {
 }
 
 /**
- * 删除临时音乐文件数据 Service
+ * 删除临时音频文件数据 Service
  * @param musicName
  * @param coverName
  * @returns {Promise<{code: number, data: {message}}|{code: number, data: {message: string}}>}
@@ -315,7 +316,7 @@ const deleteTempMusicService = async (musicName, coverName) => {
         }
       }
     }
-    // 删除临时音乐文件和临时封面文件
+    // 删除临时音频文件和临时封面文件
     const tempMusicFile = path.join(DEFAULT_STATIC_PATH, TEMP_MUSIC_FOLDER, musicName)
     const tempCoverFile = path.join(DEFAULT_STATIC_PATH, TEMP_COVER_FOLDER, coverName)
     // 判断文件是否存在再删除
@@ -349,7 +350,7 @@ const deleteTempMusicService = async (musicName, coverName) => {
 }
 
 /**
- * 获取个人音乐列表、音乐数量 Service
+ * 获取个人音频列表、音频数量 Service
  * @param pageNumber
  * @param pageSize
  * @param uno
@@ -377,12 +378,12 @@ const selectMusicListService = async (pageNumber, pageSize, uno) => {
     // 查询数据条数
     const [{ count }] = await mysqlHandler('select count(*) count from music where upload_by = ?', [uno])
 
-    // 判断是否存在上传音乐数据
+    // 判断是否存在上传音频数据
     if (count === 0) {
       return {
         code: 200,
         data: {
-          message: '不存在上传音乐数据',
+          message: '不存在上传音频数据',
           count: 0
         }
       }
@@ -426,10 +427,43 @@ const selectMusicListService = async (pageNumber, pageSize, uno) => {
   }
 }
 
+/**
+ * 批量上传音频文件 Service
+ * @param musicFiles
+ * @param userData
+ * @returns
+ */
+const uploadMusicBatchService = async (musicFiles, userData) => {
+  try {
+    const musicFilePromiseArr = []
+    musicFiles.forEach(file => {
+      musicFilePromiseArr.push(uploadMusicPromise(file, userData))
+    })
+
+    const datas = await Promise.all(musicFilePromiseArr)
+    return {
+      code: 200,
+      data: {
+        message: '批量上传音频文件成功！',
+        datas
+      }
+    }
+  } catch (error) {
+    ServiceErrorHandler(error)
+    return {
+      code: 500,
+      data: {
+        message: error.message
+      }
+    }
+  }
+}
+
 module.exports = {
   uploadMusicService,
   uploadMusicCoverService,
   uploadMusicDataService,
   deleteTempMusicService,
-  selectMusicListService
+  selectMusicListService,
+  uploadMusicBatchService
 }

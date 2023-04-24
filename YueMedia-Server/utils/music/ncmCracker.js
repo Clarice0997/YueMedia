@@ -25,9 +25,9 @@ const ncmCracker = async (file, musicName) => {
   })
   // Promise异步 等待文件转码成功（检测是否转码结束）
   return new Promise(resolve => {
-    // 音乐文件
+    // 音频文件
     let mp3Buffer
-    // 音乐文件可能有两种类型 mp3 / flac
+    // 音频文件可能有两种类型 mp3 / flac
     const tempMp3Path = path.join(process.env.DEFAULT_STATIC_PATH, process.env.TEMP_MUSIC_FOLDER, `${musicName}.mp3`)
     const tempFlacPath = path.join(process.env.DEFAULT_STATIC_PATH, process.env.TEMP_MUSIC_FOLDER, `${musicName}.flac`)
     // 循环查看文件是否存在

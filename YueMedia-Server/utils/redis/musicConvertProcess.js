@@ -104,8 +104,6 @@ async function processAudioQueue() {
               // 保存音频转换记录
               audioConvertRecord(songId, type, size, originCodec, targetCodec, convertTimeMS)
             })
-            // 更新 Redis 总音乐转换数据缓存
-            await calculateMusicConvertRecord()
             // 任务输出压缩包
             await dirCompressing(outputDir, path.join(DEFAULT_STATIC_PATH, CONVERT_MUSIC_FOLDER, `${taskDetail.taskId}.zip`), 'zip')
             // 删除原文件夹
@@ -117,6 +115,10 @@ async function processAudioQueue() {
         .catch(async error => {
           await musicConvertErrorHandler(error)
           await updateAudioConvertQueues(taskDetail.taskId, 4, new Date())
+        })
+        .finally(async () => {
+          // 更新 Redis 总音乐转换数据缓存
+          await calculateMusicConvertRecord()
         })
       isProcessing = false
       // 重启计时器

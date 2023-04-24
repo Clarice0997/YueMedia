@@ -31,7 +31,9 @@ router.beforeEach(async (to, from, next) => {
 
   // 判断 Token 是否有效，失效则清空 Token
   if (hasToken) {
-    verify().catch(async ({ response }) => {
+    try {
+      await verify()
+    } catch ({ response }) {
       if (response.data.code !== 200) {
         hasToken = undefined
         await deleteCookie('Access-Token')
@@ -39,7 +41,7 @@ router.beforeEach(async (to, from, next) => {
         await store.dispatch('dynamicRoutes/asyncClearRoutes')
         return next('/login/login')
       }
-    })
+    }
   }
 
   // 判断跳转界面是否需要权限

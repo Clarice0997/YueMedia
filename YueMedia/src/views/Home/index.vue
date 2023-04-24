@@ -3,7 +3,7 @@
     <el-container>
       <el-header>
         <div class="logo-container">
-          <div class="logo">
+          <div class="logo" @click="clickLogoHandler">
             <h3>悦音 - 媒体管理一站式平台</h3>
           </div>
           <div class="toggle-container" @click="toggleClick">
@@ -117,6 +117,12 @@ export default {
         this.asideWidth = '0px'
         this.toggleClass = 'el-icon-s-unfold'
       }
+    },
+    // 点击 LOGO 跳转首页
+    clickLogoHandler() {
+      if (this.$router.currentRoute.name !== 'HomePage') {
+        this.$router.replace('/home')
+      }
     }
   }
 }
@@ -142,14 +148,20 @@ export default {
     .logo {
       width: 300px;
       line-height: 60px;
+      cursor: pointer;
+      transition: 0.3s;
+      color: #fafafa;
 
       h3 {
-        color: #fafafa;
         font-size: 20px;
         font-weight: 300;
         text-align: center;
         font-family: '阿里妈妈东方大楷 Regular', sans-serif;
       }
+    }
+
+    .logo:hover {
+      color: #d6fff3;
     }
 
     .toggle-container {
@@ -256,6 +268,10 @@ export default {
   z-index: 2;
   height: 100%;
   display: flex;
+}
+
+.main-container::-webkit-scrollbar {
+  display: none;
 }
 
 .footer {

@@ -39,7 +39,7 @@ const convertFileUpload = multer({
 })
 
 /**
- * @api {POST} /apis/convert/upload 上传待转码音乐文件接口
+ * @api {POST} /apis/convert/upload 上传待转码音频文件接口
  * @apiName uploadConvertMusic
  * @apiGroup MusicConvert
  * @apiName MusicConvert/uploadConvertMusic

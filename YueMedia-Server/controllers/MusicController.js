@@ -3,11 +3,11 @@ const router = require('express').Router()
 const { auth } = require('../middlewares/Auth')
 const multer = require('multer')
 const path = require('path')
-const { uploadMusicService, uploadMusicCoverService, uploadMusicDataService, deleteTempMusicService, selectMusicListService } = require('../services/MusicService')
+const { uploadMusicService, uploadMusicCoverService, uploadMusicDataService, deleteTempMusicService, selectMusicListService, uploadMusicBatchService } = require('../services/MusicService')
 const { errorHandler, multerErrorHandler } = require('../middlewares/ErrorCatcher')
 const { MulterError } = require('multer')
 
-// 音乐文件上传配置
+// 音频文件上传配置
 const musicUpload = multer({
   limits: { fileSize: 100000000, files: 1 },
   fileFilter: function (req, file, cb) {
@@ -28,14 +28,14 @@ const musicUpload = multer({
 })
 
 /**
- * @api {POST} /apis/music/upload/music 音乐文件上传接口
+ * @api {POST} /apis/music/upload/music 音频文件上传接口
  * @apiName UploadMusicFile
  * @apiGroup Music
  * @apiName Music/UploadMusicFile
  * @apiPermission User
  * @apiHeader {String} Authorization JWT鉴权
  * @apiHeader {String} Content-Type multipart/form-data
- * @apiBody {Buffer} musicFile 音乐文件
+ * @apiBody {Buffer} musicFile 音频文件
  */
 router.post(
   '/upload/music',
@@ -69,7 +69,7 @@ router.post(
   }
 )
 
-// 上传音乐图片文件配置
+// 上传音频图片文件配置
 const musicCoverUpload = multer({
   limits: { fileSize: 10000000, files: 1 },
   fileFilter: function (req, file, cb) {
@@ -84,16 +84,16 @@ const musicCoverUpload = multer({
 })
 
 /**
- * @api {POST} /apis/music/upload/music/cover 音乐封面上传接口
+ * @api {POST} /apis/music/upload/music/cover 音频封面上传接口
  * @apiName UploadMusicCover
  * @apiGroup Music
  * @apiName Music/UploadMusicCover
  * @apiPermission User
  * @apiHeader {String} Authorization JWT鉴权
  * @apiHeader {String} Content-Type multipart/form-data
- * @apiBody {Buffer} musicCoverFile 音乐封面文件
- * @apiBody {String} musicName 音乐文件名
- * @apiBody {String} originCoverName 原始音乐封面文件名
+ * @apiBody {Buffer} musicCoverFile 音频封面文件
+ * @apiBody {String} musicName 音频文件名
+ * @apiBody {String} originCoverName 原始音频封面文件名
  */
 router.post(
   '/upload/music/cover',
@@ -128,20 +128,20 @@ router.post(
 )
 
 /**
- * @api {POST} /apis/music/upload/music/data 上传音乐数据接口
+ * @api {POST} /apis/music/upload/music/data 上传音频数据接口
  * @apiName UploadMusicData
  * @apiGroup Music
  * @apiName Music/UploadMusicData
  * @apiPermission User
  * @apiHeader {String} Authorization JWT鉴权
- * @apiBody {String} songId 音乐ID
- * @apiBody {String} songName 音乐名
- * @apiBody {Number} songSize 音乐大小(Byte)
- * @apiBody {String} musicCodec 音乐编码格式
- * @apiBody {String} musicCoverFileName 音乐封面文件名
- * @apiBody {String} musicFileName 音乐文件名
- * @apiBody {String} [singerName] 音乐歌手名
- * @apiBody {String} [albumName] 音乐专辑名
+ * @apiBody {String} songId 音频ID
+ * @apiBody {String} songName 音频名
+ * @apiBody {Number} songSize 音频大小(Byte)
+ * @apiBody {String} musicCodec 音频编码格式
+ * @apiBody {String} musicCoverFileName 音频封面文件名
+ * @apiBody {String} musicFileName 音频文件名
+ * @apiBody {String} [singerName] 音频歌手名
+ * @apiBody {String} [albumName] 音频专辑名
  * @apiBody {Number} [year] 年份
  */
 router.post('/upload/music/data', auth, async (req, res) => {
@@ -156,18 +156,18 @@ router.post('/upload/music/data', auth, async (req, res) => {
 })
 
 /**
- * @api {DELETE} /apis/music/upload/music/temp 删除临时音乐数据接口
+ * @api {DELETE} /apis/music/upload/music/temp 删除临时音频数据接口
  * @apiName DeleteTempMusicData
  * @apiGroup Music
  * @apiName Music/DeleteTempMusicData
  * @apiPermission User
  * @apiHeader {String} Authorization JWT鉴权
- * @apiParam {String} musicName 音乐文件名
+ * @apiParam {String} musicName 音频文件名
  * @apiParam {String} coverName 封面文件名
  */
 router.delete('/upload/music/temp', auth, async (req, res) => {
   try {
-    // 获取临时音乐 ID
+    // 获取临时音频 ID
     const { musicName, coverName } = req.query
     // Service
     const { data, code } = await deleteTempMusicService(musicName, coverName)
@@ -179,7 +179,7 @@ router.delete('/upload/music/temp', auth, async (req, res) => {
 })
 
 /**
- * @api {GET} /apis/music/ 获取个人音乐列表、音乐数量接口
+ * @api {GET} /apis/music/ 获取个人音频列表、音频数量接口
  * @apiName selectMusicList
  * @apiGroup Music
  * @apiName Music/selectMusicList
@@ -201,15 +201,75 @@ router.get('/', auth, async (req, res) => {
   }
 })
 
-// TODO: 获取音乐接口
+// 音频文件批量上传配置
+const musicBatchUpload = multer({
+  limits: { fileSize: 100000000, files: 5 },
+  fileFilter: function (req, file, cb) {
+    const allowedMimetypes = ['audio/mpeg', 'audio/wav', 'audio/flac', 'audio/aac', 'audio/ogg', 'audio/aiff', 'audio/alac', 'application/octet-stream']
+    const allowedFiletypes = ['mp3', 'wav', 'flac', 'aac', 'ogg', 'aiff', 'alac', 'ncm']
+
+    const mimetype = allowedMimetypes.indexOf(file.mimetype) !== -1
+    const extname = allowedFiletypes.indexOf(path.extname(file.originalname).toLowerCase().substring(1)) !== -1
+
+    req.mimetype = file.mimetype
+
+    if (mimetype && extname) {
+      return cb(null, true)
+    } else {
+      cb(new MulterError('仅允许 MP3，WAV，FLAC，NCM，AAC，OGG，AIFF，ALAC 格式的文件'))
+    }
+  }
+})
+
+/**
+ * @api {POST} /apis/music/upload/music/batch 批量上传音频文件接口
+ * @apiName uploadMusicBatch
+ * @apiGroup Music
+ * @apiName Music/uploadMusicBatch
+ * @apiPermission User
+ * @apiHeader {String} Authorization JWT鉴权
+ * @apiBody {Buffer} musicFile[] 音频文件数组
+ */
+router.post(
+  '/upload/music/batch',
+  auth,
+  // 上传文件中间件
+  async (req, res, next) => {
+    try {
+      await musicBatchUpload.array('musicFile[]')(req, res, error => {
+        if (error) {
+          multerErrorHandler(error, req, res)
+        } else {
+          next()
+        }
+      })
+    } catch (error) {
+      await multerErrorHandler(error, req, res)
+    }
+  },
+  async (req, res) => {
+    try {
+      // 获取上传文件
+      const musicFiles = req.files
+      // Service
+      const { code, data } = await uploadMusicBatchService(musicFiles, req.authorization)
+      // response
+      res.status(code).send({ ...data, code })
+    } catch (error) {
+      errorHandler(error, req, res)
+    }
+  }
+)
+
+// TODO: 获取音频接口
 router.get('/:mid', auth, async (req, res) => {})
 
-// TODO: 下载音乐接口
+// TODO: 下载音频接口
 router.get('/download', auth, async (req, res) => {})
 
-// TODO: 批量下载音乐接口
+// TODO: 批量下载音频接口
 router.get('/download/batch', auth, async (req, res) => {})
 
-// TODO: 获取初始音乐接口
+// TODO: 获取初始音频接口
 
 module.exports = router
