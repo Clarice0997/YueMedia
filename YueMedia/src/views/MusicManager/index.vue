@@ -109,8 +109,12 @@ export default {
     uploadMusicFileBatchOnExceedHook() {
       this.$message.warning('批量上传一次最多上传五个文件')
     },
-    clickDownloadBatchHandler() {},
-    clickRemoveBatchHandler() {},
+    clickDownloadBatchHandler() {
+      this.$refs.musicManagerTable.downloadSelectedFile()
+    },
+    clickRemoveBatchHandler() {
+      this.$refs.musicManagerTable.removeSelectedFile()
+    },
     uploadMusicFileBatchProgressHook() {},
     uploadMusicFileBatchSuccessHook(res) {
       // 刷新列表
@@ -125,13 +129,12 @@ export default {
       NProgress.done()
     },
     openFullScreen(text) {
-      const loading = this.$loading({
+      return this.$loading({
         lock: true,
         text: text ? text : 'Loading',
         spinner: 'el-icon-loading',
         background: 'rgba(0, 0, 0, 0.7)'
       })
-      return loading
     }
   }
 }

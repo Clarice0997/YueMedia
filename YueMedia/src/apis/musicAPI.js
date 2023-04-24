@@ -39,3 +39,31 @@ export const selectMusicListAPI = async (pageNumber, pageSize) => {
     }
   })
 }
+
+/**
+ * 批量下载音频文件接口
+ * @param fileList
+ * @returns
+ */
+export const downloadMusicBatchAPI = async fileList => {
+  const fileListJson = JSON.stringify(fileList)
+  return request.get('/apis/music/download/music/batch', {
+    params: {
+      fileList: fileListJson
+    }
+  })
+}
+
+/**
+ * 批量删除音频文件接口
+ * @param fileList
+ * @returns
+ */
+export const deleteMusicBatchAPI = async fileList => {
+  const fileListJson = JSON.stringify(fileList)
+  return request.delete('/apis/music/delete/music/batch', {
+    params: {
+      fileList: fileListJson
+    }
+  })
+}

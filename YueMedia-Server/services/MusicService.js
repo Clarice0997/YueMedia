@@ -11,6 +11,8 @@ const { ServiceErrorHandler } = require('../middlewares/ErrorCatcher')
 const { ncmCracker } = require('../utils/music/ncmCracker')
 const { audioConvertRecord } = require('../models/audioConvertRecordModel')
 const { uploadMusicPromise } = require('../utils/uploadMusicPromise')
+const { dirCompressing } = require('../utils/dirCompressing')
+const { removeMusicPromise } = require('../utils/removeMusicPromise')
 
 // 存储文件位置常量
 const TEMP_MUSIC_FOLDER = process.env.TEMP_MUSIC_FOLDER
@@ -20,6 +22,7 @@ const MUSIC_FOLDER = process.env.MUSIC_FOLDER
 const COVER_FOLDER = process.env.COVER_FOLDER
 const DEFAULT_STATIC_PATH = process.env.DEFAULT_STATIC_PATH
 const TEMP_PLAY_MUSIC_FOLDER = process.env.TEMP_PLAY_MUSIC_FOLDER
+const DOWNLOAD_FOLDER = process.env.DOWNLOAD_FOLDER
 
 /**
  * 上传音频文件 Service
@@ -459,11 +462,115 @@ const uploadMusicBatchService = async (musicFiles, userData) => {
   }
 }
 
+/**
+ * 批量下载音频文件 Service
+ * @param fileList
+ * @param userData
+ * @returns
+ */
+const downloadMusicBatchService = async (fileList, userData) => {
+  try {
+    // 判断文件列表是否为空
+    if (!fileList) {
+      return {
+        code: 400,
+        data: {
+          message: '文件列表不能为空'
+        }
+      }
+    }
+    // 获取音乐文件路径
+    const filePaths = fileList.map(file => {
+      return path.join(DEFAULT_STATIC_PATH, MUSIC_FOLDER, userData.uno, file.origin_file_name)
+    })
+    // 判断音乐文件是否存在
+    if (!filePaths.every(filePath => fs.existsSync(filePath))) {
+      return {
+        code: 400,
+        data: {
+          message: '文件不存在！'
+        }
+      }
+    }
+    // 创建下载缓冲区文件夹
+    const DownloadId = `${userData.uno}_${Date.now()}`
+    const DownloadFolderPath = path.join(DEFAULT_STATIC_PATH, DOWNLOAD_FOLDER, userData.uno, DownloadId)
+    fse.ensureDirSync(DownloadFolderPath, {})
+    // 复制音乐文件到指定缓冲区文件夹中
+    console.log(filePaths)
+    filePaths.forEach(filePath => fs.copyFileSync(filePath, path.join(DownloadFolderPath, filePath.split('\\').pop())))
+    // 压缩文件夹 获取文件夹路径
+    const outputDownloadFolderPath = path.join(DEFAULT_STATIC_PATH, DOWNLOAD_FOLDER, userData.uno, `${DownloadId}.zip`)
+    await dirCompressing(DownloadFolderPath, outputDownloadFolderPath, 'zip')
+    // 删除文件夹
+    fse.removeSync(DownloadFolderPath)
+
+    return {
+      code: 200,
+      data: {
+        message: '文件打包成功！',
+        downloadPath: path.join(userData.uno, `${DownloadId}.zip`)
+      }
+    }
+  } catch (error) {
+    ServiceErrorHandler(error)
+    return {
+      code: 500,
+      data: {
+        message: error.message
+      }
+    }
+  }
+}
+
+/**
+ * 批量删除音频文件 Service
+ * @param fileList
+ * @param userData
+ * @returns
+ */
+const deleteMusicBatchService = async (fileList, userData) => {
+  try {
+    // 判断文件列表是否为空
+    if (!fileList) {
+      return {
+        code: 400,
+        data: {
+          message: '文件列表不能为空'
+        }
+      }
+    }
+    const musicFilePromiseArr = []
+    fileList.forEach(file => {
+      musicFilePromiseArr.push(removeMusicPromise(file, userData))
+    })
+
+    await Promise.all(musicFilePromiseArr)
+
+    return {
+      code: 200,
+      data: {
+        message: '批量删除文件成功！'
+      }
+    }
+  } catch (error) {
+    ServiceErrorHandler(error)
+    return {
+      code: 500,
+      data: {
+        message: error.message
+      }
+    }
+  }
+}
+
 module.exports = {
   uploadMusicService,
   uploadMusicCoverService,
   uploadMusicDataService,
   deleteTempMusicService,
   selectMusicListService,
-  uploadMusicBatchService
+  uploadMusicBatchService,
+  downloadMusicBatchService,
+  deleteMusicBatchService
 }

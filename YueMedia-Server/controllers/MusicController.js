@@ -3,7 +3,7 @@ const router = require('express').Router()
 const { auth } = require('../middlewares/Auth')
 const multer = require('multer')
 const path = require('path')
-const { uploadMusicService, uploadMusicCoverService, uploadMusicDataService, deleteTempMusicService, selectMusicListService, uploadMusicBatchService } = require('../services/MusicService')
+const { uploadMusicService, uploadMusicCoverService, uploadMusicDataService, deleteTempMusicService, selectMusicListService, uploadMusicBatchService, downloadMusicBatchService, deleteMusicBatchService } = require('../services/MusicService')
 const { errorHandler, multerErrorHandler } = require('../middlewares/ErrorCatcher')
 const { MulterError } = require('multer')
 
@@ -261,15 +261,54 @@ router.post(
   }
 )
 
-// TODO: 获取音频接口
+/**
+ * @api {GET} /apis/music/download/music/batch 批量下载音频接口
+ * @apiName downloadMusicBatch
+ * @apiGroup Music
+ * @apiName Music/downloadMusicBatch
+ * @apiPermission User
+ * @apiHeader {String} Authorization JWT鉴权
+ * @apiBody {String} fileList 下载文件数组JSON格式
+ */
+router.get('/download/music/batch', auth, async (req, res) => {
+  try {
+    // 获取上传文件
+    const { fileList } = req.query
+    // Service
+    const { code, data } = await downloadMusicBatchService(JSON.parse(fileList), req.authorization)
+    // response
+    res.status(code).send({ ...data, code })
+  } catch (error) {
+    errorHandler(error, req, res)
+  }
+})
+
+/**
+ * @api {DELETE} /apis/music/delete/music/batch 批量删除音频接口
+ * @apiName deleteMusicBatch
+ * @apiGroup Music
+ * @apiName Music/deleteMusicBatch
+ * @apiPermission User
+ * @apiHeader {String} Authorization JWT鉴权
+ * @apiBody {String} fileList 删除文件数组JSON格式
+ */
+router.delete('/delete/music/batch', auth, async (req, res) => {
+  try {
+    // 获取上传文件
+    const { fileList } = req.query
+    // Service
+    const { code, data } = await deleteMusicBatchService(JSON.parse(fileList), req.authorization)
+    // response
+    res.status(code).send({ ...data, code })
+  } catch (error) {
+    errorHandler(error, req, res)
+  }
+})
+
+// TODO: 播放音频接口
 router.get('/:mid', auth, async (req, res) => {})
 
 // TODO: 下载音频接口
 router.get('/download', auth, async (req, res) => {})
-
-// TODO: 批量下载音频接口
-router.get('/download/batch', auth, async (req, res) => {})
-
-// TODO: 获取初始音频接口
 
 module.exports = router

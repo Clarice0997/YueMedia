@@ -84,9 +84,10 @@
 </template>
 
 <script>
-import { selectMusicListAPI } from '@/apis/musicAPI'
+import { deleteMusicBatchAPI, downloadMusicBatchAPI, selectMusicListAPI } from '@/apis/musicAPI'
 import { formatDate } from '@/utils/formatDate'
 import store from '@/store'
+import { downloadAPI } from '@/apis/downloadAPI'
 
 export default {
   name: 'musicManagerTable',
@@ -96,7 +97,8 @@ export default {
       selectedMusicData: [],
       pageNumber: 1,
       pageSize: 5,
-      totalData: 0
+      totalData: 0,
+      loading: ''
     }
   },
   async mounted() {
@@ -127,6 +129,14 @@ export default {
       this.totalData = count
       this.musicData = musicData
     },
+    // 更新表格数据
+    async renewTableData() {
+      const {
+        data: { count, musicData }
+      } = await selectMusicListAPI(1, this.pageSize)
+      this.totalData = count
+      this.musicData = musicData
+    },
     // 选择表格样式变化
     tableRowClassName({ row, rowIndex }) {
       if (!row.audited) {
@@ -137,6 +147,56 @@ export default {
     // 选择列改变事件
     handleSelectionChange(val) {
       this.selectedMusicData = val
+    },
+    // 批量下载
+    async downloadSelectedFile() {
+      if (this.selectedMusicData.length === 0) {
+        return this.$message.warning('请选择文件再进行批量操作')
+      }
+      try {
+        const {
+          data: { downloadPath }
+        } = await downloadMusicBatchAPI(this.selectedMusicData)
+        downloadAPI(downloadPath).then(res => {
+          const filename = res.headers['content-disposition'].split('filename=').pop()
+          const downloadUrl = window.URL.createObjectURL(new Blob([res.data]))
+          const link = document.createElement('a')
+          link.href = downloadUrl
+          link.setAttribute('download', filename)
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+        })
+      } catch (error) {
+        if (error.response) {
+          this.$message.error(error.response.data.message)
+        }
+      }
+    },
+    // 批量删除
+    removeSelectedFile() {
+      if (this.selectedMusicData.length === 0) {
+        return this.$message.warning('请选择文件再进行批量操作')
+      }
+      deleteMusicBatchAPI(this.selectedMusicData)
+        .then(async ({ data }) => {
+          this.$message.success(data.message)
+          await this.renewTableData()
+        })
+        .catch(error => {
+          if (error.response) {
+            this.$message.error(error.response.data.message)
+          }
+        })
+    },
+    // 全屏加载函数
+    openFullScreen(text) {
+      return this.$loading({
+        lock: true,
+        text: text ? text : 'Loading',
+        spinner: 'el-icon-loading',
+        background: 'rgba(0, 0, 0, 0.7)'
+      })
     },
     // 页面显示条数改变事件
     handleSizeChange(val) {
