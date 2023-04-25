@@ -48,6 +48,7 @@ import store from '@/store'
 import { deleteCookie } from '@/utils/cookie'
 import APlayer from 'vue-aplayer'
 import { resetRouter } from '@/utils/routeHandle'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'MusicManageSystemHomeView',
@@ -64,6 +65,16 @@ export default {
 
   components: {
     APlayer
+  },
+
+  watch: {
+    playList(newValue) {
+      this.audio = newValue
+    }
+  },
+
+  computed: {
+    ...mapGetters({ playList: 'musicPlayer/getMusicList' })
   },
 
   mounted() {

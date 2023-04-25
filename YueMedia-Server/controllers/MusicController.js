@@ -3,7 +3,7 @@ const router = require('express').Router()
 const { auth } = require('../middlewares/Auth')
 const multer = require('multer')
 const path = require('path')
-const { uploadMusicService, uploadMusicCoverService, uploadMusicDataService, deleteTempMusicService, selectMusicListService, uploadMusicBatchService, downloadMusicBatchService, deleteMusicBatchService } = require('../services/MusicService')
+const { uploadMusicService, uploadMusicCoverService, uploadMusicDataService, deleteTempMusicService, selectMusicListService, uploadMusicBatchService, downloadMusicBatchService, deleteMusicBatchService, startPlayMusicService } = require('../services/MusicService')
 const { errorHandler, multerErrorHandler } = require('../middlewares/ErrorCatcher')
 const { MulterError } = require('multer')
 
@@ -305,8 +305,27 @@ router.delete('/delete/music/batch', auth, async (req, res) => {
   }
 })
 
-// TODO: 播放音频接口
-router.get('/:mid', auth, async (req, res) => {})
+/**
+ * @api {GET} /apis/music/play 开始播放音频接口
+ * @apiName startPlayMusic
+ * @apiGroup Music
+ * @apiName Music/startPlayMusic
+ * @apiPermission User
+ * @apiHeader {String} Authorization JWT鉴权
+ * @apiBody {String} musicData 音乐数据对象JSON格式
+ */
+router.get('/play', auth, async (req, res) => {
+  try {
+    // 获取上传文件
+    const { musicData } = req.query
+    // Service
+    const { code, data } = await startPlayMusicService(JSON.parse(musicData), req.authorization)
+    // response
+    res.status(code).send({ ...data, code })
+  } catch (error) {
+    errorHandler(error, req, res)
+  }
+})
 
 // TODO: 下载音频接口
 router.get('/download', auth, async (req, res) => {})

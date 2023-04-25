@@ -563,6 +563,56 @@ const deleteMusicBatchService = async (fileList, userData) => {
   }
 }
 
+/**
+ * 开始播放音乐 Service
+ * @param musicData
+ * @param userData
+ * @returns
+ */
+const startPlayMusicService = async (musicData, userData) => {
+  try {
+    // 判断音频数据是否为空
+    if (!musicData) {
+      return {
+        code: 400,
+        data: {
+          message: '音频数据不能为空'
+        }
+      }
+    }
+    // 判断音频文件是否存在
+    const musicFilePath = path.join(DEFAULT_STATIC_PATH, PLAY_MUSIC_FOLDER, userData.uno, musicData.play_file_name)
+    if (!fs.existsSync(musicFilePath)) {
+      return {
+        code: 400,
+        data: {
+          message: '播放音频文件不存在！'
+        }
+      }
+    }
+    return {
+      code: 200,
+      data: {
+        data: {
+          title: musicData.song_name,
+          artist: musicData.singer_name,
+          src: musicData.play_file_name,
+          pic: musicData.music_cover_file_name
+        },
+        message: '获取音频播放数据成功！'
+      }
+    }
+  } catch (error) {
+    ServiceErrorHandler(error)
+    return {
+      code: 500,
+      data: {
+        message: error.message
+      }
+    }
+  }
+}
+
 module.exports = {
   uploadMusicService,
   uploadMusicCoverService,
@@ -571,5 +621,6 @@ module.exports = {
   selectMusicListService,
   uploadMusicBatchService,
   downloadMusicBatchService,
-  deleteMusicBatchService
+  deleteMusicBatchService,
+  startPlayMusicService
 }

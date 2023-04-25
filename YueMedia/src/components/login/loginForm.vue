@@ -103,7 +103,18 @@ export default {
       // 校验登录表单是否合法
       this.$refs.form.validate(async valid => {
         if (valid) {
-          // TODO: 手机端或宽高比过低的设备禁止登录 移动端适配未实现
+          // 防止移动端登录
+          if (/Android|webOS|iPhone|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            // 重置表单
+            this.form = this.$options.data().form
+            return this.$message.error('不支持使用移动设备或宽高比过低的设备登录')
+          }
+          // 防止宽高比过低的设备登录
+          if (window.screen.width <= 480 || window.screen.height <= 480) {
+            // 重置表单
+            this.form = this.$options.data().form
+            return this.$message.error('不支持使用移动设备或宽高比过低的设备登录')
+          }
           // Loading遮罩
           this.fullscreenLoading = true
           // 加载按钮

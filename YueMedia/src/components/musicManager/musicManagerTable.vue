@@ -53,7 +53,7 @@
       <el-table-column label="操作" fixed="right" width="200" align="center">
         <template slot-scope="scope">
           <div class="handler-list">
-            <p class="icon">
+            <p class="icon" @click="clickPlayHandler(scope.row)">
               <img src="@/assets/image/icons/play.svg" />
             </p>
             <p class="icon">
@@ -84,7 +84,7 @@
 </template>
 
 <script>
-import { deleteMusicBatchAPI, downloadMusicBatchAPI, selectMusicListAPI } from '@/apis/musicAPI'
+import { deleteMusicBatchAPI, downloadMusicBatchAPI, selectMusicListAPI, startPlayMusicAPI } from '@/apis/musicAPI'
 import { formatDate } from '@/utils/formatDate'
 import store from '@/store'
 import { downloadAPI } from '@/apis/downloadAPI'
@@ -211,6 +211,26 @@ export default {
       this.pageNumber = val
       // 页码改变改变重新获取用户数据
       this.initTableData()
+    },
+    // 点击播放按钮处理事件
+    clickPlayHandler(musicData) {
+      // 请求开始播放音频 API
+      startPlayMusicAPI(musicData)
+        .then(async ({ data: { data } }) => {
+          // 设置音频播放器播放列表
+          await this.$store.dispatch('musicPlayer/setMusicList', [
+            {
+              ...data,
+              src: `${process.env['VUE_APP_REQUEST_URL']}/apis/download/music?playMusicPath=playMusic/${this.$store.state.userProfile.userData.uno}/${data.src}`,
+              pic: `${process.env['VUE_APP_REQUEST_URL']}/cover/${this.$store.state.userProfile.userData.uno}/${data.pic}`
+            }
+          ])
+        })
+        .catch(error => {
+          if (error.response) {
+            this.$message.error(error.response.data.message)
+          }
+        })
     }
   }
 }

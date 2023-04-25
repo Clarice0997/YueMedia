@@ -1,5 +1,5 @@
 <template>
-  <el-card shadow="hover" class="body-card">
+  <el-card shadow="hover" class="body-card" :body-style="'height:100%'">
     <iframe :src="docUrl"></iframe>
   </el-card>
 </template>

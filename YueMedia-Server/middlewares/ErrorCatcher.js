@@ -54,10 +54,20 @@ const downloadErrorHandler = async (err, ip) => {
   await errorRecord(err.name, err.message, 'Download Error', err.stack, ip)
 }
 
+// PlayMusic 错误日志
+const playMusicErrorHandler = async (err, ip) => {
+  console.log('PlayMusic Error')
+  console.log(err)
+  console.log(err.name)
+  console.log(err.message)
+  await errorRecord(err.name, err.message, 'PlayMusic Error', err.stack, ip)
+}
+
 module.exports = {
   errorHandler,
   multerErrorHandler,
   ServiceErrorHandler,
   musicConvertErrorHandler,
-  downloadErrorHandler
+  downloadErrorHandler,
+  playMusicErrorHandler
 }

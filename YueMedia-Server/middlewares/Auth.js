@@ -3,11 +3,17 @@ const { decryptJsonWebToken } = require('../utils/Jwt')
 
 const authHandler = async req => {
   // 获取 JWT
-  const authorization = req.headers.authorization
+  let authorization = req.headers.authorization
   // 判断 JWT 是否存在
   if (!authorization) {
-    console.log('校验失败=>' + req.originalUrl)
-    return false
+    // 请求头中不存在则从 Cookie 中找 JWT
+    const accessToken = req.cookies['Access-Token']
+    if (!accessToken) {
+      console.log('校验失败=>' + req.originalUrl)
+      return false
+    } else {
+      authorization = `Bearer ${accessToken}`
+    }
   }
   // 判断 JWT 是否合法
   try {
