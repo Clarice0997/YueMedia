@@ -20,9 +20,14 @@
           <el-tag size="medium" type="success" v-else>公开</el-tag>
         </template>
       </el-table-column>
+      <!--   TODO: 重构私有开放   -->
       <!--  开放API地址  -->
-      <el-table-column label="开放API地址" prop="music_api" width="200" align="center">
-        <template slot-scope="scope"></template>
+      <el-table-column label="开放API地址" prop="music_api" width="220" align="center">
+        <template slot-scope="scope">
+          <el-link v-if="scope.row.status === 2" :href="scope.row.open_url | concatUrl" :underline="false" type="primary" target="_blank">
+            {{ scope.row.open_url | concatUrl }}
+          </el-link>
+        </template>
       </el-table-column>
       <!--  音频编码格式  -->
       <el-table-column label="编码格式" prop="music_codec" width="150" sortable align="center">
@@ -52,21 +57,20 @@
       <!-- 操作列  -->
       <el-table-column label="操作" fixed="right" width="200" align="center">
         <template slot-scope="scope">
-          <!--      TODO: 鼠标悬浮文字提示      -->
           <div class="handler-list">
-            <p class="icon" @click="clickPlayHandler(scope.row)">
+            <a class="icon" @click="clickPlayHandler(scope.row)" title="播放">
               <img src="@/assets/image/icons/play.svg" />
-            </p>
-            <p class="icon" @click="clickDownloadHandler(scope.row)">
-              <img src="@/assets/image/icons/download_from_the_cload.svg" />
-            </p>
+            </a>
+            <a class="icon" @click="clickDownloadHandler(scope.row)">
+              <img src="@/assets/image/icons/download_from_the_cload.svg" title="下载" />
+            </a>
             <!--      TODO: 改变API开放状态      -->
-            <p class="icon">
-              <img src="@/assets/image/icons/settings.svg" />
-            </p>
-            <p class="icon" @click="clickDeleteHandler(scope.row)">
-              <img src="@/assets/image/icons/delete_document.svg" />
-            </p>
+            <a class="icon">
+              <img src="@/assets/image/icons/settings.svg" title="设置" />
+            </a>
+            <a class="icon" @click="clickDeleteHandler(scope.row)">
+              <img src="@/assets/image/icons/delete_document.svg" title="删除" />
+            </a>
           </div>
         </template>
       </el-table-column>
@@ -120,6 +124,9 @@ export default {
     },
     concatCoverUrl(value) {
       return `${process.env['VUE_APP_REQUEST_URL']}/cover/${store.state['userProfile'].userData.uno}/${value}`
+    },
+    concatUrl(value) {
+      return `${process.env['VUE_APP_REQUEST_URL']}/openApi/${value}`
     }
   },
   methods: {

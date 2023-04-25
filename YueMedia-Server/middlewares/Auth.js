@@ -1,7 +1,7 @@
 // import modules
 const { decryptJsonWebToken } = require('../utils/Jwt')
 
-const authHandler = async req => {
+const authHandler = async (req, key = process.env.JWT_key) => {
   // 获取 JWT
   let authorization = req.headers.authorization
   // 判断 JWT 是否存在
@@ -17,7 +17,7 @@ const authHandler = async req => {
   }
   // 判断 JWT 是否合法
   try {
-    const JsonWebToken = await decryptJsonWebToken(authorization.split(' ').pop())
+    const JsonWebToken = await decryptJsonWebToken(authorization.split(' ').pop(), key)
     if (JsonWebToken) {
       console.log(JsonWebToken.username + ' 校验通过=> ' + req.originalUrl)
       return JsonWebToken
@@ -87,6 +87,18 @@ const superAdminAuth = async (req, res, next) => {
   }
 }
 
-// 超级管理员校验中间件
+// 开放 API TOKEN 校验中间件
+const openApiAuth = async (req, res, next) => {
+  const JsonWebToken = await authHandler(req, process.env.OPEN_JWT_KEY)
+  // 判断校验结果
+  if (!JsonWebToken) {
+    res.status(401).send({
+      message: '身份验证失败'
+    })
+  } else {
+    req.authorization = JsonWebToken
+    next()
+  }
+}
 
-module.exports = { auth, adminAuth, superAdminAuth }
+module.exports = { auth, adminAuth, superAdminAuth, openApiAuth }

@@ -18,9 +18,11 @@
   "verbose": true,
   "colors": true,
   "private": false,
-  "excludeFilters": [
-    "node_modules"
-  ],
+  "exclude": {
+    "paths": [
+      "./controllers/ApiController.js"
+    ]
+  },
   "includeFilters": [
     ".*\\\\.js$"
   ]

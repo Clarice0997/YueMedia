@@ -1,0 +1,27 @@
+{
+  "name": "悦音 - 媒体管理一站式平台开放 API 文档",
+  "version": "1.0.0",
+  "description": "第三方接口文档",
+  "title": "悦音 - 媒体管理一站式平台开放 API 文档",
+  "url": "http://localhost:3001",
+  "header": {
+    "title": "悦音 - 媒体管理一站式平台开放 API 文档",
+    "content": "<h1>API文档</h1>"
+  },
+  "template": {
+    "withCompare": true,
+    "withGenerator": true
+  },
+  "language": "zh",
+  "markdown": true,
+  "debug": true,
+  "verbose": true,
+  "colors": true,
+  "private": false,
+  "include": {
+    "paths": [
+      "controller"
+    ],
+    "pattern": "ApiController.js"
+  }
+}

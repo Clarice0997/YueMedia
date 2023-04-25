@@ -38,6 +38,9 @@ app.use(express.static('../static'))
 // 接口文档地址：http://localhost:3001/apidoc
 app.use('/apidoc', express.static('./doc/apidoc'))
 
+// 第三方接口文档地址：http://localhost:3001/apidoc-open
+app.use('/apidoc-open', express.static('./doc/open-apidoc'))
+
 // 扫描文件夹，删除过期临时文件
 require('./config/DelTempFile')
 
