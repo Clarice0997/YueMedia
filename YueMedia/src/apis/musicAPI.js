@@ -81,3 +81,17 @@ export const startPlayMusicAPI = async musicData => {
     }
   })
 }
+
+/**
+ * 下载音频 API
+ * @param musicData
+ * @returns
+ */
+export const downloadMusicAPI = async musicData => {
+  const musicDataJson = JSON.stringify(musicData)
+  return request.get('/apis/music/download/music', {
+    params: {
+      musicData: musicDataJson
+    }
+  })
+}

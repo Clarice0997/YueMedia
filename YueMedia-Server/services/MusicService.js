@@ -613,6 +613,59 @@ const startPlayMusicService = async (musicData, userData) => {
   }
 }
 
+/**
+ * 下载音频文件 Service
+ * @param musicData
+ * @param userData
+ * @returns
+ */
+const downloadMusicService = async (musicData, userData) => {
+  try {
+    // 判断音频数据是否为空
+    if (!musicData) {
+      return {
+        code: 400,
+        data: {
+          message: '音频数据不能为空'
+        }
+      }
+    }
+    // 获取音频文件路径
+    const filePath = path.join(DEFAULT_STATIC_PATH, MUSIC_FOLDER, userData.uno, musicData.origin_file_name)
+    // 判断音频文件是否存在
+    if (!fs.existsSync(filePath)) {
+      return {
+        code: 400,
+        data: {
+          message: '音频文件不存在！'
+        }
+      }
+    }
+    // 确保用户下载文件夹存在
+    const userDownloadPath = path.join(DEFAULT_STATIC_PATH, DOWNLOAD_FOLDER, userData.uno)
+    fse.ensureDirSync(userDownloadPath, {})
+    // 复制音频文件到缓冲区文件夹中
+    const fileName = `${musicData.song_name}_${Date.now() + path.extname(musicData.origin_file_name)}`
+    fs.copyFileSync(filePath, path.join(userDownloadPath, fileName))
+
+    return {
+      code: 200,
+      data: {
+        message: '文件已加载到缓冲区',
+        downloadPath: path.join(userData.uno, fileName)
+      }
+    }
+  } catch (error) {
+    ServiceErrorHandler(error)
+    return {
+      code: 500,
+      data: {
+        message: error.message
+      }
+    }
+  }
+}
+
 module.exports = {
   uploadMusicService,
   uploadMusicCoverService,
@@ -622,5 +675,6 @@ module.exports = {
   uploadMusicBatchService,
   downloadMusicBatchService,
   deleteMusicBatchService,
-  startPlayMusicService
+  startPlayMusicService,
+  downloadMusicService
 }

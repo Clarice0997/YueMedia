@@ -56,7 +56,7 @@
             <p class="icon" @click="clickPlayHandler(scope.row)">
               <img src="@/assets/image/icons/play.svg" />
             </p>
-            <p class="icon">
+            <p class="icon" @click="clickDownloadHandler(scope.row)">
               <img src="@/assets/image/icons/download_from_the_cload.svg" />
             </p>
             <p class="icon">
@@ -84,7 +84,7 @@
 </template>
 
 <script>
-import { deleteMusicBatchAPI, downloadMusicBatchAPI, selectMusicListAPI, startPlayMusicAPI } from '@/apis/musicAPI'
+import { deleteMusicBatchAPI, downloadMusicAPI, downloadMusicBatchAPI, selectMusicListAPI, startPlayMusicAPI } from '@/apis/musicAPI'
 import { formatDate } from '@/utils/formatDate'
 import store from '@/store'
 import { downloadAPI } from '@/apis/downloadAPI'
@@ -231,6 +231,30 @@ export default {
             this.$message.error(error.response.data.message)
           }
         })
+    },
+    // 点击下载按钮处理事件
+    async clickDownloadHandler(musicData) {
+      try {
+        // 请求下载音频 API
+        const {
+          data: { downloadPath }
+        } = await downloadMusicAPI(musicData)
+        downloadAPI(downloadPath).then(res => {
+          // 中文解码
+          const filename = decodeURIComponent(res.headers['content-disposition'].split('filename=').pop())
+          const downloadUrl = window.URL.createObjectURL(new Blob([res.data]))
+          const link = document.createElement('a')
+          link.href = downloadUrl
+          link.setAttribute('download', filename)
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+        })
+      } catch (error) {
+        if (error.response) {
+          this.$message.error(error.response.data.message)
+        }
+      }
     }
   }
 }
