@@ -95,3 +95,17 @@ export const downloadMusicAPI = async musicData => {
     }
   })
 }
+
+/**
+ * 删除音频 API
+ * @param musicData
+ * @returns
+ */
+export const deleteMusicAPI = async musicData => {
+  const musicDataJson = JSON.stringify(musicData)
+  return request.delete('/apis/music/delete/music', {
+    params: {
+      musicData: musicDataJson
+    }
+  })
+}

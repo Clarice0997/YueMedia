@@ -666,6 +666,43 @@ const downloadMusicService = async (musicData, userData) => {
   }
 }
 
+/**
+ * 删除音频文件 Service
+ * @param musicData
+ * @param userData
+ * @returns
+ */
+const deleteMusicService = async (musicData, userData) => {
+  try {
+    // 判断音频数据是否为空
+    if (!musicData) {
+      return {
+        code: 400,
+        data: {
+          message: '音频数据不能为空'
+        }
+      }
+    }
+
+    await removeMusicPromise(musicData, userData)
+
+    return {
+      code: 200,
+      data: {
+        message: '删除音频文件成功'
+      }
+    }
+  } catch (error) {
+    ServiceErrorHandler(error)
+    return {
+      code: 500,
+      data: {
+        message: error.message
+      }
+    }
+  }
+}
+
 module.exports = {
   uploadMusicService,
   uploadMusicCoverService,
@@ -676,5 +713,6 @@ module.exports = {
   downloadMusicBatchService,
   deleteMusicBatchService,
   startPlayMusicService,
-  downloadMusicService
+  downloadMusicService,
+  deleteMusicService
 }

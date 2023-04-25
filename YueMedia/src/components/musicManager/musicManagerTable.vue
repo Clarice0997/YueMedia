@@ -52,6 +52,7 @@
       <!-- 操作列  -->
       <el-table-column label="操作" fixed="right" width="200" align="center">
         <template slot-scope="scope">
+          <!--      TODO: 鼠标悬浮文字提示      -->
           <div class="handler-list">
             <p class="icon" @click="clickPlayHandler(scope.row)">
               <img src="@/assets/image/icons/play.svg" />
@@ -59,10 +60,11 @@
             <p class="icon" @click="clickDownloadHandler(scope.row)">
               <img src="@/assets/image/icons/download_from_the_cload.svg" />
             </p>
+            <!--      TODO: 改变API开放状态      -->
             <p class="icon">
               <img src="@/assets/image/icons/settings.svg" />
             </p>
-            <p class="icon">
+            <p class="icon" @click="clickDeleteHandler(scope.row)">
               <img src="@/assets/image/icons/delete_document.svg" />
             </p>
           </div>
@@ -84,7 +86,7 @@
 </template>
 
 <script>
-import { deleteMusicBatchAPI, downloadMusicAPI, downloadMusicBatchAPI, selectMusicListAPI, startPlayMusicAPI } from '@/apis/musicAPI'
+import { deleteMusicAPI, deleteMusicBatchAPI, downloadMusicAPI, downloadMusicBatchAPI, selectMusicListAPI, startPlayMusicAPI } from '@/apis/musicAPI'
 import { formatDate } from '@/utils/formatDate'
 import store from '@/store'
 import { downloadAPI } from '@/apis/downloadAPI'
@@ -131,9 +133,10 @@ export default {
     },
     // 更新表格数据
     async renewTableData() {
+      this.pageNumber = 1
       const {
         data: { count, musicData }
-      } = await selectMusicListAPI(1, this.pageSize)
+      } = await selectMusicListAPI(this.pageNumber, this.pageSize)
       this.totalData = count
       this.musicData = musicData
     },
@@ -250,6 +253,21 @@ export default {
           link.click()
           document.body.removeChild(link)
         })
+      } catch (error) {
+        if (error.response) {
+          this.$message.error(error.response.data.message)
+        }
+      }
+    },
+    // 点击删除按钮处理事件
+    async clickDeleteHandler(musicData) {
+      try {
+        // 请求删除音频 API
+        const {
+          data: { message }
+        } = await deleteMusicAPI(musicData)
+        this.$message.success(message)
+        await this.renewTableData()
       } catch (error) {
         if (error.response) {
           this.$message.error(error.response.data.message)
