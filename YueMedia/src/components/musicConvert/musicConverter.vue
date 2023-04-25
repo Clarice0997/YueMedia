@@ -88,7 +88,7 @@
             <div class="file-tools-sticky">
               <div class="btn-holder1">
                 <el-select :disabled="!isAllowUpload" placeholder="添加更多文件" v-model="selectedOption" size="medium" @change="handleOptionChange">
-                  <el-option v-for="item in options" :label="item" :value="item"></el-option>
+                  <el-option v-for="(item, index) in options" :key="index" :label="item" :value="item"></el-option>
                 </el-select>
                 <div class="add-btn-caption">使用 Ctrl 或 Shift 一次添加多个文件</div>
                 <div class="warning-max-tip" v-if="uploadFiles.length >= 5">一次最多处理5个文件</div>

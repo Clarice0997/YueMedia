@@ -58,14 +58,7 @@ export default {
       menuList: [],
       toggleIndex: false,
       asideWidth: '300px',
-      audio: [
-        {
-          title: 'Little Snowflake',
-          artist: '花近 feat. ryuryu',
-          src: `${process.env.VUE_APP_REQUEST_URL}/df64172568e6614d23046b50618636ce1681897545891.mp3`,
-          pic: `${process.env.VUE_APP_REQUEST_URL}/df64172568e6614d23046b50618636ce1681897545891.jpg`
-        }
-      ]
+      audio: this.$store.getters['musicPlayer/getMusicList']
     }
   },
 

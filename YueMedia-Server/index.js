@@ -67,6 +67,8 @@ app.use('/apis/convert', require('./controllers/MusicConvertController'))
 app.use('/apis/error', require('./controllers/ErrorHandlerController'))
 // 下载路由
 app.use('/apis/download', require('./controllers/DownloadController'))
+// 开放API路由
+app.use('/apis/openapi', require('./controllers/ApiController'))
 
 // 连接测试接口
 app.get('/', (req, res) => {

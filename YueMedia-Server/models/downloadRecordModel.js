@@ -14,6 +14,10 @@ const downloadRecordSchema = new mongoose.Schema({
     type: String,
     require: true
   },
+  type: {
+    type: String,
+    default: 'Normal Download'
+  },
   status: {
     type: Number,
     default: 0

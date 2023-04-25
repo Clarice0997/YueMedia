@@ -497,7 +497,6 @@ const downloadMusicBatchService = async (fileList, userData) => {
     const DownloadFolderPath = path.join(DEFAULT_STATIC_PATH, DOWNLOAD_FOLDER, userData.uno, DownloadId)
     fse.ensureDirSync(DownloadFolderPath, {})
     // 复制音乐文件到指定缓冲区文件夹中
-    console.log(filePaths)
     filePaths.forEach(filePath => fs.copyFileSync(filePath, path.join(DownloadFolderPath, filePath.split('\\').pop())))
     // 压缩文件夹 获取文件夹路径
     const outputDownloadFolderPath = path.join(DEFAULT_STATIC_PATH, DOWNLOAD_FOLDER, userData.uno, `${DownloadId}.zip`)

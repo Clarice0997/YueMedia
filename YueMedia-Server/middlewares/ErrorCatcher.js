@@ -45,4 +45,19 @@ const musicConvertErrorHandler = async err => {
   await errorRecord(err.name, err.message, 'MusicConvert Error', err.stack)
 }
 
-module.exports = { errorHandler, multerErrorHandler, ServiceErrorHandler, musicConvertErrorHandler }
+// Download 错误日志
+const downloadErrorHandler = async (err, ip) => {
+  console.log('Download Error')
+  console.log(err)
+  console.log(err.name)
+  console.log(err.message)
+  await errorRecord(err.name, err.message, 'Download Error', err.stack, ip)
+}
+
+module.exports = {
+  errorHandler,
+  multerErrorHandler,
+  ServiceErrorHandler,
+  musicConvertErrorHandler,
+  downloadErrorHandler
+}
