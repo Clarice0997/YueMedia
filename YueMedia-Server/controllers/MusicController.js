@@ -14,7 +14,8 @@ const {
   deleteMusicBatchService,
   startPlayMusicService,
   downloadMusicService,
-  deleteMusicService
+  deleteMusicService,
+  updateMusicStatusService
 } = require('../services/MusicService')
 const { errorHandler, multerErrorHandler } = require('../middlewares/ErrorCatcher')
 const { MulterError } = require('multer')
@@ -280,7 +281,7 @@ router.post(
  * @apiName Music/downloadMusicBatch
  * @apiPermission User
  * @apiHeader {String} Authorization JWT鉴权
- * @apiBody {String} fileList 下载文件数组JSON格式
+ * @apiParam {String} fileList 下载文件数组JSON格式
  */
 router.get('/download/music/batch', auth, async (req, res) => {
   try {
@@ -302,7 +303,7 @@ router.get('/download/music/batch', auth, async (req, res) => {
  * @apiName Music/deleteMusicBatch
  * @apiPermission User
  * @apiHeader {String} Authorization JWT鉴权
- * @apiBody {String} fileList 删除文件数组JSON格式
+ * @apiParam {String} fileList 删除文件数组JSON格式
  */
 router.delete('/delete/music/batch', auth, async (req, res) => {
   try {
@@ -324,7 +325,7 @@ router.delete('/delete/music/batch', auth, async (req, res) => {
  * @apiName Music/startPlayMusic
  * @apiPermission User
  * @apiHeader {String} Authorization JWT鉴权
- * @apiBody {String} musicData 音乐数据对象JSON格式
+ * @apiParam {String} musicData 音频数据对象JSON格式
  */
 router.get('/play', auth, async (req, res) => {
   try {
@@ -346,7 +347,7 @@ router.get('/play', auth, async (req, res) => {
  * @apiName Music/downloadMusic
  * @apiPermission User
  * @apiHeader {String} Authorization JWT鉴权
- * @apiBody {String} musicData 音乐数据对象JSON格式
+ * @apiParam {String} musicData 音频数据对象JSON格式
  */
 router.get('/download/music', auth, async (req, res) => {
   try {
@@ -368,14 +369,36 @@ router.get('/download/music', auth, async (req, res) => {
  * @apiName Music/deleteMusic
  * @apiPermission User
  * @apiHeader {String} Authorization JWT鉴权
- * @apiBody {String} musicData 音乐数据对象JSON格式
+ * @apiParam {String} musicData 音频数据对象JSON格式
  */
 router.delete('/delete/music', auth, async (req, res) => {
   try {
-    // 获取删除音乐文件对象
+    // 获取删除音频文件对象
     const { musicData } = req.query
     // Service
     const { code, data } = await deleteMusicService(JSON.parse(musicData), req.authorization)
+    // response
+    res.status(code).send({ ...data, code })
+  } catch (error) {
+    errorHandler(error, req, res)
+  }
+})
+
+/**
+ * @api {PUT} /apis/music/status 修改音频开放状态
+ * @apiName updateMusicStatus
+ * @apiGroup Music
+ * @apiName Music/updateMusicStatus
+ * @apiPermission User
+ * @apiHeader {String} Authorization JWT鉴权
+ * @apiBody {String} musicData 音频数据对象JSON格式
+ */
+router.put('/status', auth, async (req, res) => {
+  try {
+    // 获取音频文件对象
+    const { musicData } = req.body
+    // Service
+    const { code, data } = await updateMusicStatusService(JSON.parse(musicData), req.authorization)
     // response
     res.status(code).send({ ...data, code })
   } catch (error) {

@@ -109,6 +109,7 @@
       <el-step title="选择目标转码格式"></el-step>
       <el-step title="提交转码任务"></el-step>
     </el-steps>
+    <!--  TODO: 折叠面板展示音频介绍  -->
   </div>
 </template>
 

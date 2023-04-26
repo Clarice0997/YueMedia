@@ -63,8 +63,7 @@
             <a class="icon" @click="clickDownloadHandler(scope.row)">
               <img src="@/assets/image/icons/download_from_the_cload.svg" title="下载" />
             </a>
-            <!--      TODO: 改变API开放状态      -->
-            <a class="icon">
+            <a class="icon" @click="clickSettingHandler(scope.row)">
               <img src="@/assets/image/icons/settings.svg" title="设置" />
             </a>
             <a class="icon" @click="clickDeleteHandler(scope.row)">
@@ -85,11 +84,22 @@
     <div class="block">
       <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="pageNumber" :page-sizes="[5, 10, 15, 20]" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper" :total="totalData"></el-pagination>
     </div>
+    <!--  设置对话框  -->
+    <el-dialog title="音频设置" append-to-body :visible.sync="dialogVisible" width="30%">
+      设置音频开放状态：
+      <el-select v-model="selectedData.status" placeholder="请选择">
+        <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"></el-option>
+      </el-select>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="clickCloseDialogHandler">取 消</el-button>
+        <el-button type="primary" @click="clickConfirmHandler">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { deleteMusicAPI, deleteMusicBatchAPI, downloadMusicAPI, downloadMusicBatchAPI, selectMusicListAPI, startPlayMusicAPI } from '@/apis/musicAPI'
+import { deleteMusicAPI, deleteMusicBatchAPI, downloadMusicAPI, downloadMusicBatchAPI, selectMusicListAPI, startPlayMusicAPI, updateMusicStatusAPI } from '@/apis/musicAPI'
 import { formatDate } from '@/utils/formatDate'
 import store from '@/store'
 import { downloadAPI } from '@/apis/downloadAPI'
@@ -103,7 +113,19 @@ export default {
       pageNumber: 1,
       pageSize: 5,
       totalData: 0,
-      loading: ''
+      loading: '',
+      dialogVisible: false,
+      selectedData: {},
+      options: [
+        {
+          value: 1,
+          label: '私有'
+        },
+        {
+          value: 2,
+          label: '公开'
+        }
+      ]
     }
   },
   async mounted() {
@@ -122,6 +144,7 @@ export default {
       return formatDate(myDate, fmt)
     },
     concatCoverUrl(value) {
+      if (!value) return
       return `${process.env['VUE_APP_REQUEST_URL']}/cover/${store.state['userProfile'].userData.uno}/${value}`
     },
     concatUrl(value) {
@@ -279,6 +302,31 @@ export default {
           this.$message.error(error.response.data.message)
         }
       }
+    },
+    clickSettingHandler(musicData) {
+      this.dialogVisible = true
+      // 深拷贝
+      this.selectedData = JSON.parse(JSON.stringify(musicData))
+    },
+    clickCloseDialogHandler() {
+      this.dialogVisible = false
+      this.selectedData = {}
+    },
+    clickConfirmHandler() {
+      updateMusicStatusAPI(this.selectedData)
+        .then(({ data }) => {
+          this.$message.success(data.message)
+          this.initTableData()
+        })
+        .catch(error => {
+          if (error.response) {
+            this.$message.error(error.response.data.message)
+          }
+        })
+        .finally(() => {
+          this.dialogVisible = false
+          this.selectedData = {}
+        })
     }
   }
 }

@@ -109,3 +109,15 @@ export const deleteMusicAPI = async musicData => {
     }
   })
 }
+
+/**
+ * 修改音频开放状态 API
+ * @param musicData
+ * @returns
+ */
+export const updateMusicStatusAPI = async musicData => {
+  const musicDataJson = JSON.stringify(musicData)
+  return request.put('/apis/music/status', {
+    musicData: musicDataJson
+  })
+}
