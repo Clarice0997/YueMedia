@@ -1,10 +1,17 @@
 <template>
-  <el-card shadow="hover" class="body-card"></el-card>
+  <div style="height: 100%; width: 100%; display: flex; flex-direction: column">
+    <el-card shadow="hover" class="body-card">
+      <myFileTable></myFileTable>
+    </el-card>
+  </div>
 </template>
 
 <script>
 export default {
-  name: 'MusicManageSystemMyFileView'
+  name: 'MusicManageSystemMyFileView',
+  components: {
+    myFileTable: () => import('@/components/myFile/myFileTable.vue')
+  }
 }
 </script>
 

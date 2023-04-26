@@ -58,16 +58,16 @@
         <template slot-scope="scope">
           <div class="handler-list">
             <a class="icon" @click="clickPlayHandler(scope.row)" title="播放">
-              <img src="@/assets/image/icons/play.svg" />
+              <img src="@/assets/image/icons/play.svg" alt="播放" />
             </a>
-            <a class="icon" @click="clickDownloadHandler(scope.row)">
-              <img src="@/assets/image/icons/download_from_the_cload.svg" title="下载" />
+            <a class="icon" @click="clickDownloadHandler(scope.row)" title="下载">
+              <img src="@/assets/image/icons/download_from_the_cload.svg" alt="下载" />
             </a>
-            <a class="icon" @click="clickSettingHandler(scope.row)">
-              <img src="@/assets/image/icons/settings.svg" title="设置" />
+            <a class="icon" @click="clickSettingHandler(scope.row)" title="设置">
+              <img src="@/assets/image/icons/settings.svg" alt="设置" />
             </a>
-            <a class="icon" @click="clickDeleteHandler(scope.row)">
-              <img src="@/assets/image/icons/delete_document.svg" title="删除" />
+            <a class="icon" @click="clickDeleteHandler(scope.row)" title="删除">
+              <img src="@/assets/image/icons/delete_document.svg" alt="删除" />
             </a>
           </div>
         </template>
@@ -189,16 +189,21 @@ export default {
         const {
           data: { downloadPath }
         } = await downloadMusicBatchAPI(this.selectedMusicData)
-        downloadAPI(downloadPath, 'Music Batch Download').then(res => {
-          const filename = res.headers['content-disposition'].split('filename=').pop()
-          const downloadUrl = window.URL.createObjectURL(new Blob([res.data]))
-          const link = document.createElement('a')
-          link.href = downloadUrl
-          link.setAttribute('download', filename)
-          document.body.appendChild(link)
-          link.click()
-          document.body.removeChild(link)
-        })
+        downloadAPI(downloadPath, 'Music Batch Download')
+          .then(res => {
+            const filename = res.headers['content-disposition'].split('filename=').pop()
+            const downloadUrl = window.URL.createObjectURL(new Blob([res.data]))
+            const link = document.createElement('a')
+            link.href = downloadUrl
+            link.setAttribute('download', filename)
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+          })
+          .catch(error => {
+            console.log(error)
+            this.$message.error('文件下载异常')
+          })
       } catch (error) {
         if (error.response) {
           this.$message.error(error.response.data.message)
@@ -271,17 +276,22 @@ export default {
         const {
           data: { downloadPath }
         } = await downloadMusicAPI(musicData)
-        downloadAPI(downloadPath, 'Music Download').then(res => {
-          // 中文解码
-          const filename = decodeURIComponent(res.headers['content-disposition'].split('filename=').pop())
-          const downloadUrl = window.URL.createObjectURL(new Blob([res.data]))
-          const link = document.createElement('a')
-          link.href = downloadUrl
-          link.setAttribute('download', filename)
-          document.body.appendChild(link)
-          link.click()
-          document.body.removeChild(link)
-        })
+        downloadAPI(downloadPath, 'Music Download')
+          .then(res => {
+            // 中文解码
+            const filename = decodeURIComponent(res.headers['content-disposition'].split('filename=').pop())
+            const downloadUrl = window.URL.createObjectURL(new Blob([res.data]))
+            const link = document.createElement('a')
+            link.href = downloadUrl
+            link.setAttribute('download', filename)
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+          })
+          .catch(error => {
+            console.log(error)
+            this.$message.error('文件下载异常')
+          })
       } catch (error) {
         if (error.response) {
           this.$message.error(error.response.data.message)
@@ -376,5 +386,13 @@ export default {
       height: 24px;
     }
   }
+}
+
+.el-table .warning-row {
+  background: oldlace;
+}
+
+.el-table .success-row {
+  background: #f0f9eb;
 }
 </style>

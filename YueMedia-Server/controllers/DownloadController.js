@@ -25,7 +25,7 @@ router.get('/', auth, async (req, res) => {
     if (code === 500) return res.status(code).send({ ...data, code })
     // 设置响应头
     res.header('Access-Control-Expose-Headers', 'Content-Disposition')
-    res.header('Content-Disposition', 'inline; filename=' + encodeURIComponent(filename))
+    res.header('Content-Disposition', 'attachment; filename=' + encodeURIComponent(filename))
     res.header('Content-Type', mimetype)
     // 文件读取流 管道传输 监听传输完毕事件&传输失败事件 更新文件下载记录
     const filestream = fs.createReadStream(concatDownloadPath)
@@ -110,7 +110,7 @@ router.get('/patch', auth, async (req, res) => {
     if (code === 500) return res.status(code).send({ ...data, code })
     // 设置响应头
     res.header('Access-Control-Expose-Headers', 'Content-Disposition')
-    res.header('Content-Disposition', 'inline; filename=' + encodeURIComponent(filename))
+    res.header('Content-Disposition', 'attachment; filename=' + encodeURIComponent(filename))
     res.header('Content-Type', mimetype)
     // 文件读取流 管道传输 监听传输完毕事件&传输失败事件 更新文件下载记录
     const filestream = fs.createReadStream(concatDownloadPath)

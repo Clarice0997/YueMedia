@@ -90,4 +90,40 @@ const getMyFileListService = async (pageNumber, pageSize, uno) => {
   }
 }
 
-module.exports = { getMyFileListService }
+/**
+ * 删除个人处理文件 Service
+ * @param taskId
+ * @returns
+ */
+const deleteMyFileService = async taskId => {
+  try {
+    // 判断参数是否存在
+    if (!taskId) {
+      return {
+        code: 400,
+        data: {
+          message: '参数不合法！'
+        }
+      }
+    }
+
+    await AudioConvertQueues.findOneAndDelete({ taskId })
+
+    return {
+      code: 200,
+      data: {
+        message: '删除处理文件记录成功'
+      }
+    }
+  } catch (error) {
+    ServiceErrorHandler(error)
+    return {
+      code: 500,
+      data: {
+        message: error.message
+      }
+    }
+  }
+}
+
+module.exports = { getMyFileListService, deleteMyFileService }
