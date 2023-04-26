@@ -20,12 +20,11 @@
           <el-tag size="medium" type="success" v-else>公开</el-tag>
         </template>
       </el-table-column>
-      <!--   TODO: 重构私有开放   -->
       <!--  开放API地址  -->
       <el-table-column label="开放API地址" prop="music_api" width="220" align="center">
         <template slot-scope="scope">
-          <el-link v-if="scope.row.status === 2" :href="scope.row.open_url | concatUrl" :underline="false" type="primary" target="_blank">
-            {{ scope.row.open_url | concatUrl }}
+          <el-link v-if="scope.row.status === 2" :href="scope.row.open_path | concatUrl" :underline="false" type="primary" target="_blank">
+            {{ scope.row.open_path | concatUrl }}
           </el-link>
         </template>
       </el-table-column>
@@ -126,7 +125,7 @@ export default {
       return `${process.env['VUE_APP_REQUEST_URL']}/cover/${store.state['userProfile'].userData.uno}/${value}`
     },
     concatUrl(value) {
-      return `${process.env['VUE_APP_REQUEST_URL']}/openApi/${value}`
+      return `${process.env['VUE_APP_REQUEST_URL']}/apis/openapi/music?musicPath=${value}`
     }
   },
   methods: {

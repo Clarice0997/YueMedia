@@ -25,14 +25,18 @@ const folders = {
   CONVERT_MUSIC: {
     path: path.join(process.env.DEFAULT_STATIC_PATH, process.env.CONVERT_MUSIC_FOLDER),
     maxAge: 3600000
+  },
+  DOWNLOAD_FOLDER: {
+    path: path.join(process.env.DEFAULT_STATIC_PATH, process.env.DOWNLOAD_FOLDER),
+    maxAge: 3600000
   }
 }
 
-// 删除过期文件方法
 const deleteExpiredFiles = () => {
   for (const folder in folders) {
     fs.readdir(folders[folder].path, (err, files) => {
       if (err) throw err
+      if (files.length === 0) return
 
       files.forEach(file => {
         const filePath = path.join(folders[folder].path, file)
@@ -40,8 +44,13 @@ const deleteExpiredFiles = () => {
         const age = Date.now() - stats.ctimeMs
         if (age > folders[folder].maxAge) {
           if (stats.isDirectory()) {
-            fse.removeSync(filePath)
-            console.log(`${filePath} has been deleted`)
+            if (fs.readdirSync(filePath).length === 0) {
+              // 如果文件夹为空，直接返回
+              return
+            } else {
+              fse.removeSync(filePath)
+              console.log(`${filePath} has been deleted`)
+            }
           } else {
             fs.unlink(filePath, err => {
               if (err) throw err
@@ -53,8 +62,6 @@ const deleteExpiredFiles = () => {
     })
   }
 }
-
-// TODO: 清除下载缓冲区
 
 // 开机清理一次
 deleteExpiredFiles()

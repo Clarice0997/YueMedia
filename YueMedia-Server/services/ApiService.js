@@ -51,25 +51,35 @@ const getOpenApiTokenService = async (userData, endDate) => {
 }
 
 /**
- * 开放 API 获取音频文件 Service
+ * 开放 API 获取私有音频文件 Service
  * @param musicPath
  * @param req
  * @returns
  */
-const getMusicOpenapiService = async (musicPath, req) => {
+const getPrivateMusicOpenapiService = async (musicPath, req) => {
   try {
     // 拼接文件链接
-    const concatFilePath = path.join(process.env.DEFAULT_STATIC_PATH, process.env.OPENAPI_FOLDER, req.authorization.uno, musicPath)
+    const concatFilePath = path.join(process.env.DEFAULT_STATIC_PATH, process.env.MUSIC_FOLDER, req.authorization.uno, musicPath)
+    // 确保文件存在
+    if (!fs.existsSync(concatFilePath)) {
+      return {
+        code: 400,
+        data: {
+          message: '文件不存在'
+        }
+      }
+    }
     // 获取文件名
     const filename = path.basename(concatFilePath)
     const mimetype = mime.getType(concatFilePath)
 
     // 开放 API 调用记录
     const openApiRecord = new OpenApiRecord({
+      public: false,
       userId: req.authorization.uno,
       ip: req.ip,
       path: musicPath,
-      type: 'Get Music API',
+      type: 'Get Private Music API',
       fileSize: fs.statSync(concatFilePath).size,
       startTime: new Date()
     })
@@ -92,4 +102,55 @@ const getMusicOpenapiService = async (musicPath, req) => {
   }
 }
 
-module.exports = { getOpenApiTokenService, getMusicOpenapiService }
+/**
+ * 开放 API 获取公开音频文件 Service
+ * @param musicPath
+ * @param req
+ * @returns
+ */
+const getMusicOpenapiService = async (musicPath, req) => {
+  try {
+    // 拼接文件链接
+    const concatFilePath = path.join(process.env.DEFAULT_STATIC_PATH, process.env.OPENAPI_FOLDER, musicPath)
+    // 确保文件存在
+    if (!fs.existsSync(concatFilePath)) {
+      return {
+        code: 400,
+        data: {
+          message: '文件不存在'
+        }
+      }
+    }
+    // 获取文件名
+    const filename = path.basename(concatFilePath)
+    const mimetype = mime.getType(concatFilePath)
+
+    // 开放 API 调用记录
+    const openApiRecord = new OpenApiRecord({
+      public: true,
+      ip: req.ip,
+      path: musicPath,
+      type: 'Get Open Music API',
+      fileSize: fs.statSync(concatFilePath).size,
+      startTime: new Date()
+    })
+    await openApiRecord.save()
+
+    return {
+      filename,
+      mimetype,
+      openApiRecord,
+      concatFilePath
+    }
+  } catch (error) {
+    ServiceErrorHandler(error)
+    return {
+      code: 500,
+      data: {
+        message: error.message
+      }
+    }
+  }
+}
+
+module.exports = { getOpenApiTokenService, getPrivateMusicOpenapiService, getMusicOpenapiService }

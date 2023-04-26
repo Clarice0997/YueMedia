@@ -1,11 +1,12 @@
 // import modules
 const mongoose = require('mongoose')
 
-// TODO: 重构私有开放
 const openApiRecordSchema = new mongoose.Schema({
   userId: {
-    type: String,
-    require: true
+    type: String
+  },
+  public: {
+    type: Boolean
   },
   ip: {
     type: String,

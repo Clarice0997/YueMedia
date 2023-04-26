@@ -411,8 +411,7 @@ const selectMusicListService = async (pageNumber, pageSize, uno) => {
     const filterMusicData = musicData.map(music => {
       let filterMusic = music
       filterMusic['music_codec'] = codecData.find(codec => codec.id === filterMusic['music_codec']).codec
-      // TODO: 重构私有开放
-      filterMusic['open_url'] = music.status === 1 ? '' : path.join(uno, music.origin_file_name)
+      filterMusic['open_path'] = music.status === 1 ? '' : path.join(uno, music.origin_file_name)
       return filterMusic
     })
 

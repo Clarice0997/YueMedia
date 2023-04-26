@@ -1,7 +1,7 @@
 // import modules
 const { auth, openApiAuth } = require('../middlewares/Auth')
 const { errorHandler, downloadErrorHandler } = require('../middlewares/ErrorCatcher')
-const { getOpenApiTokenService, getMusicOpenapiService } = require('../services/ApiService')
+const { getOpenApiTokenService, getPrivateMusicOpenapiService, getMusicOpenapiService } = require('../services/ApiService')
 const fs = require('fs')
 const router = require('express').Router()
 
@@ -27,17 +27,57 @@ router.get('/', auth, async (req, res) => {
   }
 })
 
-// TODO: 重构私有开放
 /**
- * @api {GET} /apis/openapi/music 开放 API 获取音频文件接口
- * @apiName getMusicOpenapi
+ * @api {GET} /apis/openapi/private/music 开放 API 获取私有音频文件接口
+ * @apiName getPrivateMusicOpenapi
  * @apiGroup Openapi
- * @apiName Openapi/getMusicOpenapi
+ * @apiName Openapi/getPrivateMusicOpenapi
  * @apiPermission All
  * @apiHeader {String} Authorization Open API Token
  * @apiParam {String} musicPath 下载地址
  */
-router.get('/music', openApiAuth, async (req, res) => {
+router.get('/private/music', openApiAuth, async (req, res) => {
+  try {
+    // 获取文件路径
+    const { musicPath } = req.query
+    // Service
+    const { filename, mimetype, openApiRecord, concatFilePath, code, data } = await getPrivateMusicOpenapiService(musicPath, req)
+    // 错误返回
+    if (code === 500) return res.status(code).send({ ...data, code })
+    // 设置响应头
+    res.header('Access-Control-Expose-Headers', 'Content-Disposition')
+    res.header('Content-Disposition', 'inline; filename=' + encodeURIComponent(filename))
+    res.header('Content-Type', mimetype)
+    // 文件读取流 管道传输 监听传输完毕事件&传输失败事件 更新文件下载记录
+    const filestream = fs.createReadStream(concatFilePath)
+    try {
+      filestream.pipe(res).on('finish', async () => {
+        openApiRecord.status = 1
+        openApiRecord.endTime = new Date()
+        openApiRecord.duration = openApiRecord.endTime - openApiRecord.startTime
+        await openApiRecord.save()
+      })
+    } catch (error) {
+      // 断开传输流
+      filestream.close()
+      openApiRecord.status = 2
+      await openApiRecord.save()
+      await downloadErrorHandler(error, req.ip)
+    }
+  } catch (error) {
+    await errorHandler(error, req, res)
+  }
+})
+
+/**
+ * @api {GET} /apis/openapi/music 开放 API 获取公开音频文件接口
+ * @apiName getMusicOpenapi
+ * @apiGroup Openapi
+ * @apiName Openapi/getMusicOpenapi
+ * @apiPermission All
+ * @apiParam {String} musicPath 下载地址
+ */
+router.get('/music', async (req, res) => {
   try {
     // 获取文件路径
     const { musicPath } = req.query
@@ -70,6 +110,6 @@ router.get('/music', openApiAuth, async (req, res) => {
   }
 })
 
-// TODO: 开放API进行音频转码任务
+// TODO: 开放 API 进行音频转码任务
 
 module.exports = router
