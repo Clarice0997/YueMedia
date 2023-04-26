@@ -189,7 +189,7 @@ export default {
         const {
           data: { downloadPath }
         } = await downloadMusicBatchAPI(this.selectedMusicData)
-        downloadAPI(downloadPath).then(res => {
+        downloadAPI(downloadPath, 'Music Batch Download').then(res => {
           const filename = res.headers['content-disposition'].split('filename=').pop()
           const downloadUrl = window.URL.createObjectURL(new Blob([res.data]))
           const link = document.createElement('a')
@@ -271,7 +271,7 @@ export default {
         const {
           data: { downloadPath }
         } = await downloadMusicAPI(musicData)
-        downloadAPI(downloadPath).then(res => {
+        downloadAPI(downloadPath, 'Music Download').then(res => {
           // 中文解码
           const filename = decodeURIComponent(res.headers['content-disposition'].split('filename=').pop())
           const downloadUrl = window.URL.createObjectURL(new Blob([res.data]))

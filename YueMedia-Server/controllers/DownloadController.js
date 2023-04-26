@@ -3,7 +3,7 @@ const { auth } = require('../middlewares/Auth')
 const router = require('express').Router()
 const fs = require('fs')
 const { errorHandler, downloadErrorHandler, playMusicErrorHandler } = require('../middlewares/ErrorCatcher')
-const { downloadService, playMusicService } = require('../services/DownloadService')
+const { downloadService, playMusicService, downloadPatchService } = require('../services/DownloadService')
 
 /**
  * @api {GET} /apis/download 下载文件接口
@@ -13,13 +13,14 @@ const { downloadService, playMusicService } = require('../services/DownloadServi
  * @apiPermission User
  * @apiHeader {String} Authorization JWT鉴权
  * @apiParam {String} downloadPath 下载地址
+ * @apiParam {String} [downloadType] 下载类型
  */
 router.get('/', auth, async (req, res) => {
   try {
     // 获取下载地址
-    const { downloadPath } = req.query
+    const { downloadPath, downloadType } = req.query
     // Service
-    const { filename, mimetype, downloadRecord, concatDownloadPath, code, data } = await downloadService(downloadPath, req)
+    const { filename, mimetype, downloadRecord, concatDownloadPath, code, data } = await downloadService(downloadPath, downloadType, req)
     // 错误返回
     if (code === 500) return res.status(code).send({ ...data, code })
     // 设置响应头
@@ -89,6 +90,47 @@ router.get('/music', auth, async (req, res) => {
   }
 })
 
-// TODO: 转码音频下载接口
+/**
+ * @api {GET} /apis/download/patch 下载处理任务压缩包接口
+ * @apiName DownloadPatch
+ * @apiGroup Download
+ * @apiName Download/DownloadPatch
+ * @apiPermission User
+ * @apiHeader {String} Authorization JWT鉴权
+ * @apiParam {String} downloadPath 下载地址
+ * @apiParam {String} [downloadType] 下载类型
+ */
+router.get('/patch', auth, async (req, res) => {
+  try {
+    // 获取下载地址
+    const { downloadPath, downloadType } = req.query
+    // Service
+    const { filename, mimetype, downloadRecord, concatDownloadPath, code, data } = await downloadPatchService(downloadPath, downloadType, req)
+    // 错误返回
+    if (code === 500) return res.status(code).send({ ...data, code })
+    // 设置响应头
+    res.header('Access-Control-Expose-Headers', 'Content-Disposition')
+    res.header('Content-Disposition', 'inline; filename=' + encodeURIComponent(filename))
+    res.header('Content-Type', mimetype)
+    // 文件读取流 管道传输 监听传输完毕事件&传输失败事件 更新文件下载记录
+    const filestream = fs.createReadStream(concatDownloadPath)
+    try {
+      filestream.pipe(res).on('finish', async () => {
+        downloadRecord.status = 1
+        downloadRecord.downloadEndTime = new Date()
+        downloadRecord.downloadDuration = downloadRecord.downloadEndTime - downloadRecord.downloadStartTime
+        await downloadRecord.save()
+      })
+    } catch (error) {
+      // 断开传输流
+      filestream.close()
+      downloadRecord.status = 2
+      await downloadRecord.save()
+      await downloadErrorHandler(error, req.ip)
+    }
+  } catch (error) {
+    await errorHandler(error, req, res)
+  }
+})
 
 module.exports = router

@@ -203,7 +203,7 @@ const submitMusicConvertTaskService = async (tasks, user) => {
     const taskId = `${user.uno}-${Date.now()}`
     // 插入 Redis 任务队列
     await rpushRedis('music_convert_tasks', JSON.stringify({ task: { taskId, createTime: Date.now(), tasks } }))
-    await insertAudioConvertQueues(taskId, tasks)
+    await insertAudioConvertQueues(taskId, tasks, user.uno)
     return {
       code: 200,
       data: { task: { taskId, tasks } }

@@ -7,6 +7,10 @@ const audioConvertQueueSchema = new mongoose.Schema({
     type: String,
     require: true
   },
+  userId: {
+    type: String,
+    require: true
+  },
   tasks: {
     type: Array,
     require: true
@@ -55,9 +59,9 @@ audioConvertQueueSchema.statics.updateStatus = function () {
 const AudioConvertQueues = mongoose.model('audio_convert_queues', audioConvertQueueSchema)
 
 // 插入音频转码任务
-async function insertAudioConvertQueues(taskId, tasks) {
+async function insertAudioConvertQueues(taskId, tasks, userId) {
   try {
-    const audioConvertQueues = new AudioConvertQueues({ taskId, tasks, status: 1 })
+    const audioConvertQueues = new AudioConvertQueues({ taskId, tasks, userId, status: 1 })
     await audioConvertQueues.save()
   } catch (err) {
     console.error(err)

@@ -72,6 +72,8 @@ app.use('/apis/error', require('./controllers/ErrorHandlerController'))
 app.use('/apis/download', require('./controllers/DownloadController'))
 // 开放API路由
 app.use('/apis/openapi', require('./controllers/ApiController'))
+// 文件路由
+app.use('/apis/file', require('./controllers/FileController'))
 
 // 连接测试接口
 app.get('/', (req, res) => {
