@@ -172,4 +172,111 @@ async function registerService({ username, password, nickname, phone, email }) {
   }
 }
 
-module.exports = { loginService, registerService }
+/**
+ * 修改用户信息 Service
+ * @param userData
+ * @param uno
+ * @returns
+ */
+const updateUserDataService = async (userData, uno) => {
+  try {
+    // 判断参数是否存在
+    if (!userData) {
+      return {
+        code: 400,
+        data: {
+          message: '参数不合法！'
+        }
+      }
+    }
+    // 如果存在电话 判断电话是否已被使用
+    if (userData.phone) {
+      if ((await mysqlHandler(`select * from users where phone = ?`, [userData.phone])).length !== 0) {
+        return {
+          code: 409,
+          data: {
+            message: '电话已被使用！'
+          }
+        }
+      }
+    }
+    // 如果存在邮箱 判断邮箱是否已被使用
+    if (userData.email) {
+      if ((await mysqlHandler(`select * from users where email = ?`, [userData.email])).length !== 0) {
+        return {
+          code: 409,
+          data: {
+            message: '邮箱已被使用！'
+          }
+        }
+      }
+    }
+    // 修改用户信息
+    await mysqlHandler('update users set nickname = ?, phone = ?,email = ? where uno = ?', [userData.nickname, userData.phone, userData.email, uno])
+
+    return {
+      code: 200,
+      data: {
+        message: '修改用户信息成功！'
+      }
+    }
+  } catch (error) {
+    ServiceErrorHandler(error)
+    return {
+      code: 500,
+      data: {
+        message: error.message
+      }
+    }
+  }
+}
+
+/**
+ * 修改用户密码 Service
+ * @param password
+ * @param newPassword
+ * @param uno
+ * @returns
+ */
+const updateUserPasswordService = async (password, newPassword, uno) => {
+  try {
+    // 判断参数是否存在
+    if (!(password && newPassword)) {
+      return {
+        code: 400,
+        data: {
+          message: '参数不合法！'
+        }
+      }
+    }
+    // 判断原密码是否匹配
+    const user = await mysqlHandler(`select * from users where uno = ?`, [uno])
+    if (!compareSync(password, user[0].password)) {
+      return {
+        code: 400,
+        data: {
+          message: '密码错误！'
+        }
+      }
+    }
+    // 修改密码
+    await mysqlHandler('update users set password = ? where uno = ?', [await hashSync(newPassword, 10), uno])
+
+    return {
+      code: 200,
+      data: {
+        message: '修改密码成功！'
+      }
+    }
+  } catch (error) {
+    ServiceErrorHandler(error)
+    return {
+      code: 500,
+      data: {
+        message: error.message
+      }
+    }
+  }
+}
+
+module.exports = { loginService, registerService, updateUserDataService, updateUserPasswordService }

@@ -6,9 +6,9 @@ const { ErrorModel } = require('../models/errorRecordModel')
  * 获取所有未处理错误 Service
  * @returns
  */
-const getErrorsSerivce = async () => {
+const getErrorsSerivce = async errorType => {
   try {
-    const errors = await ErrorModel.find({ status: { $in: [0, 2] } })
+    const errors = await ErrorModel.find({ status: { $in: [errorType] } }).sort({ date: 'desc' })
     // return
     return {
       data: {

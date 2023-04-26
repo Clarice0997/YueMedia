@@ -1,6 +1,6 @@
 // import module
 const router = require('express').Router()
-const { loginService, registerService } = require('../services/UserService')
+const { loginService, registerService, updateUserDataService, updateUserPasswordService } = require('../services/UserService')
 const { auth } = require('../middlewares/Auth')
 const { errorHandler } = require('../middlewares/ErrorCatcher')
 
@@ -80,6 +80,51 @@ router.get('/account/profile', auth, async (req, res) => {
     message: '用户数据获取成功',
     data: authorization
   })
+})
+
+/**
+ * @api {PUT} /apis/user/account/profile 修改个人信息
+ * @apiName updateUserData
+ * @apiGroup User
+ * @apiName User/updateUserData
+ * @apiPermission User
+ * @apiHeader {String} Authorization JWT鉴权
+ * @apiBody {Object} userData 用户信息
+ */
+router.put('/account/profile', auth, async (req, res) => {
+  // 获取用户新信息
+  const { userData } = req.body
+  // Service
+  try {
+    const { code, data } = await updateUserDataService(userData, req.authorization.uno)
+    // response
+    res.status(code).send({ ...data, code })
+  } catch (error) {
+    errorHandler(error, req, res)
+  }
+})
+
+/**
+ * @api {PUT} /apis/user/account/password 修改用户密码
+ * @apiName updateUserPassword
+ * @apiGroup User
+ * @apiName User/updateUserPassword
+ * @apiPermission User
+ * @apiHeader {String} Authorization JWT鉴权
+ * @apiBody {String} password 旧密码
+ * @apiBody {String} newPassword 新密码
+ */
+router.put('/account/password', auth, async (req, res) => {
+  // 获取密码
+  const { password, newPassword } = req.body
+  // Service
+  try {
+    const { code, data } = await updateUserPasswordService(password, newPassword, req.authorization.uno)
+    // response
+    res.status(code).send({ ...data, code })
+  } catch (error) {
+    errorHandler(error, req, res)
+  }
 })
 
 module.exports = router

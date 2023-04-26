@@ -211,14 +211,14 @@ export default {
     handleSizeChange(val) {
       // 赋值页面显示条数
       this.pageSize = val
-      // 显示条数改变重新获取用户数据
+      // 显示条数改变重新获取数据
       this.initTableData()
     },
     // 页码改变事件
     handleCurrentChange(val) {
       // 页码改变
       this.pageNumber = val
-      // 页码改变改变重新获取用户数据
+      // 页码改变改变重新获取数据
       this.initTableData()
     },
     // 点击播放按钮处理事件

@@ -11,7 +11,7 @@
           </div>
         </div>
         <div class="user-container">
-          <div class="userInfo">
+          <div class="userInfo" @click="isShowUserForm = true">
             <i class="el-icon-user"></i>
           </div>
           <div class="logout" @click="clickLogoutHandler">
@@ -37,6 +37,9 @@
       </el-container>
     </el-container>
     <div class="page-bg"></div>
+    <el-drawer title="用户信息" :visible.sync="isShowUserForm" direction="rtl" size="20%" destroy-on-close>
+      <userDetail ref="userDetail" @hideDrawer="hideDrawer" @logoutHandler="clickLogoutHandler"></userDetail>
+    </el-drawer>
     <!--  TODO: 删除音乐列表，需要修改原组件，尝试使用 patch-package  -->
     <a-player :music="audio[0]" :list="audio" :volume="0.2" listFolded repeat="repeat-all" />
   </div>
@@ -55,6 +58,7 @@ export default {
 
   data() {
     return {
+      isShowUserForm: false,
       toggleClass: 'el-icon-s-fold',
       menuList: [],
       toggleIndex: false,
@@ -64,7 +68,8 @@ export default {
   },
 
   components: {
-    APlayer
+    APlayer,
+    userDetail: () => import('@/components/user/userDetail.vue')
   },
 
   watch: {
@@ -127,6 +132,10 @@ export default {
       if (this.$router.currentRoute.name !== 'HomePage') {
         this.$router.replace('/home')
       }
+    },
+    // 隐藏 Drawer
+    hideDrawer() {
+      this.isShowUserForm = false
     }
   }
 }

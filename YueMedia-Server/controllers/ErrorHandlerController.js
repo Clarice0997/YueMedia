@@ -5,17 +5,20 @@ const { getErrorsSerivce, updateErrorService } = require('../services/ErrorHandl
 const router = require('express').Router()
 
 /**
- * @api {GET} /apis/error/errors 获取所有未处理错误接口
+ * @api {GET} /apis/error/errors 获取所有错误接口
  * @apiName getErrors
  * @apiGroup Error
  * @apiName Error/getErrors
  * @apiPermission SuperAdmin
  * @apiHeader {String} Authorization JWT鉴权
+ * @apiParam {Number} errorType 错误类型 (0未处理 1已处理 2标记 3忽略)
  */
 router.get('/errors', superAdminAuth, async (req, res) => {
   try {
+    // 获取错误类型
+    const { errorType } = req.query
     // Service
-    const { code, data } = await getErrorsSerivce()
+    const { code, data } = await getErrorsSerivce(errorType)
     // response
     res.status(code).send({ ...data, code })
   } catch (error) {
