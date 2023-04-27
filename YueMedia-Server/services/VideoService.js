@@ -7,6 +7,8 @@ const path = require('path')
 const { spawnSync } = require('child_process')
 const ffmpegError = require('../utils/ffmpegError')
 const { mysqlHandler } = require('../config/mysql')
+const { removeVideoPromise } = require('../utils/removeVideoPromise')
+const { dirCompressing } = require('../utils/dirCompressing')
 
 // 存储文件位置常量
 const DEFAULT_STATIC_PATH = process.env.DEFAULT_STATIC_PATH
@@ -393,6 +395,207 @@ const startPlayVideoService = async (videoData, userData) => {
   }
 }
 
+/**
+ * 修改视频开放状态 Service
+ * @param videoData
+ * @param userData
+ * @returns
+ */
+const updateVideoStatusService = async (videoData, userData) => {
+  try {
+    // 判断视频数据是否为空
+    if (!videoData) {
+      return {
+        code: 400,
+        data: {
+          message: '视频数据不能为空'
+        }
+      }
+    }
+    // 查询视频文件原先开放状态
+    const [originVideoData] = await mysqlHandler('select * from video where id = ?', [videoData.id])
+
+    if (originVideoData.status === 1) {
+      if (videoData.status === 1) {
+        return {
+          code: 200,
+          data: {
+            message: '视频状态无需修改'
+          }
+        }
+      } else {
+        fse.copySync(path.join(DEFAULT_STATIC_PATH, VIDEO_FOLDER, userData.uno, videoData.video_file_name), path.join(DEFAULT_STATIC_PATH, OPENAPI_FOLDER, userData.uno, videoData.video_file_name))
+        await mysqlHandler('update video set status = ? where id = ?', [videoData.status, videoData.id])
+      }
+    } else {
+      if (videoData.status === 2) {
+        return {
+          code: 200,
+          data: {
+            message: '视频状态无需修改'
+          }
+        }
+      } else {
+        fs.unlinkSync(path.join(DEFAULT_STATIC_PATH, OPENAPI_FOLDER, userData.uno, videoData.video_file_name))
+        await mysqlHandler('update video set status = ? where id = ?', [videoData.status, videoData.id])
+      }
+    }
+
+    return {
+      code: 200,
+      data: {
+        message: '修改视频状态成功'
+      }
+    }
+  } catch (error) {
+    ServiceErrorHandler(error)
+    return {
+      code: 500,
+      data: {
+        message: error.message
+      }
+    }
+  }
+}
+
+/**
+ * 删除视频 Service
+ * @param videoData
+ * @param userData
+ * @returns
+ */
+const deleteVideoService = async (videoData, userData) => {
+  try {
+    // 判断视频数据是否为空
+    if (!videoData) {
+      return {
+        code: 400,
+        data: {
+          message: '视频数据不能为空'
+        }
+      }
+    }
+
+    await removeVideoPromise(videoData, userData)
+
+    return {
+      code: 200,
+      data: {
+        message: '删除视频文件成功'
+      }
+    }
+  } catch (error) {
+    ServiceErrorHandler(error)
+    return {
+      code: 500,
+      data: {
+        message: error.message
+      }
+    }
+  }
+}
+
+/**
+ * 批量下载视频文件 Service
+ * @param fileList
+ * @param userData
+ * @returns
+ */
+const downloadVideoBatchService = async (fileList, userData) => {
+  try {
+    // 判断文件列表是否为空
+    if (!fileList) {
+      return {
+        code: 400,
+        data: {
+          message: '文件列表不能为空'
+        }
+      }
+    }
+    // 获取视频文件路径
+    const filePaths = fileList.map(file => {
+      return path.join(DEFAULT_STATIC_PATH, VIDEO_FOLDER, userData.uno, file.video_file_name)
+    })
+    // 判断视频文件是否存在
+    if (!filePaths.every(filePath => fs.existsSync(filePath))) {
+      return {
+        code: 400,
+        data: {
+          message: '文件不存在！'
+        }
+      }
+    }
+    // 创建下载缓冲区文件夹
+    const DownloadId = `${userData.uno}_${Date.now()}`
+    const DownloadFolderPath = path.join(DEFAULT_STATIC_PATH, DOWNLOAD_FOLDER, userData.uno, DownloadId)
+    fse.ensureDirSync(DownloadFolderPath, {})
+    // 复制视频文件到指定缓冲区文件夹中
+    filePaths.forEach(filePath => fs.copyFileSync(filePath, path.join(DownloadFolderPath, filePath.split('\\').pop())))
+    // 压缩文件夹 获取文件夹路径
+    const outputDownloadFolderPath = path.join(DEFAULT_STATIC_PATH, DOWNLOAD_FOLDER, userData.uno, `${DownloadId}.zip`)
+    await dirCompressing(DownloadFolderPath, outputDownloadFolderPath, 'zip')
+    // 删除文件夹
+    fse.removeSync(DownloadFolderPath)
+
+    return {
+      code: 200,
+      data: {
+        message: '文件打包成功！',
+        downloadPath: path.join(userData.uno, `${DownloadId}.zip`)
+      }
+    }
+  } catch (error) {
+    ServiceErrorHandler(error)
+    return {
+      code: 500,
+      data: {
+        message: error.message
+      }
+    }
+  }
+}
+
+/**
+ * 批量删除视频 Service
+ * @param fileList
+ * @param userData
+ * @returns
+ */
+const deleteVideoBatchService = async (fileList, userData) => {
+  try {
+    // 判断文件列表是否为空
+    if (!fileList) {
+      return {
+        code: 400,
+        data: {
+          message: '文件列表不能为空'
+        }
+      }
+    }
+    const videoFilePromiseArr = []
+    fileList.forEach(file => {
+      videoFilePromiseArr.push(removeVideoPromise(file, userData))
+    })
+
+    await Promise.all(videoFilePromiseArr)
+
+    return {
+      code: 200,
+      data: {
+        message: '批量删除文件成功！'
+      }
+    }
+  } catch (error) {
+    ServiceErrorHandler(error)
+    return {
+      code: 500,
+      data: {
+        message: error.message
+      }
+    }
+  }
+}
+
 module.exports = {
   uploadVideoService,
   uploadVideoCoverService,
@@ -400,5 +603,9 @@ module.exports = {
   deleteTempVideoService,
   selectVideoListService,
   downloadVideoService,
-  startPlayVideoService
+  startPlayVideoService,
+  updateVideoStatusService,
+  deleteVideoService,
+  downloadVideoBatchService,
+  deleteVideoBatchService
 }

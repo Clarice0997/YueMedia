@@ -1,5 +1,5 @@
 <template>
-  <el-dialog center title="播放器" top="10vh" append-to-body :visible.sync="localDialogVideoPlayerVisible" width="70%" @close="closeVideoPlayerHandler">
+  <el-dialog center :title="title" top="10vh" append-to-body :visible.sync="localDialogVideoPlayerVisible" width="70%" @close="closeVideoPlayerHandler">
     <vue-core-video-player preload="none" ref="videoPlayer" style="height: 70vh" :src="videoSource" :cover="cover" :title="title" :logo="targetIp + '/music.svg'" :autoplay="false" />
   </el-dialog>
 </template>

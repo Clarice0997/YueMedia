@@ -185,6 +185,7 @@ export default {
                 type: 'success',
                 duration: 2000
               })
+              this.$emit('renewTableHandler')
             })
             .catch(({ response }) => {
               // 提示错误弹窗

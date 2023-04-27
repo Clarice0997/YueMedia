@@ -30,7 +30,7 @@
     <el-card shadow="hover" class="body-card">
       <musicManagerTable ref="musicManagerTable"></musicManagerTable>
     </el-card>
-    <uploadMusicDialog :dialog-insert-music-form-visible="dialogInsertMusicFormVisibleData" @hideInsertMusicDialogHandler="hideInsertMusicDialogHandler"></uploadMusicDialog>
+    <uploadMusicDialog :dialog-insert-music-form-visible="dialogInsertMusicFormVisibleData" @renewTableHandler="renewTableHandler" @hideInsertMusicDialogHandler="hideInsertMusicDialogHandler"></uploadMusicDialog>
   </div>
 </template>
 
@@ -135,6 +135,10 @@ export default {
         spinner: 'el-icon-loading',
         background: 'rgba(0, 0, 0, 0.7)'
       })
+    },
+    renewTableHandler() {
+      // 刷新列表
+      this.$refs.musicManagerTable.initTableData()
     }
   }
 }

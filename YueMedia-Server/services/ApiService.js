@@ -153,4 +153,113 @@ const getMusicOpenapiService = async (musicPath, req) => {
   }
 }
 
-module.exports = { getOpenApiTokenService, getPrivateMusicOpenapiService, getMusicOpenapiService }
+/**
+ * 开放 API 获取私有视频文件 Service
+ * @param videoPath
+ * @param req
+ * @returns
+ */
+const getPrivateVideoOpenapiService = async (videoPath, req) => {
+  try {
+    // 拼接文件链接
+    const concatFilePath = path.join(process.env.DEFAULT_STATIC_PATH, process.env.MUSIC_FOLDER, req.authorization.uno, videoPath)
+    // 确保文件存在
+    if (!fs.existsSync(concatFilePath)) {
+      return {
+        code: 400,
+        data: {
+          message: '文件不存在'
+        }
+      }
+    }
+    // 获取文件名
+    const filename = path.basename(concatFilePath)
+    const mimetype = mime.getType(concatFilePath)
+
+    // 开放 API 调用记录
+    const openApiRecord = new OpenApiRecord({
+      public: false,
+      userId: req.authorization.uno,
+      ip: req.ip,
+      path: videoPath,
+      type: 'Get Private Video API',
+      fileSize: fs.statSync(concatFilePath).size,
+      startTime: new Date()
+    })
+    await openApiRecord.save()
+
+    return {
+      filename,
+      mimetype,
+      openApiRecord,
+      concatFilePath
+    }
+  } catch (error) {
+    ServiceErrorHandler(error)
+    return {
+      code: 500,
+      data: {
+        message: error.message
+      }
+    }
+  }
+}
+
+/**
+ * 开放 API 获取公开视频文件 Service
+ * @param videoPath
+ * @param req
+ * @returns
+ */
+const getVideoOpenapiService = async (videoPath, req) => {
+  try {
+    // 拼接文件链接
+    const concatFilePath = path.join(process.env.DEFAULT_STATIC_PATH, process.env.OPENAPI_FOLDER, videoPath)
+    // 确保文件存在
+    if (!fs.existsSync(concatFilePath)) {
+      return {
+        code: 400,
+        data: {
+          message: '文件不存在'
+        }
+      }
+    }
+    // 获取文件名
+    const filename = path.basename(concatFilePath)
+    const mimetype = mime.getType(concatFilePath)
+
+    // 开放 API 调用记录
+    const openApiRecord = new OpenApiRecord({
+      public: true,
+      ip: req.ip,
+      path: videoPath,
+      type: 'Get Open Video API',
+      fileSize: fs.statSync(concatFilePath).size,
+      startTime: new Date()
+    })
+    await openApiRecord.save()
+
+    return {
+      filename,
+      mimetype,
+      openApiRecord,
+      concatFilePath
+    }
+  } catch (error) {
+    ServiceErrorHandler(error)
+    return {
+      code: 500,
+      data: {
+        message: error.message
+      }
+    }
+  }
+}
+
+module.exports = {
+  getOpenApiTokenService,
+  getPrivateMusicOpenapiService,
+  getMusicOpenapiService,
+  getVideoOpenapiService,
+  getPrivateVideoOpenapiService
+}

@@ -41,8 +41,12 @@ export default {
     clickInsertVideoHandler() {
       this.dialogInsertVideoFormVisible = true
     },
-    clickDownloadBatchHandler() {},
-    clickRemoveBatchHandler() {},
+    clickDownloadBatchHandler() {
+      this.$refs.videoManagerTable.downloadSelectedFile()
+    },
+    clickRemoveBatchHandler() {
+      this.$refs.videoManagerTable.removeSelectedFile()
+    },
     hideInsertVideoDialogHandler() {
       this.dialogInsertVideoFormVisibleData = false
     },

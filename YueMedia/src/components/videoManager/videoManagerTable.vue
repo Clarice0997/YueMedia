@@ -103,7 +103,7 @@
 </template>
 
 <script>
-import { downloadVideoAPI, selectVideoListAPI, startPlayVideoAPI } from '@/apis/videoAPI'
+import { deleteVideoAPI, deleteVideoBatchAPI, downloadVideoAPI, downloadVideoBatchAPI, selectVideoListAPI, startPlayVideoAPI, updateVideoStatusAPI } from '@/apis/videoAPI'
 import { formatDate } from '@/utils/formatDate'
 import store from '@/store'
 import { downloadAPI } from '@/apis/downloadAPI'
@@ -190,7 +190,7 @@ export default {
     },
     // 选择列改变事件
     handleSelectionChange(val) {
-      this.selectedMusicData = val
+      this.selectedVideoData = val
     },
     // 页面显示条数改变事件
     handleSizeChange(val) {
@@ -205,6 +205,52 @@ export default {
       this.pageNumber = val
       // 页码改变改变重新获取数据
       this.initTableData()
+    },
+    // 批量下载
+    async downloadSelectedFile() {
+      if (this.selectedVideoData.length === 0) {
+        return this.$message.warning('请选择文件再进行批量操作')
+      }
+      try {
+        const {
+          data: { downloadPath }
+        } = await downloadVideoBatchAPI(this.selectedVideoData)
+        downloadAPI(downloadPath, 'Video Batch Download')
+          .then(res => {
+            const filename = res.headers['content-disposition'].split('filename=').pop()
+            const downloadUrl = window.URL.createObjectURL(new Blob([res.data]))
+            const link = document.createElement('a')
+            link.href = downloadUrl
+            link.setAttribute('download', filename)
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+          })
+          .catch(error => {
+            console.log(error)
+            this.$message.error('文件下载异常')
+          })
+      } catch (error) {
+        if (error.response) {
+          this.$message.error(error.response.data.message)
+        }
+      }
+    },
+    // 批量删除
+    removeSelectedFile() {
+      if (this.selectedVideoData.length === 0) {
+        return this.$message.warning('请选择文件再进行批量操作')
+      }
+      deleteVideoBatchAPI(this.selectedVideoData)
+        .then(async ({ data }) => {
+          this.$message.success(data.message)
+          await this.renewTableData()
+        })
+        .catch(error => {
+          if (error.response) {
+            this.$message.error(error.response.data.message)
+          }
+        })
     },
     clickPlayHandler(videoData) {
       startPlayVideoAPI(videoData)
@@ -252,27 +298,39 @@ export default {
       // 深拷贝
       this.selectedData = JSON.parse(JSON.stringify(videoData))
     },
-    clickDeleteHandler(videoData) {},
+    async clickDeleteHandler(videoData) {
+      try {
+        // 请求删除视频 API
+        const {
+          data: { message }
+        } = await deleteVideoAPI(videoData)
+        this.$message.success(message)
+        await this.renewTableData()
+      } catch (error) {
+        if (error.response) {
+          this.$message.error(error.response.data.message)
+        }
+      }
+    },
     clickCloseDialogHandler() {
       this.dialogVisible = false
       this.selectedData = {}
     },
     clickConfirmHandler() {
-      // TODO: 确认修改状态处理函数
-      // updateMusicStatusAPI(this.selectedData)
-      //   .then(({ data }) => {
-      //     this.$message.success(data.message)
-      //     this.initTableData()
-      //   })
-      //   .catch(error => {
-      //     if (error.response) {
-      //       this.$message.error(error.response.data.message)
-      //     }
-      //   })
-      //   .finally(() => {
-      //     this.dialogVisible = false
-      //     this.selectedData = {}
-      //   })
+      updateVideoStatusAPI(this.selectedData)
+        .then(({ data }) => {
+          this.$message.success(data.message)
+          this.initTableData()
+        })
+        .catch(error => {
+          if (error.response) {
+            this.$message.error(error.response.data.message)
+          }
+        })
+        .finally(() => {
+          this.dialogVisible = false
+          this.selectedData = {}
+        })
     },
     closeVideoPlayerHandler() {
       this.dialogVideoPlayerVisible = false

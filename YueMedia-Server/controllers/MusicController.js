@@ -385,7 +385,7 @@ router.delete('/delete/music', auth, async (req, res) => {
 })
 
 /**
- * @api {PUT} /apis/music/status 修改音频开放状态
+ * @api {PUT} /apis/music/status 修改音频开放状态接口
  * @apiName updateMusicStatus
  * @apiGroup Music
  * @apiName Music/updateMusicStatus

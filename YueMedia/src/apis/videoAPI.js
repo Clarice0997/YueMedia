@@ -67,3 +67,57 @@ export const startPlayVideoAPI = async videoData => {
     }
   })
 }
+
+/**
+ * 修改视频开放状态 API
+ * @param videoData
+ * @returns
+ */
+export const updateVideoStatusAPI = async videoData => {
+  const videoDataJson = JSON.stringify(videoData)
+  return request.put('/apis/video/status', {
+    videoData: videoDataJson
+  })
+}
+
+/**
+ * 删除视频 API
+ * @param videoData
+ * @returns
+ */
+export const deleteVideoAPI = async videoData => {
+  const videoDataJson = JSON.stringify(videoData)
+  return request.delete('/apis/video/delete/video', {
+    params: {
+      videoData: videoDataJson
+    }
+  })
+}
+
+/**
+ * 批量下载视频文件 API
+ * @param fileList
+ * @returns
+ */
+export const downloadVideoBatchAPI = async fileList => {
+  const fileListJson = JSON.stringify(fileList)
+  return request.get('/apis/video/download/video/batch', {
+    params: {
+      fileList: fileListJson
+    }
+  })
+}
+
+/**
+ * 批量删除视频文件 API
+ * @param fileList
+ * @returns
+ */
+export const deleteVideoBatchAPI = async fileList => {
+  const fileListJson = JSON.stringify(fileList)
+  return request.delete('/apis/video/delete/video/batch', {
+    params: {
+      fileList: fileListJson
+    }
+  })
+}

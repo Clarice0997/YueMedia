@@ -4,7 +4,19 @@ const { auth } = require('../middlewares/Auth')
 const multer = require('multer')
 const { errorHandler, multerErrorHandler } = require('../middlewares/ErrorCatcher')
 const { MulterError } = require('multer')
-const { uploadVideoService, uploadVideoCoverService, uploadVideoDataService, deleteTempVideoService, selectVideoListService, downloadVideoService, startPlayVideoService } = require('../services/VideoService')
+const {
+  uploadVideoService,
+  uploadVideoCoverService,
+  uploadVideoDataService,
+  deleteTempVideoService,
+  selectVideoListService,
+  downloadVideoService,
+  startPlayVideoService,
+  updateVideoStatusService,
+  deleteVideoService,
+  downloadVideoBatchService,
+  deleteVideoBatchService
+} = require('../services/VideoService')
 const path = require('path')
 
 // 视频文件上传配置
@@ -228,6 +240,94 @@ router.get('/play', auth, async (req, res) => {
     const { videoData } = req.query
     // Service
     const { code, data } = await startPlayVideoService(JSON.parse(videoData), req.authorization)
+    // response
+    res.status(code).send({ ...data, code })
+  } catch (error) {
+    errorHandler(error, req, res)
+  }
+})
+
+/**
+ * @api {PUT} /apis/video/status 修改视频开放状态接口
+ * @apiName updateVideoStatus
+ * @apiGroup Video
+ * @apiName Video/updateVideoStatus
+ * @apiPermission User
+ * @apiHeader {String} Authorization JWT鉴权
+ * @apiBody {String} videoData 视频数据对象JSON格式
+ */
+router.put('/status', auth, async (req, res) => {
+  try {
+    // 获取视频文件对象
+    const { videoData } = req.body
+    // Service
+    const { code, data } = await updateVideoStatusService(JSON.parse(videoData), req.authorization)
+    // response
+    res.status(code).send({ ...data, code })
+  } catch (error) {
+    errorHandler(error, req, res)
+  }
+})
+
+/**
+ * @api {DELETE} /apis/video/delete/video 删除视频接口
+ * @apiName deleteVideo
+ * @apiGroup Video
+ * @apiName Video/deleteVideo
+ * @apiPermission User
+ * @apiHeader {String} Authorization JWT鉴权
+ * @apiParam {String} videoData 视频数据对象JSON格式
+ */
+router.delete('/delete/video', auth, async (req, res) => {
+  try {
+    // 获取删除视频文件对象
+    const { videoData } = req.query
+    // Service
+    const { code, data } = await deleteVideoService(JSON.parse(videoData), req.authorization)
+    // response
+    res.status(code).send({ ...data, code })
+  } catch (error) {
+    errorHandler(error, req, res)
+  }
+})
+
+/**
+ * @api {GET} /apis/video/download/video/batch 批量下载视频接口
+ * @apiName downloadVideoBatch
+ * @apiGroup Video
+ * @apiName Video/downloadVideoBatch
+ * @apiPermission User
+ * @apiHeader {String} Authorization JWT鉴权
+ * @apiParam {String} fileList 下载文件数组JSON格式
+ */
+router.get('/download/video/batch', auth, async (req, res) => {
+  try {
+    // 获取上传文件
+    const { fileList } = req.query
+    // Service
+    const { code, data } = await downloadVideoBatchService(JSON.parse(fileList), req.authorization)
+    // response
+    res.status(code).send({ ...data, code })
+  } catch (error) {
+    errorHandler(error, req, res)
+  }
+})
+
+/**
+ * @api {DELETE} /apis/video/delete/video/batch 批量删除视频接口
+ * @apiName deleteVideoBatch
+ * @apiGroup Video
+ * @apiName Video/deleteVideoBatch
+ * @apiPermission User
+ * @apiHeader {String} Authorization JWT鉴权
+ * @apiParam {String} fileList 删除文件数组JSON格式
+ */
+router.delete('/delete/video/batch', auth, async (req, res) => {
+  try {
+    // 获取上传文件
+    const { fileList } = req.query
+    // Service
+    const { code, data } = await deleteVideoBatchService(JSON.parse(fileList), req.authorization)
     // response
     res.status(code).send({ ...data, code })
   } catch (error) {
