@@ -29,6 +29,14 @@ const folders = {
   DOWNLOAD_FOLDER: {
     path: path.join(process.env.DEFAULT_STATIC_PATH, process.env.DOWNLOAD_FOLDER),
     maxAge: 3600000
+  },
+  TEMP_VIDEO_FOLDER: {
+    path: path.join(process.env.DEFAULT_STATIC_PATH, process.env.TEMP_VIDEO_FOLDER),
+    maxAge: staticMaxAge
+  },
+  TEMP_VIDEO_COVER_FOLDER: {
+    path: path.join(process.env.DEFAULT_STATIC_PATH, process.env.TEMP_VIDEO_COVER_FOLDER),
+    maxAge: staticMaxAge
   }
 }
 

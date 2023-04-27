@@ -30,7 +30,7 @@
     <el-card shadow="hover" class="body-card">
       <musicManagerTable ref="musicManagerTable"></musicManagerTable>
     </el-card>
-    <uploadMusicDialog :dialog-insert-music-form-visible="dialogInsertMusicFormVisible" @hideInsertMusicDialogHandler="hideInsertMusicDialogHandler"></uploadMusicDialog>
+    <uploadMusicDialog :dialog-insert-music-form-visible="dialogInsertMusicFormVisibleData" @hideInsertMusicDialogHandler="hideInsertMusicDialogHandler"></uploadMusicDialog>
   </div>
 </template>
 

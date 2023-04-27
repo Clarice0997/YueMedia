@@ -74,6 +74,8 @@ app.use('/apis/download', require('./controllers/DownloadController'))
 app.use('/apis/openapi', require('./controllers/ApiController'))
 // 文件路由
 app.use('/apis/file', require('./controllers/FileController'))
+// 视频路由
+app.use('/apis/video', require('./controllers/VideoController'))
 
 // 连接测试接口
 app.get('/', (req, res) => {

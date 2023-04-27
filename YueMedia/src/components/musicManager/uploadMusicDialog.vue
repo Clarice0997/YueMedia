@@ -1,13 +1,13 @@
 <template>
-  <!-- 新增音乐对话框 -->
-  <el-dialog title="新增歌曲" :visible.sync="localDialogInsertMusicFormVisible" append-to-body @close="resetUploadMusicForm">
+  <!-- 新增音频对话框 -->
+  <el-dialog title="新增音频" :visible.sync="localDialogInsertMusicFormVisible" append-to-body @close="resetUploadMusicForm">
     <el-form ref="insertMusicForm" :model="insertMusicForm" :rules="insertMusicFormRules" label-position="top">
-      <!-- 上传音乐文件 -->
-      <el-form-item label="上传音乐文件" prop="musicFile">
+      <!-- 上传音频文件 -->
+      <el-form-item label="上传音频文件" prop="musicFile">
         <el-upload class="uploadMusic" ref="uploadMusic" :disabled="isMusicUploaded" :before-upload="uploadMusicFileBeforeHook" :on-success="uploadMusicFileSuccessHook" :limit="1" drag name="musicFile" with-credentials :headers="{ Authorization }" :action="targetIp + '/apis/music/upload/music'">
           <i class="el-icon-upload"></i>
           <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-          <div class="el-upload__tip" slot="tip" style="margin: 0">音乐文件大小不超过 100 MB</div>
+          <div class="el-upload__tip" slot="tip" style="margin: 0">音频文件大小不超过 100 MB</div>
         </el-upload>
       </el-form-item>
       <!-- 上传封面文件 -->
@@ -94,26 +94,26 @@ export default {
       },
       insertMusicFormRules: {
         musicFile: [
-          // 音乐文件上传校验
+          // 音频文件上传校验
           {
             validator: (rule, value, callback) => {
               if (value) {
                 callback()
               } else {
-                callback(new Error('音乐文件未上传'))
+                callback(new Error('音频文件未上传'))
               }
             },
             trigger: 'blur'
           }
         ],
         coverFile: [
-          // 音乐封面上传校验
+          // 音频封面上传校验
           {
             validator: (rule, value, callback) => {
               if (value) {
                 callback()
               } else {
-                callback(new Error('音乐封面未上传'))
+                callback(new Error('音频封面未上传'))
               }
             },
             trigger: 'blur'
@@ -170,7 +170,7 @@ export default {
     clickCloseInsertMusicDialogHandler() {
       this.resetUploadMusicForm()
     },
-    // 点击确认插入音乐处理函数
+    // 点击确认插入音频处理函数
     clickConfirmInsertMusicHandler() {
       this.$refs.insertMusicForm.validate(async valid => {
         if (valid) {
@@ -202,7 +202,7 @@ export default {
         }
       })
     },
-    // 音乐文件上传前回调
+    // 音频文件上传前回调
     uploadMusicFileBeforeHook(file) {
       const allowedMimetypes = ['audio/mpeg', 'audio/wav', 'audio/flac', 'audio/aac', 'audio/ogg', 'audio/aiff', 'audio/alac']
       let isAllowedMusic = allowedMimetypes.indexOf(file.type) !== -1
@@ -215,7 +215,7 @@ export default {
       }
 
       if (!isAllowedMusic) {
-        this.$message.error('只能上传音乐文件（MP3/WAV/FLAC/NCM/AAC/OGG/AIFF/ALAC）')
+        this.$message.error('只能上传音频文件（MP3/WAV/FLAC/NCM/AAC/OGG/AIFF/ALAC）')
         return false
       }
 
@@ -226,7 +226,7 @@ export default {
 
       return isAllowedMusic && isLt100M
     },
-    // 音乐封面文件上传前回调
+    // 音频封面文件上传前回调
     uploadMusicCoverBeforeHook(file) {
       const allowedMimetypes = ['image/jpeg', 'image/png', 'image/jpg']
       const isAllowedImage = allowedMimetypes.indexOf(file.type) !== -1
@@ -244,13 +244,13 @@ export default {
 
       return isAllowedImage && isLt10M
     },
-    // 音乐文件上传成功回调
+    // 音频文件上传成功回调
     uploadMusicFileSuccessHook({ coverName, musicName, meta, songId }) {
       // 文件已上传索引
       this.isMusicUploaded = true
-      // 保存音乐元数据
+      // 保存音频元数据
       const musicData = { ...meta, coverName, musicName, songId }
-      // 保存音乐数据到表单文件
+      // 保存音频数据到表单文件
       this.insertMusicForm = {
         albumName: musicData.album ? musicData.album : '',
         singerName: musicData.artists ? musicData.artists.join('/') : '',
@@ -266,12 +266,12 @@ export default {
       }
       // 成功上传通知
       this.$notify({
-        title: '音乐文件已成功上传',
+        title: '音频文件已成功上传',
         type: 'success'
       })
-      // 音乐封面
+      // 音频封面
       this.isMusicCoverExist = true
-      // 预览音乐封面
+      // 预览音频封面
       this.coverImage = `${process.env.VUE_APP_REQUEST_URL}/tempCover/${coverName}?time=${Date.now()}`
       // 用于替换封面
       this.updateMusicCover = {
@@ -279,21 +279,21 @@ export default {
         originCoverName: coverName
       }
     },
-    // 音乐封面上传成功回调
+    // 音频封面上传成功回调
     uploadMusicCoverSuccessHook({ message, picture }) {
-      // 音乐封面成功上传通知
+      // 音频封面成功上传通知
       this.$notify({
         title: message,
         type: 'success'
       })
-      // 音乐封面上传索引
+      // 音频封面上传索引
       this.isMusicCoverExist = true
       this.insertMusicForm.coverFile = true
       this.insertMusicForm.musicCoverFileName = picture
-      // 上传音乐封面显示
+      // 上传音频封面显示
       this.coverImage = `${process.env.VUE_APP_REQUEST_URL}/tempCover/${picture}?time=${Date.now()}`
     },
-    // 重置音乐上传 dialog
+    // 重置音频上传 dialog
     resetUploadMusicForm() {
       // 重置表单
       this.insertMusicForm = this.$options.data().insertMusicForm
@@ -314,7 +314,7 @@ export default {
       this.updateMusicCover = {}
       this.coverImage = ''
     },
-    // 删除临时音乐文件
+    // 删除临时音频文件
     async deleteTempMusic() {
       try {
         const {
