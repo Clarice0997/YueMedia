@@ -23,6 +23,13 @@ import '@fortawesome/fontawesome-free/css/all.css'
 // permission控制
 import './permission'
 
+// 引入视频播放器
+import VueCoreVideoPlayer from 'vue-core-video-player'
+
+Vue.use(VueCoreVideoPlayer, {
+  lang: 'zh-CN'
+})
+
 Vue.config.productionTip = false
 
 new Vue({

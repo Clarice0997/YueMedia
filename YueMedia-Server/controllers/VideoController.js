@@ -4,7 +4,7 @@ const { auth } = require('../middlewares/Auth')
 const multer = require('multer')
 const { errorHandler, multerErrorHandler } = require('../middlewares/ErrorCatcher')
 const { MulterError } = require('multer')
-const { uploadVideoService, uploadVideoCoverService, uploadVideoDataService, deleteTempVideoService } = require('../services/VideoService')
+const { uploadVideoService, uploadVideoCoverService, uploadVideoDataService, deleteTempVideoService, selectVideoListService, downloadVideoService, startPlayVideoService } = require('../services/VideoService')
 const path = require('path')
 
 // 视频文件上传配置
@@ -161,6 +161,73 @@ router.delete('/upload/video/temp', auth, async (req, res) => {
     const { videoFileName, videoCoverFileName } = req.query
     // Service
     const { data, code } = await deleteTempVideoService(videoFileName, videoCoverFileName)
+    // response
+    res.status(code).send({ ...data, code })
+  } catch (error) {
+    errorHandler(error, req, res)
+  }
+})
+
+/**
+ * @api {GET} /apis/video/ 获取个人视频列表、视频数量接口
+ * @apiName selectVideoList
+ * @apiGroup Video
+ * @apiName Video/selectVideoList
+ * @apiPermission User
+ * @apiHeader {String} Authorization JWT鉴权
+ * @apiParam {Number} [pageNumber] 页数
+ * @apiParam {Number} [pageSize] 条数
+ */
+router.get('/', auth, async (req, res) => {
+  try {
+    // 获取分页数据
+    const { pageNumber, pageSize } = req.query
+    // Service
+    const { data, code } = await selectVideoListService(pageNumber, pageSize, req.authorization.uno)
+    // response
+    res.status(code).send({ ...data, code })
+  } catch (error) {
+    errorHandler(error, req, res)
+  }
+})
+
+/**
+ * @api {GET} /apis/video/download/video 下载视频接口
+ * @apiName downloadVideo
+ * @apiGroup Video
+ * @apiName Video/downloadVideo
+ * @apiPermission User
+ * @apiHeader {String} Authorization JWT鉴权
+ * @apiParam {String} videoData 视频数据对象JSON格式
+ */
+router.get('/download/video', auth, async (req, res) => {
+  try {
+    // 获取上传文件
+    const { videoData } = req.query
+    // Service
+    const { code, data } = await downloadVideoService(JSON.parse(videoData), req.authorization)
+    // response
+    res.status(code).send({ ...data, code })
+  } catch (error) {
+    errorHandler(error, req, res)
+  }
+})
+
+/**
+ * @api {GET} /apis/video/play 开始播放视频接口
+ * @apiName startPlayVideo
+ * @apiGroup Video
+ * @apiName Video/startPlayVideo
+ * @apiPermission User
+ * @apiHeader {String} Authorization JWT鉴权
+ * @apiParam {String} videoData 视频数据对象JSON格式
+ */
+router.get('/play', auth, async (req, res) => {
+  try {
+    // 获取上传文件
+    const { videoData } = req.query
+    // Service
+    const { code, data } = await startPlayVideoService(JSON.parse(videoData), req.authorization)
     // response
     res.status(code).send({ ...data, code })
   } catch (error) {

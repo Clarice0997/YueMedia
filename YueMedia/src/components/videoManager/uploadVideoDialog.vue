@@ -286,6 +286,8 @@ export default {
             })
             .finally(() => {
               this.resetUploadVideoForm()
+              // 刷新表格数据 & 隐藏 dialog
+              this.$emit('renewVideoTableDataHandler')
               this.$emit('hideInsertVideoDialogHandler')
             })
         } else {

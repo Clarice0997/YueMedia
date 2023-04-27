@@ -358,7 +358,7 @@ const deleteTempMusicService = async (musicName, coverName) => {
  * @param pageNumber
  * @param pageSize
  * @param uno
- * @returns {Promise<{code: number, data: {count: number, message: string}}|{code: number, data: {count: *, message: string}}|{code: number, data: {message: string}}|{code: number, data: {message}}|{code: number, data: {musicData: unknown, count: *}}>}
+ * @returns
  */
 const selectMusicListService = async (pageNumber, pageSize, uno) => {
   try {
@@ -412,7 +412,7 @@ const selectMusicListService = async (pageNumber, pageSize, uno) => {
     const filterMusicData = musicData.map(music => {
       let filterMusic = music
       filterMusic['music_codec'] = codecData.find(codec => codec.id === filterMusic['music_codec']).codec
-      filterMusic['open_path'] = music.status === 1 ? '' : path.join(uno, music.origin_file_name)
+      filterMusic['open_path'] = music.status === 1 ? undefined : path.join(uno, music.origin_file_name)
       return filterMusic
     })
 
@@ -595,12 +595,10 @@ const startPlayMusicService = async (musicData, userData) => {
     return {
       code: 200,
       data: {
-        data: {
-          title: musicData.song_name,
-          artist: musicData.singer_name,
-          src: musicData.play_file_name,
-          pic: musicData.music_cover_file_name
-        },
+        title: musicData.song_name,
+        artist: musicData.singer_name,
+        src: musicData.play_file_name,
+        pic: musicData.music_cover_file_name,
         message: '获取音频播放数据成功！'
       }
     }

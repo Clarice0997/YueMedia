@@ -211,4 +211,194 @@ const deleteTempVideoService = async (videoFileName, videoCoverFileName) => {
   }
 }
 
-module.exports = { uploadVideoService, uploadVideoCoverService, uploadVideoDataService, deleteTempVideoService }
+/**
+ * 获取个人视频列表、视频数量 Service
+ * @param pageNumber
+ * @param pageSize
+ * @param uno
+ * @returns
+ */
+const selectVideoListService = async (pageNumber, pageSize, uno) => {
+  try {
+    // 判断是否存在页码
+    if (typeof pageNumber == 'undefined') {
+      pageNumber = 1
+    }
+    // 判断是否存在页面条数限制
+    if (typeof pageSize == 'undefined') {
+      pageSize = 10
+    }
+    if (pageNumber <= 0 || pageSize <= 0 || !/\d+/gi.test(pageNumber) || !/\d+/gi.test(pageSize)) {
+      return {
+        code: 400,
+        data: {
+          message: '参数不合法'
+        }
+      }
+    }
+
+    // 查询数据条数
+    const [{ count }] = await mysqlHandler('select count(*) count from video where upload_by = ?', [uno])
+
+    // 判断是否存在上传视频数据
+    if (count === 0) {
+      return {
+        code: 200,
+        data: {
+          message: '不存在上传视频数据',
+          count: 0
+        }
+      }
+    }
+
+    // 判断查询数据是否超出范围
+    if (pageNumber * pageSize - pageSize >= count) {
+      return {
+        code: 200,
+        data: {
+          message: '数据超出范围',
+          count
+        }
+      }
+    }
+
+    // 查询视频数据
+    const videoData = await mysqlHandler('select * from video where upload_by = ? limit ?,?', [uno, (pageNumber - 1) * pageSize, Number(pageSize)])
+    // 查询编码格式
+    const codecData = await mysqlHandler('select * from video_codec')
+    // 处理返回数据
+    const filterVideoData = videoData.map(video => {
+      let filterVideo = video
+      let targetCodec = codecData.find(codec => codec.id === filterVideo['video_codec'])
+      filterVideo['video_codec'] = targetCodec.codec
+      filterVideo['mimetype'] = targetCodec.mimetype
+      filterVideo['extname'] = targetCodec.extname
+      filterVideo['open_path'] = video.status === 1 ? '' : path.join(uno, video.video_file_name)
+      return filterVideo
+    })
+
+    // Return
+    return {
+      code: 200,
+      data: { videoData: filterVideoData, count }
+    }
+  } catch (error) {
+    ServiceErrorHandler(error)
+    return {
+      code: 500,
+      data: {
+        message: error.message
+      }
+    }
+  }
+}
+
+/**
+ * 下载视频文件 Service
+ * @param videoData
+ * @param userData
+ * @returns
+ */
+const downloadVideoService = async (videoData, userData) => {
+  try {
+    // 判断视频数据是否为空
+    if (!videoData) {
+      return {
+        code: 400,
+        data: {
+          message: '视频数据不能为空'
+        }
+      }
+    }
+    // 获取视频文件路径
+    const filePath = path.join(DEFAULT_STATIC_PATH, VIDEO_FOLDER, userData.uno, videoData.video_file_name)
+    // 判断视频文件是否存在
+    if (!fs.existsSync(filePath)) {
+      return {
+        code: 400,
+        data: {
+          message: '视频文件不存在！'
+        }
+      }
+    }
+    // 确保用户下载文件夹存在
+    const userDownloadPath = path.join(DEFAULT_STATIC_PATH, DOWNLOAD_FOLDER, userData.uno)
+    fse.ensureDirSync(userDownloadPath, {})
+    // 复制视频文件到缓冲区文件夹中
+    const fileName = `${videoData.video_name}_${Date.now() + path.extname(videoData.video_file_name)}`
+    fs.copyFileSync(filePath, path.join(userDownloadPath, fileName))
+
+    return {
+      code: 200,
+      data: {
+        message: '文件已加载到缓冲区',
+        downloadPath: path.join(userData.uno, fileName)
+      }
+    }
+  } catch (error) {
+    ServiceErrorHandler(error)
+    return {
+      code: 500,
+      data: {
+        message: error.message
+      }
+    }
+  }
+}
+
+/**
+ * 开始播放视频 Service
+ * @param videoData
+ * @param userData
+ * @returns
+ */
+const startPlayVideoService = async (videoData, userData) => {
+  try {
+    // 判断视频数据是否为空
+    if (!videoData) {
+      return {
+        code: 400,
+        data: {
+          message: '视频数据不能为空'
+        }
+      }
+    }
+    // 判断视频文件是否存在
+    const videoFilePath = path.join(DEFAULT_STATIC_PATH, VIDEO_FOLDER, userData.uno, videoData.video_file_name)
+    if (!fs.existsSync(videoFilePath)) {
+      return {
+        code: 400,
+        data: {
+          message: '视频文件不存在！'
+        }
+      }
+    }
+    return {
+      code: 200,
+      data: {
+        title: videoData.video_name,
+        cover: videoData.video_cover_file_name,
+        src: videoData.video_file_name,
+        message: '获取视频播放数据成功！'
+      }
+    }
+  } catch (error) {
+    ServiceErrorHandler(error)
+    return {
+      code: 500,
+      data: {
+        message: error.message
+      }
+    }
+  }
+}
+
+module.exports = {
+  uploadVideoService,
+  uploadVideoCoverService,
+  uploadVideoDataService,
+  deleteTempVideoService,
+  selectVideoListService,
+  downloadVideoService,
+  startPlayVideoService
+}

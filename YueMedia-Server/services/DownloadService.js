@@ -5,6 +5,7 @@ const mime = require('mime')
 const { DownloadRecord } = require('../models/downloadRecordModel')
 const fs = require('fs')
 const { PlayMusicRecord } = require('../models/playMusicRecordModel')
+const { PlayVideoRecord } = require('../models/playVideoRecordModel')
 
 /**
  * 下载 Service
@@ -86,6 +87,45 @@ const playMusicService = async (playMusicPath, req) => {
 }
 
 /**
+ * 播放视频 Service
+ * @param playVideoPath
+ * @param req
+ * @returns
+ */
+const playVideoService = async (playVideoPath, req) => {
+  try {
+    // 拼接视频链接
+    const concatMusicPath = path.join(process.env.DEFAULT_STATIC_PATH, playVideoPath)
+    // 获取文件名
+    const filename = path.basename(concatMusicPath)
+    const mimetype = mime.getType(concatMusicPath)
+    // 文件下载记录
+    const playVideoRecord = new PlayVideoRecord({
+      userId: req.authorization.uno,
+      ip: req.ip,
+      videoPath: playVideoPath,
+      fileSize: fs.statSync(concatMusicPath).size,
+      downloadStartTime: new Date()
+    })
+
+    return {
+      filename,
+      mimetype,
+      playVideoRecord,
+      filePath: concatMusicPath
+    }
+  } catch (error) {
+    ServiceErrorHandler(error)
+    return {
+      code: 500,
+      data: {
+        message: error.message
+      }
+    }
+  }
+}
+
+/**
  * 下载处理任务压缩包 Service
  * @param downloadPath
  * @param downloadType
@@ -126,4 +166,4 @@ const downloadPatchService = async (downloadPath, downloadType, req) => {
   }
 }
 
-module.exports = { downloadService, playMusicService, downloadPatchService }
+module.exports = { downloadService, playMusicService, playVideoService, downloadPatchService }

@@ -254,7 +254,7 @@ export default {
     clickPlayHandler(musicData) {
       // 请求开始播放音频 API
       startPlayMusicAPI(musicData)
-        .then(async ({ data: { data } }) => {
+        .then(async ({ data }) => {
           // 设置音频播放器播放列表
           await this.$store.dispatch('musicPlayer/setMusicList', [
             {
@@ -263,6 +263,7 @@ export default {
               pic: `${process.env['VUE_APP_REQUEST_URL']}/cover/${this.$store.state.userProfile.userData.uno}/${data.pic}`
             }
           ])
+          this.$message.success(data.message)
         })
         .catch(error => {
           if (error.response) {

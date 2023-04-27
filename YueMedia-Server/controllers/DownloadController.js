@@ -3,7 +3,7 @@ const { auth } = require('../middlewares/Auth')
 const router = require('express').Router()
 const fs = require('fs')
 const { errorHandler, downloadErrorHandler, playMusicErrorHandler } = require('../middlewares/ErrorCatcher')
-const { downloadService, playMusicService, downloadPatchService } = require('../services/DownloadService')
+const { downloadService, playMusicService, downloadPatchService, playVideoService } = require('../services/DownloadService')
 
 /**
  * @api {GET} /apis/download 下载文件接口
@@ -83,6 +83,48 @@ router.get('/music', auth, async (req, res) => {
       stream.close()
       playMusicRecord.status = 2
       await playMusicRecord.save()
+      await playMusicErrorHandler(error, req.ip)
+    }
+  } catch (error) {
+    await errorHandler(error, req, res)
+  }
+})
+
+/**
+ * @api {GET} /apis/download/video 视频播放接口
+ * @apiName PlayVideo
+ * @apiGroup Download
+ * @apiName Download/PlayVideo
+ * @apiPermission User
+ * @apiHeader {String} Authorization JWT鉴权
+ * @apiParam {String} playVideoPath 视频地址
+ */
+router.get('/video', auth, async (req, res) => {
+  try {
+    // 获取播放音频文件地址
+    const { playVideoPath } = req.query
+    // Service
+    const { filename, mimetype, playVideoRecord, filePath, code, data } = await playVideoService(playVideoPath, req)
+    // 错误返回
+    if (code === 500) return res.status(code).send({ ...data, code })
+    // 设置响应头
+    res.header('Access-Control-Expose-Headers', 'Content-Disposition')
+    res.header('Content-Disposition', 'inline; filename=' + encodeURIComponent(filename))
+    res.header('Content-Type', mimetype)
+    // 音频文件读取流 管道传输 监听传输完毕事件&传输失败事件 更新音乐播放记录
+    const stream = fs.createReadStream(filePath)
+    try {
+      stream.pipe(res).on('finish', async () => {
+        playVideoRecord.status = 1
+        playVideoRecord.downloadEndTime = new Date()
+        playVideoRecord.downloadDuration = playVideoRecord.downloadEndTime - playVideoRecord.downloadStartTime
+        await playVideoRecord.save()
+      })
+    } catch (error) {
+      // 断开传输流
+      stream.close()
+      playVideoRecord.status = 2
+      await playVideoRecord.save()
       await playMusicErrorHandler(error, req.ip)
     }
   } catch (error) {

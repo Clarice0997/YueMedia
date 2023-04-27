@@ -8,8 +8,10 @@
         <el-button type="danger" icon="el-icon-delete" @click="clickRemoveBatchHandler">批量删除</el-button>
       </div>
     </el-card>
-    <el-card shadow="hover" class="body-card"></el-card>
-    <uploadVideoDialog :dialog-insert-video-form-visible="dialogInsertVideoFormVisibleData" @hideInsertVideoDialogHandler="hideInsertVideoDialogHandler"></uploadVideoDialog>
+    <el-card shadow="hover" class="body-card">
+      <videoManagerTable ref="videoManagerTable"></videoManagerTable>
+    </el-card>
+    <uploadVideoDialog :dialog-insert-video-form-visible="dialogInsertVideoFormVisibleData" @hideInsertVideoDialogHandler="hideInsertVideoDialogHandler" @renewVideoTableDataHandler="renewVideoTableDataHandler"></uploadVideoDialog>
   </div>
 </template>
 
@@ -43,6 +45,9 @@ export default {
     clickRemoveBatchHandler() {},
     hideInsertVideoDialogHandler() {
       this.dialogInsertVideoFormVisibleData = false
+    },
+    renewVideoTableDataHandler() {
+      this.$refs.videoManagerTable.initTableData()
     }
   }
 }
