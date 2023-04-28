@@ -6,10 +6,10 @@
       <!--  视频 ID  -->
       <el-table-column label="ID" align="center" min-width="150" prop="video_id" sortable></el-table-column>
       <!--  封面  -->
-      <el-table-column label="封面" align="center" min-width="150">
+      <el-table-column label="封面" align="center" min-width="200">
         <template slot-scope="scope">
           <div @click="clickPlayHandler(scope.row)">
-            <el-avatar shape="square" class="video-cover" :size="100" fit="cover" :src="scope.row.video_cover_file_name | concatCoverUrl"></el-avatar>
+            <el-image class="video-cover" :src="scope.row.video_cover_file_name | concatCoverUrl"></el-image>
           </div>
         </template>
       </el-table-column>
@@ -31,7 +31,7 @@
         </template>
       </el-table-column>
       <!--  视频编码格式  -->
-      <el-table-column label="编码格式" width="150" sortable align="center">
+      <el-table-column label="编码格式" width="200" sortable align="center">
         <template slot-scope="scope">
           <el-tag size="medium" type="success">{{ scope.row.video_codec }}</el-tag>
         </template>
@@ -107,6 +107,7 @@ import { deleteVideoAPI, deleteVideoBatchAPI, downloadVideoAPI, downloadVideoBat
 import { formatDate } from '@/utils/formatDate'
 import store from '@/store'
 import { downloadAPI } from '@/apis/downloadAPI'
+import { nextTick } from 'vue'
 
 export default {
   name: 'videoManagerTable',
@@ -171,6 +172,9 @@ export default {
       } = await selectVideoListAPI(this.pageNumber, this.pageSize)
       this.totalData = count
       this.videoData = videoData
+      nextTick(() => {
+        this.$refs.videoManagerTable.doLayout()
+      })
     },
     // 更新表格数据
     async renewTableData() {
@@ -180,11 +184,14 @@ export default {
       } = await selectVideoListAPI(this.pageNumber, this.pageSize)
       this.totalData = count
       this.videoData = videoData
+      nextTick(() => {
+        this.$refs.videoManagerTable.doLayout()
+      })
     },
     // 选择表格样式变化
     tableRowClassName({ row, rowIndex }) {
-      if (!row.audited) {
-        return 'warning-row'
+      if (row.status === 2) {
+        return 'success-row'
       }
       return ''
     },
@@ -391,17 +398,10 @@ export default {
 .video-cover {
   cursor: pointer;
   transition: 0.3s;
+  border-radius: 5px;
 }
 
 .video-cover:hover {
   opacity: 0.7;
-}
-
-.el-table .warning-row {
-  background: oldlace;
-}
-
-.el-table .success-row {
-  background: #f0f9eb;
 }
 </style>

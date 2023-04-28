@@ -1,6 +1,9 @@
 <template>
   <div style="height: 100%; width: 100%; display: flex; flex-direction: column">
     <el-card shadow="hover" class="body-card">
+      <div slot="header" class="clearfix">
+        <h1>处理文件任务列表</h1>
+      </div>
       <myFileTable></myFileTable>
     </el-card>
   </div>

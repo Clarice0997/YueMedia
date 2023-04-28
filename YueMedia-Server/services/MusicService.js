@@ -13,6 +13,7 @@ const { audioConvertRecord } = require('../models/audioConvertRecordModel')
 const { uploadMusicPromise } = require('../utils/uploadMusicPromise')
 const { dirCompressing } = require('../utils/dirCompressing')
 const { removeMusicPromise } = require('../utils/removeMusicPromise')
+const { calculateUserStorage } = require('../utils/redis/calculator/calculateUserUsedStorage')
 
 // 存储文件位置常量
 const TEMP_MUSIC_FOLDER = process.env.TEMP_MUSIC_FOLDER
@@ -286,6 +287,8 @@ const uploadMusicDataService = async (data, userData) => {
     const params = [songId, userData.uno, songName, songSize, codecId, playFileName, musicCoverFileName, musicFileName, singerName ? singerName : null, albumName ? albumName : null, year ? year : null]
     await mysqlHandler(query, params)
 
+    await calculateUserStorage(userData.uno)
+
     return {
       code: 200,
       data: {
@@ -446,6 +449,9 @@ const uploadMusicBatchService = async (musicFiles, userData) => {
     })
 
     const datas = await Promise.all(musicFilePromiseArr)
+
+    await calculateUserStorage(userData.uno)
+
     return {
       code: 200,
       data: {
@@ -547,6 +553,8 @@ const deleteMusicBatchService = async (fileList, userData) => {
     })
 
     await Promise.all(musicFilePromiseArr)
+
+    await calculateUserStorage(userData.uno)
 
     return {
       code: 200,
@@ -686,6 +694,8 @@ const deleteMusicService = async (musicData, userData) => {
 
     await removeMusicPromise(musicData, userData)
 
+    await calculateUserStorage(userData.uno)
+
     return {
       code: 200,
       data: {
@@ -706,6 +716,7 @@ const deleteMusicService = async (musicData, userData) => {
 /**
  * 修改音频开放状态 Service
  * @param musicData
+ * @param userData
  * @returns
  */
 const updateMusicStatusService = async (musicData, userData) => {

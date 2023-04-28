@@ -1,6 +1,6 @@
 // import modules
-const { hsetRedis } = require('./RedisHandler')
-const { AudioConvertRecord } = require('../../models/audioConvertRecordModel')
+const { hsetRedis } = require('../RedisHandler')
+const { AudioConvertRecord } = require('../../../models/audioConvertRecordModel')
 
 // 计算音频转码记录 Redis 持久化
 const calculateMusicConvertRecord = async () => {

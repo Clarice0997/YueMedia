@@ -23,7 +23,7 @@ const path = require('path')
 const videoUpload = multer({
   limits: { fileSize: 1000000000, files: 1 },
   fileFilter: function (req, file, cb) {
-    const allowedMimetypes = ['video/x-flv', 'video/x-ms-wmv', 'video/quicktime', 'video/x-msvideo', 'video/mp4']
+    const allowedMimetypes = ['video/x-flv', 'video/x-ms-wmv', 'video/quicktime', 'video/x-msvideo', 'video/mp4', 'video/avi']
     const mimetype = allowedMimetypes.indexOf(file.mimetype) !== -1
 
     req.mimetype = file.mimetype

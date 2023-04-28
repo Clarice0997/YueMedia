@@ -19,8 +19,7 @@
                     <span>选择文件</span>
                   </label>
                 </div>
-                <!--  TODO: 从我的音频中上传音频  -->
-                <div class="file-search-button">
+                <div class="file-search-button" @click="clickSelectMusicTable">
                   <span>
                     <i class="fas fa-folder-open"></i>
                   </span>
@@ -111,7 +110,17 @@
       <el-step title="选择目标转码格式"></el-step>
       <el-step title="提交转码任务"></el-step>
     </el-steps>
-    <!--  TODO: 折叠面板展示音频介绍  -->
+    <!--  音频介绍  -->
+    <el-collapse accordion v-if="isUploaded" style="margin-top: 50px; padding: 10px; border: 0">
+      <el-collapse-item v-for="(item, index) in introData">
+        <template slot="title">
+          <h1>{{ item.codec }}</h1>
+        </template>
+        <div style="text-align: left">{{ item.introduction }}</div>
+      </el-collapse-item>
+    </el-collapse>
+    <!--  选择我的音乐  -->
+    <selectMusicTable :dialog-select-music-table-visible="dialogSelectMusicTableVisible" @uploadSelectFile="uploadSelectFile" @closeSelectMusicTable="closeSelectMusicTable"></selectMusicTable>
   </div>
 </template>
 
@@ -119,7 +128,7 @@
 // import modules
 import axios from 'axios'
 import { getCookie } from '@/utils/cookie'
-import { deleteConvertMusicAPI, getSupportMusicCodecAPI, submitMusicConvertTaskAPI, getMusicConvertAnalyseAPI } from '@/apis/musicConvertAPI'
+import { deleteConvertMusicAPI, getSupportMusicCodecAPI, submitMusicConvertTaskAPI, getMusicConvertAnalyseAPI, uploadMyFileConvertMusicAPI } from '@/apis/musicConvertAPI'
 
 export default {
   name: 'musicConverter',
@@ -138,7 +147,11 @@ export default {
         totalTasks: 0,
         totalSize: 0,
         averageSpeed: 0
-      }
+      },
+      activeName: '1',
+      introData: [],
+      dialogSelectMusicTableVisible: false,
+      loading: ''
     }
   },
   props: {
@@ -156,12 +169,28 @@ export default {
       return this.uploadFiles.length < this.maxFileNum && !this.isUploading
     }
   },
+  components: {
+    selectMusicTable: () => import('@/components/musicConvert/selectMusicTable.vue')
+  },
   watch: {
     // 监听全选目标转码格式
     uploadFiles: {
       handler: function (files) {
         if (files.every(file => file.targetCodec)) this.stepActive = 2
         if (files.length === 0) this.stepActive = 0
+        // 监听格式 生成格式介绍
+        const introSet = new Set()
+        files.forEach(file => {
+          introSet.add(file.codec)
+          if (file.targetCodec) introSet.add(file.targetCodec)
+        })
+        const introArr = [...introSet]
+        this.introData = introArr.map(intro => {
+          return {
+            codec: intro,
+            introduction: this.supportMusicCodec.find(item => item.codec === intro).introduction
+          }
+        })
       },
       // 对象深度监听
       deep: true
@@ -203,6 +232,15 @@ export default {
         data: { totalMusicConvertRecord }
       } = await getMusicConvertAnalyseAPI()
       this.musicConvertAnalyse = totalMusicConvertRecord
+    },
+    // 全屏加载函数
+    openFullScreen(text) {
+      return this.$loading({
+        lock: true,
+        text: text ? text : 'Loading',
+        spinner: 'el-icon-loading',
+        background: 'rgba(0, 0, 0, 0.7)'
+      })
     },
     // 上传文件事件
     async selectUploadFile() {
@@ -289,9 +327,16 @@ export default {
       if (this.selectedOption === '选择文件') {
         document.getElementById('file-upload').click()
         this.selectedOption = ''
-      } else {
+      } else if (this.selectedOption === '我的音频') {
+        this.dialogSelectMusicTableVisible = true
         this.selectedOption = ''
       }
+    },
+    clickSelectMusicTable() {
+      this.dialogSelectMusicTableVisible = true
+    },
+    closeSelectMusicTable() {
+      this.dialogSelectMusicTableVisible = false
     },
     async handleDeleteTempCovertMusic(index, row) {
       // 删除对应索引数据
@@ -315,7 +360,7 @@ export default {
       submitMusicConvertTaskAPI(this.uploadFiles)
         .then(() => {
           this.reset()
-          this.$message.success('任务提交成功，请前往处理文件查看处理结果')
+          this.$message.success('任务提交成功，请及时前往处理文件查看处理结果')
         })
         .catch(error => {
           this.reset()
@@ -326,6 +371,49 @@ export default {
               duration: 2000
             })
           }
+        })
+    },
+    uploadSelectFile(fileList) {
+      console.log(fileList)
+      // 判断文件数量是否超出数量
+      if (this.uploadFiles.length + fileList.length > this.maxFileNum) {
+        return this.$message.error(`一次只能转换 ${this.maxFileNum} 个文件`)
+      }
+      // Loading
+      this.loading = this.openFullScreen('上传我的音频中')
+      // 上传文件中状态改变
+      this.isUploaded = true
+      this.isUploading = true
+      // 上传我的音频
+      uploadMyFileConvertMusicAPI(fileList)
+        .then(({ data }) => {
+          // 插入已上传文件
+          if (data.filesDetail) {
+            data.filesDetail.forEach(file => {
+              this.uploadFiles.push(file)
+            })
+          }
+          // 改变进行步骤状态
+          if (this.stepActive === 0) this.stepActive = 1
+        })
+        .catch(error => {
+          if (error.response) {
+            this.$message.error(error)
+          }
+        })
+        .finally(() => {
+          // 显示进度条
+          this.isShowProgress = false
+          // 重置上传进度
+          this.uploadProgress = 0
+          // 改变文件上传状态
+          this.isUploading = false
+          // 重置上传文件输入框
+          this.$refs.fileInput.value = ''
+          // 隐藏表格
+          this.dialogSelectMusicTableVisible = false
+          // 取消 Loading
+          this.loading.close()
         })
     },
     // 重置组件

@@ -76,6 +76,8 @@ app.use('/apis/openapi', require('./controllers/ApiController'))
 app.use('/apis/file', require('./controllers/FileController'))
 // 视频路由
 app.use('/apis/video', require('./controllers/VideoController'))
+// 用户管理路由
+app.use('/apis/userManager', require('./controllers/UserManagerController'))
 
 // 连接测试接口
 app.get('/', (req, res) => {

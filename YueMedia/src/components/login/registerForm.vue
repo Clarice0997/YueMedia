@@ -1,6 +1,8 @@
 <template>
   <el-form ref="registerForm" :model="registerForm" :rules="registerRules" size="medium" @keydown.enter.native="clickRegisterHandler" @keypress.native="preventSpecialChars">
-    <h1>加入我们</h1>
+    <div class="title">
+      <h1>加入我们</h1>
+    </div>
     <el-form-item prop="username">
       <el-input v-model="registerForm.username" placeholder="账号" clearable prefix-icon="el-icon-user"></el-input>
     </el-form-item>
@@ -35,12 +37,12 @@ export default {
     return {
       // 表单数据对象
       registerForm: {
-        username: 'admin',
-        password: '123456',
-        checkPassword: '123456',
-        nickname: 'test11',
-        phone: '18887192372',
-        email: '117895792173@qq.com'
+        username: '',
+        password: '',
+        checkPassword: '',
+        nickname: '',
+        phone: '',
+        email: ''
       },
       // 禁用特殊字符
       specialChars: [39, 34, 59, 92, 44, 61, 40, 41, 60, 62, 123, 125, 91, 93, 43, 45, 47, 92, 37, 35, 124, 32],
@@ -218,11 +220,6 @@ export default {
   padding: 20px;
   border-radius: 1rem;
 
-  h1 {
-    font-size: 2rem;
-    margin-bottom: 20px;
-  }
-
   a {
     display: block;
     margin-top: 10px;
@@ -251,5 +248,19 @@ export default {
 
 .el-form:hover {
   background: rgba(255, 255, 255, 0.868);
+}
+
+.title {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 12px;
+  background: linear-gradient(45deg, #8baaaa 0%, #ae8b9c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  h1 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
 }
 </style>

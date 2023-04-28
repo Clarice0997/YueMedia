@@ -1,6 +1,8 @@
 <template>
   <el-form ref="form" :model="form" :rules="rules" size="medium" @keydown.enter.native="clickLoginHandler" @keypress.native="preventSpecialChars">
-    <h1>登录悦音</h1>
+    <div class="title">
+      <h1>悦音 - 媒体管理一站式平台</h1>
+    </div>
     <el-form-item prop="username">
       <el-input v-model="form.username" placeholder="账号" clearable prefix-icon="el-icon-user"></el-input>
     </el-form-item>
@@ -213,11 +215,6 @@ export default {
   padding: 20px;
   border-radius: 1rem;
 
-  h1 {
-    font-size: 2rem;
-    margin-bottom: 20px;
-  }
-
   a {
     display: block;
     margin-top: 10px;
@@ -249,5 +246,19 @@ export default {
   font-family: 'poppins', sans-serif;
   box-sizing: content-box;
   border-radius: 1rem;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 12px;
+  background: linear-gradient(45deg, #8baaaa 0%, #ae8b9c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  h1 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
 }
 </style>

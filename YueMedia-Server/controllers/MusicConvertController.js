@@ -1,13 +1,13 @@
 // import modules
 const router = require('express').Router()
 const multer = require('multer')
-const { analyseFileService, uploadConvertMusicService, deleteConvertMusicService, getSupportMusicCodecService, submitMusicConvertTaskService, getMusicConvertAnalyseService } = require('../services/MusicConvertService')
+const { analyseFileService, uploadConvertMusicService, deleteConvertMusicService, getSupportMusicCodecService, submitMusicConvertTaskService, getMusicConvertAnalyseService, uploadMyFileConvertMusicService } = require('../services/MusicConvertService')
 const { auth } = require('../middlewares/Auth')
 const { errorHandler } = require('../middlewares/ErrorCatcher')
 
 // 文件上传配置
 const fileUpload = multer({
-  limits: { fileSize: 100000000, files: 1 }
+  limits: { fileSize: 1000000000, files: 1 }
 })
 
 /**
@@ -54,6 +54,28 @@ router.post('/upload', auth, convertFileUpload.array('file[]'), async (req, res)
     const files = req.files
     // Service
     const { code, data } = await uploadConvertMusicService(files, req.body.fileNames)
+    // response
+    res.status(code).send({ ...data, code })
+  } catch (error) {
+    errorHandler(error, req, res)
+  }
+})
+
+/**
+ * @api {POST} /apis/convert/upload/myFile 上传我的音频接口
+ * @apiName uploadMyFileConvertMusic
+ * @apiGroup MusicConvert
+ * @apiName MusicConvert/uploadMyFileConvertMusic
+ * @apiPermission User
+ * @apiHeader {String} Authorization JWT鉴权
+ * @apiBody {Array} filesData 我的音频数据数组
+ */
+router.post('/upload/myFile', auth, async (req, res) => {
+  try {
+    // 获取我的音频数据数组
+    const { filesData } = req.body
+    // Service
+    const { code, data } = await uploadMyFileConvertMusicService(filesData, req.authorization.uno)
     // response
     res.status(code).send({ ...data, code })
   } catch (error) {

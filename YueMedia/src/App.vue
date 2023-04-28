@@ -30,4 +30,12 @@
   font-weight: 300;
   font-display: swap;
 }
+
+.el-table .warning-row {
+  background: oldlace;
+}
+
+.el-table .success-row {
+  background: #f0f9eb;
+}
 </style>

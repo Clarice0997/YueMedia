@@ -5,7 +5,7 @@ const { v4: uuidv4 } = require('uuid')
 const { generateJsonWebToken } = require('../utils/Jwt')
 const { loginRecord } = require('../models/loginRecordModel')
 const { ServiceErrorHandler } = require('../middlewares/ErrorCatcher')
-const { calculateLoginRecords } = require('../utils/redis/calculateLoginRecords')
+const { calculateLoginRecords } = require('../utils/redis/calculator/calculateLoginRecords')
 const { hsetRedis, hgetRedis } = require('../utils/redis/RedisHandler')
 
 /**
@@ -55,6 +55,7 @@ async function loginService(username, password, ip) {
         }
       }
     }
+    // TODO: 账号是否被禁用或被删除 账号异常
     // 用户存在则比对密码是否相同
     let flag = compareSync(password, user[0].password)
     if (flag) {

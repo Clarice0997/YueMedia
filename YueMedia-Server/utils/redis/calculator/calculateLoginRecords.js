@@ -1,6 +1,6 @@
 // import modules
-const { LoginRecord } = require('../../models/loginRecordModel')
-const { setRedis, hsetRedis } = require('./RedisHandler')
+const { LoginRecord } = require('../../../models/loginRecordModel')
+const { hsetRedis } = require('../RedisHandler')
 
 // 计算登录记录 Redis 持久化
 const calculateLoginRecords = async () => {

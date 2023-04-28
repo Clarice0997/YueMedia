@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!--  TODO: 状态行  -->
     <el-table ref="musicManagerTable" :data="musicData" @selection-change="handleSelectionChange" tooltip-effect="dark" class="musicManagerTable" :row-class-name="tableRowClassName" max-height="900" :default-sort="{ prop: 'create_time', order: 'ascending' }">
       <!--  选择列  -->
       <el-table-column type="selection" width="55" align="center"></el-table-column>
@@ -30,7 +29,7 @@
         </template>
       </el-table-column>
       <!--  音频编码格式  -->
-      <el-table-column label="编码格式" prop="music_codec" width="150" sortable align="center">
+      <el-table-column label="编码格式" prop="music_codec" width="200" sortable align="center">
         <template slot-scope="scope">
           <el-tag size="medium" type="success">{{ scope.row.music_codec }}</el-tag>
         </template>
@@ -104,6 +103,7 @@ import { deleteMusicAPI, deleteMusicBatchAPI, downloadMusicAPI, downloadMusicBat
 import { formatDate } from '@/utils/formatDate'
 import store from '@/store'
 import { downloadAPI } from '@/apis/downloadAPI'
+import { nextTick } from 'vue'
 
 export default {
   name: 'musicManagerTable',
@@ -160,6 +160,9 @@ export default {
       } = await selectMusicListAPI(this.pageNumber, this.pageSize)
       this.totalData = count
       this.musicData = musicData
+      nextTick(() => {
+        this.$refs.musicManagerTable.doLayout()
+      })
     },
     // 更新表格数据
     async renewTableData() {
@@ -169,11 +172,14 @@ export default {
       } = await selectMusicListAPI(this.pageNumber, this.pageSize)
       this.totalData = count
       this.musicData = musicData
+      nextTick(() => {
+        this.$refs.musicManagerTable.doLayout()
+      })
     },
     // 选择表格样式变化
     tableRowClassName({ row, rowIndex }) {
-      if (!row.audited) {
-        return 'warning-row'
+      if (row.status === 2) {
+        return 'success-row'
       }
       return ''
     },
@@ -388,13 +394,5 @@ export default {
       height: 24px;
     }
   }
-}
-
-.el-table .warning-row {
-  background: oldlace;
-}
-
-.el-table .success-row {
-  background: #f0f9eb;
 }
 </style>

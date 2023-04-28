@@ -13,6 +13,15 @@ export const deleteConvertMusicAPI = async filename => {
 }
 
 /**
+ * 上传我的音频 API
+ * @param filesData
+ * @returns
+ */
+export const uploadMyFileConvertMusicAPI = async filesData => {
+  return request.post('apis/convert/upload/myFile', { filesData })
+}
+
+/**
  * 获取支持音乐格式 API
  * @returns
  */

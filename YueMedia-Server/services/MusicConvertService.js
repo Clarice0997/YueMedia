@@ -8,8 +8,10 @@ const { mysqlHandler } = require('../config/mysql')
 const { rpushRedis, hgetRedis } = require('../utils/redis/RedisHandler')
 const { insertAudioConvertQueues } = require('../models/audioConvertQueueModel')
 
+// 文件夹常量
 const DEFAULT_STATIC_PATH = process.env.DEFAULT_STATIC_PATH
 const TEMP_PARSE_MUSIC_FOLDER = process.env.TEMP_PARSE_MUSIC_FOLDER
+const MUSIC_FOLDER = process.env.MUSIC_FOLDER
 
 /**
  * 文件分析 Service
@@ -83,6 +85,54 @@ const uploadConvertMusicService = async (files, fileNames) => {
         codec: metadata.format.codec,
         size: files[i].size,
         musicFileName
+      })
+    }
+    return {
+      code: 200,
+      data: { filesDetail }
+    }
+  } catch (error) {
+    ServiceErrorHandler(error)
+    return {
+      code: 500,
+      data: {
+        message: error.message
+      }
+    }
+  }
+}
+
+/**
+ * 上传我的音频 Service
+ * @param filesData
+ * @param uno
+ * @returns
+ */
+const uploadMyFileConvertMusicService = async (filesData, uno) => {
+  try {
+    // 参数校验
+    if (!filesData) {
+      return {
+        code: 400,
+        data: {
+          message: '参数不合法'
+        }
+      }
+    }
+    let filesDetail = []
+    // 循环待转码文件 存入待转码文件夹
+    for (let i = 0; i < filesData.length; i++) {
+      const originMusicPath = path.join(DEFAULT_STATIC_PATH, MUSIC_FOLDER, uno, filesData[i].origin_file_name)
+      const musicPath = path.join(DEFAULT_STATIC_PATH, TEMP_PARSE_MUSIC_FOLDER, filesData[i].origin_file_name)
+      // 存储待解析音乐文件
+      fs.copyFileSync(originMusicPath, musicPath)
+      // 存储上传转码音乐文件信息
+      filesDetail.push({
+        originalName: filesData[i].song_name,
+        status: 1,
+        codec: filesData[i].music_codec,
+        size: filesData[i].song_size,
+        musicFileName: filesData[i].origin_file_name
       })
     }
     return {
@@ -250,5 +300,6 @@ module.exports = {
   deleteConvertMusicService,
   getSupportMusicCodecService,
   submitMusicConvertTaskService,
-  getMusicConvertAnalyseService
+  getMusicConvertAnalyseService,
+  uploadMyFileConvertMusicService
 }

@@ -141,7 +141,7 @@ export default {
   },
   methods: {
     uploadVideoFileBeforeHook(file) {
-      const allowedMimetypes = ['video/x-flv', 'video/x-ms-wmv', 'video/quicktime', 'video/x-msvideo', 'video/mp4']
+      const allowedMimetypes = ['video/x-flv', 'video/x-ms-wmv', 'video/quicktime', 'video/x-msvideo', 'video/mp4', 'video/avi']
       let isAllowedVideo = allowedMimetypes.indexOf(file.type) !== -1
       const isLt1G = file.size / 1024 / 1024 < 1024
 

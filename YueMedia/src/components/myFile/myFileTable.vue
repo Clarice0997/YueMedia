@@ -1,7 +1,6 @@
 <template>
   <div>
-    <!--  TODO: 状态行  -->
-    <el-table ref="myFileTable" :data="fileListData" tooltip-effect="dark" class="myFileTable" :height="700" :max-height="700">
+    <el-table ref="myFileTable" :data="fileListData" :row-class-name="tableRowClassName" tooltip-effect="dark" class="myFileTable" :height="700" :max-height="700">
       <!--  ID  -->
       <el-table-column label="ID" align="center" min-width="250" prop="taskId"></el-table-column>
       <!--   任务详细   -->
@@ -67,6 +66,7 @@
 import { deleteMyFileAPI, getMyFileListAPI } from '@/apis/fileAPI'
 import { formatDate } from '@/utils/formatDate'
 import { downloadPatchAPI } from '@/apis/downloadAPI'
+import { nextTick } from 'vue'
 
 export default {
   name: 'myFileTable',
@@ -95,6 +95,9 @@ export default {
       } = await getMyFileListAPI(this.pageNumber, this.pageSize)
       this.totalData = count
       this.fileListData = queues
+      nextTick(() => {
+        this.$refs.myFileTable.doLayout()
+      })
     },
     // 更新表格数据
     async renewTableData() {
@@ -104,6 +107,18 @@ export default {
       } = await getMyFileListAPI(this.pageNumber, this.pageSize)
       this.totalData = count
       this.fileListData = queues
+      nextTick(() => {
+        this.$refs.myFileTable.doLayout()
+      })
+    },
+    // 判断行状态函数
+    tableRowClassName({ row, rowIndex }) {
+      if (row.status === 2) {
+        return 'success-row'
+      } else if (row.status === 4) {
+        return 'warning-row'
+      }
+      return ''
     },
     // 页面显示条数改变事件
     handleSizeChange(val) {
@@ -193,13 +208,5 @@ export default {
 
 .block {
   margin-top: 10px;
-}
-
-.el-table .warning-row {
-  background: oldlace;
-}
-
-.el-table .success-row {
-  background: #f0f9eb;
 }
 </style>

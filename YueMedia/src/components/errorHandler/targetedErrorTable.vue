@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-table ref="targetedErrorTable" :data="currentTargetedErrorTableData" :height="400" :max-height="400" tooltip-effect="dark" class="targetedErrorTable">
+    <el-table ref="targetedErrorTable" :data="currentTargetedErrorTableData" :height="400" :max-height="400" tooltip-effect="dark" :row-class-name="tableRowClassName" class="targetedErrorTable">
       <el-table-column label="ID" width="220" align="center" prop="_id"></el-table-column>
       <el-table-column label="错误信息" width="250" align="center">
         <template slot-scope="scope">
@@ -92,6 +92,13 @@ export default {
       this.pageSize = val
       // 显示条数改变重新获取数据
       this.initTableData()
+    },
+    // 选择表格样式变化
+    tableRowClassName({ row, rowIndex }) {
+      if (row.status === 2) {
+        return 'warning-row'
+      }
+      return ''
     },
     // 页码改变事件
     handleCurrentChange(val) {
