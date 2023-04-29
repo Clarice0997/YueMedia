@@ -7,7 +7,7 @@
       <!--   任务详细   -->
       <el-table-column label="任务详情" align="center" :min-width="80">
         <template slot-scope="scope">
-          <el-popover placement="bottom" title="任务详情" width="800" trigger="hover" :content="JSON.stringify(scope.row.tasks)">
+          <el-popover placement="bottom" title="任务详情" width="800" trigger="click" :content="JSON.stringify(scope.row.tasks)">
             <el-button type="primary" slot="reference" size="medium">任务详情</el-button>
           </el-popover>
         </template>

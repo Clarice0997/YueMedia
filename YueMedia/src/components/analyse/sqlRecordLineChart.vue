@@ -1,46 +1,47 @@
 <template>
-  <div ref="loginRecordChart" id="loginRecordChart" style="height: 400px; width: 100%"></div>
+  <div ref="sqlRecordLineChart" id="sqlRecordLineChart" style="height: 400px; width: 100%"></div>
 </template>
 
 <script>
-import { getLoginRecordAPI } from '@/apis/dataAPI'
+import { getSqlLineRecordAPI } from '@/apis/dataAPI'
 import * as echarts from 'echarts'
 import store from '@/store'
 import { throttle } from 'lodash'
 
 export default {
-  name: 'loginRecordChart',
+  name: 'sqlRecordLineChart',
   data() {
     return {
-      loginRecordChartOption: {}
+      sqlLineChartData: [],
+      sqlLineChartOption: {}
     }
   },
   mounted() {
-    this.initLoginRecordChart()
+    this.initSqlRecordLineChart()
     this.resizeObserverCharts()
   },
 
   methods: {
-    async initLoginRecordChart() {
+    async initSqlRecordLineChart() {
       try {
         const {
-          data: { data }
-        } = await getLoginRecordAPI()
-        // 解构键值
-        const dates = data.map(item => item.date)
-        const counts = data.map(item => item.count)
-        // 渲染 Echart 图标
-        const loginChart = echarts.init(this.$refs.loginRecordChart, 'macarons', { resize: true })
-        this.loginRecordChartOption = {
+          data: { result }
+        } = await getSqlLineRecordAPI()
+        this.sqlLineChartData = result
+        // Echart 初始化
+        const sqlRecordLineChart = echarts.init(this.$refs.sqlRecordLineChart, 'macarons', { resize: true })
+        this.sqlLineChartOption = {
           title: {
-            text: '用户登录趋势表',
+            text: 'SQL 语句响应情况表',
             left: 'center',
-            // subtext: '数据来源：所有用户登录记录',
             textStyle: {
               fontSize: 20,
               fontWeight: 'bold'
             },
             padding: 10
+          },
+          grid: {
+            top: '20%'
           },
           tooltip: {
             trigger: 'axis',
@@ -50,9 +51,6 @@ export default {
                 color: '#999'
               }
             }
-          },
-          grid: {
-            top: '20%'
           },
           toolbox: {
             feature: {
@@ -65,50 +63,70 @@ export default {
           dataZoom: [
             {
               type: 'slider',
-              start: 50,
+              start: 0,
               end: 100
             }
           ],
-          legend: {
-            data: ['登录次数', '趋势'],
-            left: 'center',
-            top: 40
-          },
           color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
             { offset: 0, color: '#a1c4fd' },
             { offset: 1, color: '#c2e9fb' }
           ]),
+          legend: {
+            data: ['请求次数', '平均响应时间（毫秒）'],
+            left: 'center',
+            top: 40
+          },
           xAxis: {
             type: 'category',
-            data: dates
+            axisTick: {
+              alignWithLabel: true
+            },
+            data: this.sqlLineChartData.map(data => data.date)
           },
           yAxis: [
             {
               type: 'value',
-              name: '登录次数',
+              name: '请求次数',
               axisLabel: {
                 formatter: '{value} 次'
               }
+            },
+            {
+              type: 'value',
+              name: '平均响应时间（毫秒）',
+              axisLabel: {
+                formatter: '{value} MS'
+              },
+              splitLine: { show: false },
+              axisLine: { show: false },
+              axisTick: { show: false }
             }
           ],
           series: [
             {
-              name: '登录次数',
+              name: '请求次数',
               type: 'bar',
-              data: counts,
+              data: this.sqlLineChartData.map(data => data.count),
               itemStyle: {
                 opacity: 0.5
-              }
+              },
+              yAxisIndex: 0,
+              silent: this.sqlLineChartData.map(data => data.count).length === 0
             },
             {
-              name: '趋势',
+              name: '平均响应时间（毫秒）',
               type: 'line',
-              data: counts
+              data: this.sqlLineChartData.map(data => data.averageResponseTime),
+              yAxisIndex: 1,
+              silent: this.sqlLineChartData.map(data => data.averageResponseTime).length === 0
             }
           ]
         }
-        loginChart.setOption(this.loginRecordChartOption, true)
-        await store.dispatch('dataCharts/addEchart', { chartName: 'loginChart', chart: loginChart })
+        sqlRecordLineChart.setOption(this.sqlLineChartOption, true)
+        await store.dispatch('dataCharts/addEchart', {
+          chartName: 'sqlRecordLineChart',
+          chart: sqlRecordLineChart
+        })
       } catch (e) {
         // 异常处理
         console.log(e.message)
@@ -122,7 +140,7 @@ export default {
       }
     },
     resizeObserverCharts() {
-      const chartContainer = this.$refs.loginRecordChart
+      const chartContainer = this.$refs.sqlRecordLineChart
       const resizeObserver = new ResizeObserver(
         throttle(() => {
           store.dispatch('dataCharts/redrawEcharts')

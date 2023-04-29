@@ -163,7 +163,7 @@ const getMusicOpenapiService = async (musicPath, req) => {
 const getPrivateVideoOpenapiService = async (videoPath, req) => {
   try {
     // 拼接文件链接
-    const concatFilePath = path.join(process.env.DEFAULT_STATIC_PATH, process.env.MUSIC_FOLDER, req.authorization.uno, videoPath)
+    const concatFilePath = path.join(process.env.DEFAULT_STATIC_PATH, process.env.VIDEO_FOLDER, req.authorization.uno, videoPath)
     // 确保文件存在
     if (!fs.existsSync(concatFilePath)) {
       return {

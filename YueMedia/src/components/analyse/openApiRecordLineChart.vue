@@ -1,46 +1,47 @@
 <template>
-  <div ref="loginRecordChart" id="loginRecordChart" style="height: 400px; width: 100%"></div>
+  <div ref="openApiRecordLineChart" id="openApiRecordLineChart" style="height: 400px; width: 100%"></div>
 </template>
 
 <script>
-import { getLoginRecordAPI } from '@/apis/dataAPI'
+import { getOpenApiLineRecordAPI } from '@/apis/dataAPI'
 import * as echarts from 'echarts'
 import store from '@/store'
 import { throttle } from 'lodash'
 
 export default {
-  name: 'loginRecordChart',
+  name: 'openApiRecordLineChart',
   data() {
     return {
-      loginRecordChartOption: {}
+      openApiLineChartData: [],
+      openApiLineChartOption: {}
     }
   },
   mounted() {
-    this.initLoginRecordChart()
+    this.initOpenApiRecordLineChart()
     this.resizeObserverCharts()
   },
 
   methods: {
-    async initLoginRecordChart() {
+    async initOpenApiRecordLineChart() {
       try {
         const {
-          data: { data }
-        } = await getLoginRecordAPI()
-        // 解构键值
-        const dates = data.map(item => item.date)
-        const counts = data.map(item => item.count)
-        // 渲染 Echart 图标
-        const loginChart = echarts.init(this.$refs.loginRecordChart, 'macarons', { resize: true })
-        this.loginRecordChartOption = {
+          data: { result }
+        } = await getOpenApiLineRecordAPI()
+        this.openApiLineChartData = result
+        // Echart 初始化
+        const openApiRecordLineChart = echarts.init(this.$refs.openApiRecordLineChart, 'macarons', { resize: true })
+        this.openApiLineChartOption = {
           title: {
-            text: '用户登录趋势表',
+            text: 'Open API 调用情况表',
             left: 'center',
-            // subtext: '数据来源：所有用户登录记录',
             textStyle: {
               fontSize: 20,
               fontWeight: 'bold'
             },
             padding: 10
+          },
+          grid: {
+            top: '20%'
           },
           tooltip: {
             trigger: 'axis',
@@ -50,9 +51,6 @@ export default {
                 color: '#999'
               }
             }
-          },
-          grid: {
-            top: '20%'
           },
           toolbox: {
             feature: {
@@ -65,50 +63,70 @@ export default {
           dataZoom: [
             {
               type: 'slider',
-              start: 50,
+              start: 0,
               end: 100
             }
           ],
-          legend: {
-            data: ['登录次数', '趋势'],
-            left: 'center',
-            top: 40
-          },
           color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
             { offset: 0, color: '#a1c4fd' },
             { offset: 1, color: '#c2e9fb' }
           ]),
+          legend: {
+            data: ['调用次数', '平均响应时间（毫秒）'],
+            left: 'center',
+            top: 40
+          },
           xAxis: {
             type: 'category',
-            data: dates
+            axisTick: {
+              alignWithLabel: true
+            },
+            data: this.openApiLineChartData.map(data => data.date)
           },
           yAxis: [
             {
               type: 'value',
-              name: '登录次数',
+              name: '调用次数',
               axisLabel: {
                 formatter: '{value} 次'
               }
+            },
+            {
+              type: 'value',
+              name: '平均响应时间（毫秒）',
+              axisLabel: {
+                formatter: '{value} MS'
+              },
+              splitLine: { show: false },
+              axisLine: { show: false },
+              axisTick: { show: false }
             }
           ],
           series: [
             {
-              name: '登录次数',
+              name: '调用次数',
               type: 'bar',
-              data: counts,
+              data: this.openApiLineChartData.map(data => data.count),
               itemStyle: {
                 opacity: 0.5
-              }
+              },
+              yAxisIndex: 0,
+              silent: this.openApiLineChartData.map(data => data.count).length === 0
             },
             {
-              name: '趋势',
+              name: '平均响应时间（毫秒）',
               type: 'line',
-              data: counts
+              data: this.openApiLineChartData.map(data => data.averageDuration),
+              yAxisIndex: 1,
+              silent: this.openApiLineChartData.map(data => data.averageDuration).length === 0
             }
           ]
         }
-        loginChart.setOption(this.loginRecordChartOption, true)
-        await store.dispatch('dataCharts/addEchart', { chartName: 'loginChart', chart: loginChart })
+        openApiRecordLineChart.setOption(this.openApiLineChartOption, true)
+        await store.dispatch('dataCharts/addEchart', {
+          chartName: 'openApiRecordLineChart',
+          chart: openApiRecordLineChart
+        })
       } catch (e) {
         // 异常处理
         console.log(e.message)
@@ -122,7 +140,7 @@ export default {
       }
     },
     resizeObserverCharts() {
-      const chartContainer = this.$refs.loginRecordChart
+      const chartContainer = this.$refs.openApiRecordLineChart
       const resizeObserver = new ResizeObserver(
         throttle(() => {
           store.dispatch('dataCharts/redrawEcharts')
