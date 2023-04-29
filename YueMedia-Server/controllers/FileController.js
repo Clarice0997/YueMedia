@@ -2,7 +2,7 @@
 const router = require('express').Router()
 const { auth } = require('../middlewares/Auth')
 const { errorHandler } = require('../middlewares/ErrorCatcher')
-const { getMyFileListService, deleteMyFileService } = require('../services/FileService')
+const { getMyFileListService, deleteMyFileService, getMyFinishFileListService } = require('../services/FileService')
 
 /**
  * @api {GET} /apis/file 获取个人处理文件列表接口
@@ -20,6 +20,25 @@ router.get('/', auth, async (req, res) => {
     const { pageNumber, pageSize } = req.query
     // Service
     const { code, data } = await getMyFileListService(pageNumber, pageSize, req.authorization.uno)
+    // response
+    res.status(code).send({ ...data, code })
+  } catch (error) {
+    errorHandler(error, req, res)
+  }
+})
+
+/**
+ * @api {GET} /apis/file/finish 获取个人已处理文件列表接口
+ * @apiName getMyFinishFileList
+ * @apiGroup File
+ * @apiName File/getMyFinishFileList
+ * @apiPermission User
+ * @apiHeader {String} Authorization JWT鉴权
+ */
+router.get('/finish', auth, async (req, res) => {
+  try {
+    // Service
+    const { code, data } = await getMyFinishFileListService(req.authorization.uno)
     // response
     res.status(code).send({ ...data, code })
   } catch (error) {

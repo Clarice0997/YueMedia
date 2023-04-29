@@ -9,7 +9,7 @@ const ffmpegError = require('../utils/ffmpegError')
 const { mysqlHandler } = require('../config/mysql')
 const { removeVideoPromise } = require('../utils/removeVideoPromise')
 const { dirCompressing } = require('../utils/dirCompressing')
-const { calculateUserStorage } = require('../utils/redis/calculator/calculateUserUsedStorage')
+const { calculateUserUsedStorage } = require('../utils/redis/calculator/calculateUserUsedStorage')
 
 // 存储文件位置常量
 const DEFAULT_STATIC_PATH = process.env.DEFAULT_STATIC_PATH
@@ -155,7 +155,7 @@ const uploadVideoDataService = async (videoData, userData) => {
     const params = [videoData.videoId, userData.uno, videoData.videoName, 1, videoData.videoSize, codecId, videoData.videoFileName, videoData.videoCoverFileName]
     await mysqlHandler(query, params)
 
-    await calculateUserStorage(userData.uno)
+    await calculateUserUsedStorage(userData.uno)
 
     return {
       code: 200,
@@ -481,7 +481,7 @@ const deleteVideoService = async (videoData, userData) => {
 
     await removeVideoPromise(videoData, userData)
 
-    await calculateUserStorage(userData.uno)
+    await calculateUserUsedStorage(userData.uno)
 
     return {
       code: 200,
@@ -584,7 +584,7 @@ const deleteVideoBatchService = async (fileList, userData) => {
 
     await Promise.all(videoFilePromiseArr)
 
-    await calculateUserStorage(userData.uno)
+    await calculateUserUsedStorage(userData.uno)
 
     return {
       code: 200,

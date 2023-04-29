@@ -15,7 +15,7 @@
         <el-input v-model="form.safecode" placeholder="验证码"></el-input>
       </el-form-item>
     </div>
-    <el-button class="login-button" type="primary" v-loading.fullscreen="fullscreenLoading" :loading="btnLoading" @click="clickLoginHandler">立即登录 </el-button>
+    <el-button class="login-button" type="primary" :loading="btnLoading" @click="clickLoginHandler">立即登录</el-button>
     <router-link to="/login/register">立即注册</router-link>
   </el-form>
 </template>
@@ -30,6 +30,7 @@ export default {
 
   data() {
     return {
+      loading: '',
       // 表单数据对象
       form: {
         username: '',
@@ -84,8 +85,6 @@ export default {
           }
         ]
       },
-      // Loading显隐
-      fullscreenLoading: false,
       // 按钮加载状态
       btnLoading: false,
       // 验证码地址
@@ -94,6 +93,12 @@ export default {
   },
 
   mounted() {},
+
+  beforeDestroy() {
+    if (this.loading) {
+      this.loading.close()
+    }
+  },
 
   methods: {
     // 刷新验证码函数
@@ -118,7 +123,7 @@ export default {
             return this.$message.error('不支持使用移动设备或宽高比过低的设备登录')
           }
           // Loading遮罩
-          this.fullscreenLoading = true
+          this.loading = this.openFullScreen('登录中...')
           // 加载按钮
           this.btnLoading = true
 
@@ -139,7 +144,7 @@ export default {
             // 停止加载按钮
             this.btnLoading = false
             // 停止全屏遮罩
-            this.fullscreenLoading = false
+            this.loading.close()
             return false
           }
 
@@ -163,6 +168,8 @@ export default {
                 type: 'error',
                 duration: 2000
               })
+              // 停止 Loading
+              this.loading.close()
             })
             .finally(() => {
               // 刷新验证码
@@ -171,8 +178,6 @@ export default {
               this.form = this.$options.data().form
               // 停止加载按钮
               this.btnLoading = false
-              // 停止全屏遮罩
-              this.fullscreenLoading = false
             })
         } else {
           return false
@@ -184,6 +189,15 @@ export default {
       if (this.specialChars.includes(event.keyCode)) {
         event.preventDefault()
       }
+    },
+    // 全屏加载函数
+    openFullScreen(text) {
+      return this.$loading({
+        lock: true,
+        text: text ? text : 'Loading',
+        spinner: 'el-icon-loading',
+        background: 'rgba(0, 0, 0, 0.7)'
+      })
     }
   }
 }

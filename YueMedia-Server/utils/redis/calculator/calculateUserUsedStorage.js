@@ -79,4 +79,4 @@ const calculateUsersUsedStorage = async () => {
   }
 }
 
-module.exports = { calculateUserStorage: calculateUserUsedStorage, calculateUsersUsedStorage }
+module.exports = { calculateUserUsedStorage, calculateUsersUsedStorage }

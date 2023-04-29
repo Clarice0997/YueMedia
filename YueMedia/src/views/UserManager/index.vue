@@ -35,7 +35,9 @@ export default {
     searchUserHandler() {
       this.$refs.userManagerTable.searchUserHandler(this.searchID)
     },
-    batchDeleteUserHandler() {}
+    batchDeleteUserHandler() {
+      this.$refs.userManagerTable.deleteUserBatchHandler()
+    }
   }
 }
 </script>

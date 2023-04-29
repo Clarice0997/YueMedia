@@ -13,9 +13,9 @@ const OPENAPI_FOLDER = process.env.OPENAPI_FOLDER
 const removeVideoPromise = (file, userData) => {
   return new Promise(async (resolve, reject) => {
     // 删除文件 源文件 封面文件
-    const musicPath = path.join(DEFAULT_STATIC_PATH, VIDEO_FOLDER, userData.uno, file.video_file_name)
+    const videoPath = path.join(DEFAULT_STATIC_PATH, VIDEO_FOLDER, userData.uno, file.video_file_name)
     const coverPath = path.join(DEFAULT_STATIC_PATH, VIDEO_COVER_FOLDER, userData.uno, file.video_cover_file_name)
-    fse.removeSync(musicPath)
+    fse.removeSync(videoPath)
     fse.removeSync(coverPath)
     // 判断是否为开放文件 删除开放文件
     if (file.status === 2) {

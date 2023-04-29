@@ -129,6 +129,7 @@ const getMusicOpenapiService = async (musicPath, req) => {
     const openApiRecord = new OpenApiRecord({
       public: true,
       ip: req.ip,
+      userId: musicPath.split('\\').shift(),
       path: musicPath,
       type: 'Get Open Music API',
       fileSize: fs.statSync(concatFilePath).size,
@@ -233,6 +234,7 @@ const getVideoOpenapiService = async (videoPath, req) => {
       public: true,
       ip: req.ip,
       path: videoPath,
+      userId: videoPath.split('\\').shift(),
       type: 'Get Open Video API',
       fileSize: fs.statSync(concatFilePath).size,
       startTime: new Date()

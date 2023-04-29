@@ -91,6 +91,57 @@ const getMyFileListService = async (pageNumber, pageSize, uno) => {
 }
 
 /**
+ * 获取个人已处理文件列表 Service
+ * @param uno
+ * @returns
+ */
+const getMyFinishFileListService = async uno => {
+  try {
+    // 查询数据条数
+    const count = await AudioConvertQueues.countDocuments({ userId: uno })
+
+    // 判断是否存在已处理文件
+    if (count === 0) {
+      return {
+        code: 200,
+        data: {
+          message: '不存在已处理文件数据',
+          count: 0
+        }
+      }
+    }
+
+    // 查询个人已处理文件列表
+    const queues = await AudioConvertQueues.find({ userId: uno, status: 2 }).sort({ createdAt: 'desc' })
+
+    // 深拷贝原型
+    const newQueues = JSON.parse(JSON.stringify(queues))
+
+    // 处理返回数据（添加下载相对路径）
+    const filterQueues = newQueues.map(queue => {
+      let filterQueue = queue
+      if (filterQueue.status === 2) {
+        filterQueue.downloadPath = path.join(CONVERT_MUSIC_FOLDER, `${queue.taskId}.zip`)
+      }
+      return filterQueue
+    })
+
+    return {
+      code: 200,
+      data: { queues: filterQueues }
+    }
+  } catch (error) {
+    ServiceErrorHandler(error)
+    return {
+      code: 500,
+      data: {
+        message: error.message
+      }
+    }
+  }
+}
+
+/**
  * 删除个人处理文件 Service
  * @param taskId
  * @returns
@@ -126,4 +177,4 @@ const deleteMyFileService = async taskId => {
   }
 }
 
-module.exports = { getMyFileListService, deleteMyFileService }
+module.exports = { getMyFileListService, deleteMyFileService, getMyFinishFileListService }

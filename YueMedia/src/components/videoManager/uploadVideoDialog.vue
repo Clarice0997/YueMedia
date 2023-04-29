@@ -3,7 +3,6 @@
     <el-form ref="insertVideoForm" :model="insertVideoForm" :rules="insertVideoFormRules" label-position="top">
       <!-- 上传视频文件 -->
       <el-form-item label="上传视频文件" prop="videoFile">
-        <!--    TODO: action 钩子需修改    -->
         <el-upload class="uploadVideo" ref="uploadVideo" :disabled="isVideoUploaded" :before-upload="uploadVideoFileBeforeHook" :on-success="uploadVideoFileSuccessHook" :limit="1" drag name="videoFile" with-credentials :headers="{ Authorization }" :action="targetIp + '/apis/video/upload/video'">
           <i class="el-icon-upload"></i>
           <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
@@ -19,7 +18,6 @@
             </div>
           </el-image>
         </div>
-        <!--    TODO: 替换封面    -->
         <el-upload
           class="uploadVideoCover"
           :show-file-list="false"

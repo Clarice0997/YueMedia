@@ -87,7 +87,6 @@
           <div class="file-tools-sticky-wrapper">
             <div class="file-tools-sticky">
               <div class="btn-holder1">
-                <!--  TODO: 从我的音频中上传音频  -->
                 <el-select :disabled="!isAllowUpload" placeholder="添加更多文件" v-model="selectedOption" size="medium" @change="handleOptionChange">
                   <el-option v-for="(item, index) in options" :key="index" :label="item" :value="item"></el-option>
                 </el-select>

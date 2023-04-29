@@ -1,38 +1,23 @@
 <template>
-  <el-card shadow="hover" class="top-card">
-    <div ref="loginRecordChart" id="loginRecordChart" style="height: 400px; width: 100%"></div>
-  </el-card>
+  <div ref="loginRecordChart" id="loginRecordChart" style="height: 400px; width: 100%"></div>
 </template>
 
 <script>
-// import modules
-// 必须采用 import * as 方式导入，否则 init 会报错
-import * as echarts from 'echarts'
 import { getLoginRecordAPI } from '@/apis/dataAPI'
+import * as echarts from 'echarts'
 import store from '@/store'
 import { throttle } from 'lodash'
-import { mapState } from 'vuex'
 
 export default {
-  name: 'superAdminAnalysis',
+  name: 'loginRecordChart',
   data() {
     return {
-      loginRecordChartOption: {},
-      userRecordChartOption: {}
+      loginRecordChartOption: {}
     }
   },
-
-  computed: {
-    ...mapState('dataCharts', ['charts'])
-  },
-
   mounted() {
     this.initLoginRecordChart()
     this.resizeObserverCharts()
-  },
-
-  beforeDestroy() {
-    store.dispatch('dataCharts/clearEcharts')
   },
 
   methods: {
@@ -50,7 +35,7 @@ export default {
           title: {
             text: '用户登录趋势表',
             left: 'center',
-            subtext: '数据来源：MongoDB',
+            subtext: '数据来源：所有用户登录记录',
             textStyle: {
               fontSize: 20,
               fontWeight: 'bold'
@@ -137,9 +122,4 @@ export default {
 }
 </script>
 
-<style lang="less" scoped>
-.top-card {
-  margin: 10px;
-  flex-grow: 1;
-}
-</style>
+<style lang="less" scoped></style>

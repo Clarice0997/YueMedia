@@ -43,10 +43,10 @@
       <el-table-column label="用户操作" fixed="right" align="center" width="400">
         <template slot-scope="scope">
           <el-button type="primary" size="mini" @click="updateUserDataHandler(scope.row)">修改信息</el-button>
-          <el-button type="primary" size="mini">设置密码</el-button>
-          <el-button type="success" size="mini" v-if="scope.row.status === 2">启用用户</el-button>
-          <el-button type="danger" size="mini" v-else>禁用用户</el-button>
-          <el-button type="danger" size="mini">删除用户</el-button>
+          <el-button type="primary" size="mini" @click="updateUserPasswordHandler(scope.row)">设置密码</el-button>
+          <el-button type="success" size="mini" @click="updateUserStatusHandler(scope.row, 1)" v-if="scope.row.status === 2"> 启用用户 </el-button>
+          <el-button type="danger" size="mini" @click="updateUserStatusHandler(scope.row, 2)" v-else>禁用用户 </el-button>
+          <el-button type="danger" size="mini" @click="deleteUserHandler(scope.row)">删除用户</el-button>
         </template>
       </el-table-column>
       <template slot="empty">
@@ -81,11 +81,23 @@
         <el-button type="primary" @click="clickConfirmUpdateUserHandler">确 定</el-button>
       </div>
     </el-dialog>
+    <!-- 设置密码对话框 -->
+    <el-dialog title="设置密码" :close-on-click-modal="false" destroy-on-close :visible.sync="updateUserPasswordFormVisible" append-to-body @close="resetUpdateUserPasswordForm" width="20%">
+      <el-form ref="updateUserPasswordForm" :model="selectedUserData" :rules="updateUserFormRules" size="medium">
+        <el-form-item label="密码" prop="password">
+          <el-input v-model="selectedUserData.password" placeholder="请输入密码" show-password prefix-icon="el-icon-lock"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="resetUpdateUserPasswordForm">取 消</el-button>
+        <el-button type="primary" @click="clickConfirmUpdateUserPasswordHandler">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { selectUserListAPI, updateUserDataAPI } from '@/apis/userManagerAPI'
+import { deleteUserAPI, deleteUserBatchAPI, selectUserListAPI, updateUserDataAPI, updateUserPasswordAPI, updateUserStatusAPI } from '@/apis/userManagerAPI'
 import { nextTick } from 'vue'
 import { formatDate } from '@/utils/formatDate'
 
@@ -101,6 +113,7 @@ export default {
       // 选中列数组
       multipleSelection: [],
       updateUserFormVisible: false,
+      updateUserPasswordFormVisible: false,
       selectedUserData: {},
       selectedOriginUserData: {},
       updateUserFormRules: {
@@ -144,6 +157,21 @@ export default {
           {
             pattern: /\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/,
             message: '邮箱格式不正确',
+            trigger: 'blur'
+          }
+        ],
+        password: [
+          // 必填项校验
+          {
+            required: true,
+            message: '请输入密码',
+            trigger: 'blur'
+          },
+          // 长度校验
+          {
+            min: 6,
+            max: 20,
+            message: '登录密码长度在6-20字符之间',
             trigger: 'blur'
           }
         ]
@@ -232,12 +260,21 @@ export default {
       this.selectedOriginUserData = JSON.parse(JSON.stringify(userData))
       this.updateUserFormVisible = true
     },
+    updateUserPasswordHandler(userData) {
+      this.selectedUserData = JSON.parse(JSON.stringify(userData))
+      this.selectedOriginUserData = JSON.parse(JSON.stringify(userData))
+      this.updateUserPasswordFormVisible = true
+    },
     resetUpdateUserForm() {
       this.selectedUserData = {}
       this.selectedOriginUserData = {}
     },
     clickCloseUpdateUserFormDialogHandler() {
       this.updateUserFormVisible = false
+      this.resetUpdateUserForm()
+    },
+    resetUpdateUserPasswordForm() {
+      this.updateUserPasswordFormVisible = false
       this.resetUpdateUserForm()
     },
     async clickConfirmUpdateUserHandler() {
@@ -269,6 +306,60 @@ export default {
             this.clickCloseUpdateUserFormDialogHandler()
           })
       }
+    },
+    async clickConfirmUpdateUserPasswordHandler() {
+      updateUserPasswordAPI(this.selectedUserData.password, this.selectedUserData.uno)
+        .then(({ data }) => {
+          this.$message.success(data.message)
+          this.initTableData()
+        })
+        .catch(error => {
+          if (error.response) this.$message.error(error.response.data.message)
+        })
+        .finally(() => {
+          this.resetUpdateUserPasswordForm()
+        })
+    },
+    async updateUserStatusHandler(userData, targetStatus) {
+      updateUserStatusAPI(targetStatus, userData.uno)
+        .then(({ data }) => {
+          this.$message.success(data.message)
+          this.initTableData()
+        })
+        .catch(error => {
+          if (error.response) this.$message.error(error.response.data.message)
+        })
+        .finally(() => {
+          this.resetUpdateUserPasswordForm()
+        })
+    },
+    async deleteUserHandler(userData) {
+      deleteUserAPI(userData.uno)
+        .then(({ data }) => {
+          this.$message.success(data.message)
+          this.initTableData()
+        })
+        .catch(error => {
+          if (error.response) this.$message.error(error.response.data.message)
+        })
+        .finally(() => {
+          this.resetUpdateUserPasswordForm()
+        })
+    },
+    async deleteUserBatchHandler() {
+      if (this.multipleSelection.length === 0) return this.$message.warning('请选择用户')
+      // 批量删除
+      deleteUserBatchAPI(this.multipleSelection.map(item => item.uno))
+        .then(({ data }) => {
+          this.$message.success(data.message)
+          this.initTableData()
+        })
+        .catch(error => {
+          if (error.response) this.$message.error(error.response.data.message)
+        })
+        .finally(() => {
+          this.resetUpdateUserPasswordForm()
+        })
     }
   }
 }

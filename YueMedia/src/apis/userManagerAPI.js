@@ -36,3 +36,55 @@ export const updateUserDataAPI = async ({ nickname, phone, email, storage }, uno
     uno
   })
 }
+
+/**
+ * 修改用户密码 API
+ * @param password
+ * @param uno
+ * @returns
+ */
+export const updateUserPasswordAPI = async (password, uno) => {
+  return request.put('/apis/userManager/userData/password', {
+    password,
+    uno
+  })
+}
+
+/**
+ * 改变用户状态 API
+ * @param status
+ * @param uno
+ * @returns
+ */
+export const updateUserStatusAPI = async (status, uno) => {
+  return request.put('/apis/userManager/userData/status', {
+    status,
+    uno
+  })
+}
+
+/**
+ * 删除用户 API
+ * @param uno
+ * @returns
+ */
+export const deleteUserAPI = async uno => {
+  return request.delete('/apis/userManager/user', {
+    params: {
+      uno
+    }
+  })
+}
+
+/**
+ * 批量删除用户 API
+ * @param unoList
+ * @returns
+ */
+export const deleteUserBatchAPI = async unoList => {
+  return request.delete('/apis/userManager/user/batch', {
+    params: {
+      unoList: JSON.stringify(unoList)
+    }
+  })
+}

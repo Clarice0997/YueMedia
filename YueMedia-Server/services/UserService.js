@@ -7,6 +7,8 @@ const { loginRecord } = require('../models/loginRecordModel')
 const { ServiceErrorHandler } = require('../middlewares/ErrorCatcher')
 const { calculateLoginRecords } = require('../utils/redis/calculator/calculateLoginRecords')
 const { hsetRedis, hgetRedis } = require('../utils/redis/RedisHandler')
+const { calculateUserUsedStorage } = require('../utils/redis/calculator/calculateUserUsedStorage')
+const { calculateUserStorage } = require('../utils/redis/calculator/calculateUserStorage')
 
 /**
  * 登录 Service
@@ -55,7 +57,14 @@ async function loginService(username, password, ip) {
         }
       }
     }
-    // TODO: 账号是否被禁用或被删除 账号异常
+    if (user[0].status === 2 || user[0].del_flag === 2) {
+      return {
+        code: 400,
+        data: {
+          message: '账号异常！'
+        }
+      }
+    }
     // 用户存在则比对密码是否相同
     let flag = compareSync(password, user[0].password)
     if (flag) {
@@ -153,9 +162,13 @@ async function registerService({ username, password, nickname, phone, email }) {
       }
     }
     // 注册新用户，新增用户数据
+    const uno = await uuidv4()
     const query = 'insert into users(uno,username,password,nickname,phone,email) values(?,?,?,?,?,?)'
-    const params = [await uuidv4(), username, await hashSync(password, 10), nickname, phone, email]
+    const params = [uno, username, await hashSync(password, 10), nickname, phone, email]
     await mysqlHandler(query, params)
+
+    await calculateUserUsedStorage(uno)
+    await calculateUserStorage(uno)
 
     // 成功注册返回
     return {
