@@ -21,14 +21,14 @@
         </template>
       </el-table-column>
       <!--   创建时间   -->
-      <el-table-column label="创建时间" width="250" prop="createdAt" sortable align="center">
+      <el-table-column label="创建时间" width="230" prop="createdAt" sortable align="center">
         <template slot-scope="scope">
           <i class="el-icon-time" style="margin-right: 10px"></i>
           <span>{{ scope.row.createdAt | dateFormat }}</span>
         </template>
       </el-table-column>
       <!--   完成时间   -->
-      <el-table-column label="完成时间" width="250" prop="finishedAt" align="center">
+      <el-table-column label="完成时间" width="230" prop="finishedAt" align="center">
         <template slot-scope="scope" v-if="scope.row.status === 2 || scope.row.status === 3">
           <i class="el-icon-time" style="margin-right: 10px"></i>
           <span>{{ scope.row.finishedAt | dateFormat }}</span>
