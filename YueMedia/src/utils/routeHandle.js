@@ -2,28 +2,23 @@ import router from '@/router'
 import VueRouter from 'vue-router'
 
 /**
- * 构建路由树
- * @param {*} routes
- * @returns
+ * 构建路由树 （递归实现，多级适配）
+ * @param {Array} routes
+ * @param {String} parentName
+ * @returns {Array}
  */
-export const routeHandle = async routes => {
-  // 父级路由
-  const parentRoutes = routes.filter(route => {
-    if (route.meta.isParentRoute) return route
-  })
-  // 子路由
-  const childRoutes = routes.filter(route => {
-    if (!route.meta.isParentRoute) return route
-  })
-  // 子路由插入父路由 children
-  childRoutes.forEach(route => {
-    parentRoutes.forEach(parent => {
-      if (parent.name === route.meta.parentName) {
-        parent.children.push(route)
+export const routeHandle = (routes, parentName) => {
+  const result = []
+  routes.forEach(route => {
+    if (route.meta.parentName === parentName) {
+      const children = routeHandle(routes, route.name)
+      if (children.length) {
+        route.children = children
       }
-    })
+      result.push(route)
+    }
   })
-  return parentRoutes
+  return result
 }
 
 /**
