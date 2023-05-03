@@ -15,7 +15,8 @@ const {
   updateVideoStatusService,
   deleteVideoService,
   downloadVideoBatchService,
-  deleteVideoBatchService
+  deleteVideoBatchService,
+  getSupportVideoCodecService
 } = require('../services/VideoService')
 const path = require('path')
 
@@ -328,6 +329,25 @@ router.delete('/delete/video/batch', auth, async (req, res) => {
     const { fileList } = req.query
     // Service
     const { code, data } = await deleteVideoBatchService(JSON.parse(fileList), req.authorization)
+    // response
+    res.status(code).send({ ...data, code })
+  } catch (error) {
+    errorHandler(error, req, res)
+  }
+})
+
+/**
+ * @api {GET} /apis/video/support 获取支持视频格式接口
+ * @apiName getSupportVideoCodec
+ * @apiGroup Video
+ * @apiName Video/getSupportVideoCodec
+ * @apiPermission User
+ * @apiHeader {String} Authorization JWT鉴权
+ */
+router.get('/support', auth, async (req, res) => {
+  try {
+    // Service
+    const { code, data } = await getSupportVideoCodecService()
     // response
     res.status(code).send({ ...data, code })
   } catch (error) {

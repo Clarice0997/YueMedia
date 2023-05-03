@@ -121,3 +121,11 @@ export const deleteVideoBatchAPI = async fileList => {
     }
   })
 }
+
+/**
+ * 获取支持视频格式 API
+ * @returns
+ */
+export const getSupportVideoCodecAPI = async () => {
+  return request.get('/apis/video/support')
+}

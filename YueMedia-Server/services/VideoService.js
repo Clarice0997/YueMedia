@@ -603,6 +603,31 @@ const deleteVideoBatchService = async (fileList, userData) => {
   }
 }
 
+/**
+ * 获取支持视频格式 Service
+ * @returns
+ */
+const getSupportVideoCodecService = async () => {
+  try {
+    // 查询数据
+    const supportVideoCodec = await mysqlHandler('select * from video_codec')
+
+    // success
+    return {
+      code: 200,
+      data: { supportVideoCodec }
+    }
+  } catch (error) {
+    ServiceErrorHandler(error)
+    return {
+      code: 500,
+      data: {
+        message: error.message
+      }
+    }
+  }
+}
+
 module.exports = {
   uploadVideoService,
   uploadVideoCoverService,
@@ -614,5 +639,6 @@ module.exports = {
   updateVideoStatusService,
   deleteVideoService,
   downloadVideoBatchService,
-  deleteVideoBatchService
+  deleteVideoBatchService,
+  getSupportVideoCodecService
 }
