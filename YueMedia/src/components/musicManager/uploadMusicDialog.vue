@@ -205,6 +205,7 @@ export default {
     },
     // 音频文件上传前回调
     uploadMusicFileBeforeHook(file) {
+      // TODO: 校验重构
       const allowedMimetypes = ['audio/mpeg', 'audio/wav', 'audio/flac', 'audio/aac', 'audio/ogg', 'audio/aiff', 'audio/alac']
       let isAllowedMusic = allowedMimetypes.indexOf(file.type) !== -1
       const isLt100M = file.size / 1024 / 1024 < 100

@@ -24,6 +24,7 @@ const { MulterError } = require('multer')
 const musicUpload = multer({
   limits: { fileSize: 100000000, files: 1 },
   fileFilter: function (req, file, cb) {
+    // TODO: 校验重构
     const allowedMimetypes = ['audio/mpeg', 'audio/wav', 'audio/flac', 'audio/aac', 'audio/ogg', 'audio/aiff', 'audio/alac', 'application/octet-stream']
     const allowedFiletypes = ['mp3', 'wav', 'flac', 'aac', 'ogg', 'aiff', 'alac', 'ncm']
 

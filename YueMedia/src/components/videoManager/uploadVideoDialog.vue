@@ -187,6 +187,7 @@ export default {
       }
     },
     uploadVideoCoverBeforeHook(file) {
+      // TODO: 校验重构
       const allowedMimetypes = ['image/jpeg', 'image/png', 'image/jpg']
       const isAllowedImage = allowedMimetypes.indexOf(file.type) !== -1
       const isLt10M = file.size / 1024 / 1024 < 10

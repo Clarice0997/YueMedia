@@ -252,6 +252,7 @@ export default {
         return this.$message.error(`一次只能转换 ${this.maxFileNum} 个文件`)
       }
       // 判断上传文件是否符合规范
+      // TODO: 校验重构
       let allowedFormats = this.supportMusicCodec.map(format => format.extname)
       let allowedMimetypes = this.supportMusicCodec.map(format => format.mimetype)
       for (let i = 0; i < this.$refs.fileInput.files.length; i++) {

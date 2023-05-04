@@ -36,6 +36,7 @@ router.post('/analyse', auth, fileUpload.single('file'), async (req, res) => {
 // 转码音乐上传配置
 const convertFileUpload = multer({
   limits: { fileSize: 100000000, files: 5 }
+  // TODO: 校验重构
 })
 
 /**
