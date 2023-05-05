@@ -131,6 +131,7 @@ export default {
 @media screen and (max-width: 900px) {
   .container {
     grid-template-columns: 1fr;
+    padding: 0;
   }
 
   .img {
@@ -143,6 +144,33 @@ export default {
 
   .login-content {
     justify-content: center;
+  }
+}
+
+@media screen and (max-width: 500px) {
+  .container {
+    grid-template-columns: 1fr;
+  }
+
+  .bg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .img {
+    display: none;
+  }
+
+  .wave {
+    display: none;
+  }
+
+  .login-content {
+    justify-content: center;
+  }
+
+  .login-container {
+    min-width: 500px;
   }
 }
 </style>
