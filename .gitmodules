@@ -1,0 +1,6 @@
+[submodule "YueMedia-Front"]
+	path = YueMedia-Front
+	url = git@github.com:Clarice0997/YueMedia-Front.git
+[submodule "YueMedia-Back"]
+	path = YueMedia-Back
+	url = git@github.com:Clarice0997/YueMedia-Back.git
